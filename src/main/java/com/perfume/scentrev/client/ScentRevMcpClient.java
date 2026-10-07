@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.perfume.scentrev.client.ScentRevMcpClientException.FailureType;
 import com.perfume.scentrev.config.ScentRevClientProperties;
+import com.perfume.scentrev.dto.ScentRevFilteredSearchResponse;
 import com.perfume.scentrev.dto.ScentRevFragranceProfileResponse;
 
 import io.modelcontextprotocol.client.McpClient;
@@ -34,10 +35,12 @@ import io.modelcontextprotocol.spec.McpSchema.Implementation;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpTransportException;
 
-/** One synchronous profile operation over a lazily initialized, reusable SDK client. */
+/** Focused synchronous profile/search operations over a lazily initialized, reusable SDK client. */
 public class ScentRevMcpClient implements AutoCloseable {
 
     private static final String PROFILE_TOOL = "get_fragrance_profile";
+    private static final String SEARCH_TOOL = "search_fragrances_filtered";
+    public static final int SEARCH_PAGE_LIMIT = 10;
 
     private final ScentRevClientProperties properties;
     private final ObjectMapper objectMapper;
@@ -85,6 +88,96 @@ public class ScentRevMcpClient implements AutoCloseable {
             throw sdkFailure(exception, false);
         }
         return extractProfile(result);
+    }
+
+    /** One brand, offset pagination, and no implicit 200-vote filter. */
+    public synchronized ScentRevFilteredSearchResponse searchFragrancesFiltered(String brandSlug, int resultOffset) {
+        if (closed) {
+            throw failure(CLOSED, "ScentRev MCP client is closed.");
+        }
+        if (properties.getApiKey() == null || properties.getApiKey().isBlank()) {
+            throw failure(CONFIGURATION, "ScentRev MCP requires a nonblank SCENTREV_API_KEY.");
+        }
+        if (brandSlug == null || brandSlug.isBlank() || resultOffset < 0) {
+            throw failure(INVALID_REQUEST, "ScentRev MCP search requires a nonblank brand slug and nonnegative offset.");
+        }
+        initializeIfNeeded();
+        CallToolResult result;
+        try {
+            result = sdkClient.callTool(CallToolRequest.builder(SEARCH_TOOL)
+                    .arguments(Map.of("filter_brand_slug", brandSlug, "min_rating_votes", 0,
+                            "result_limit", SEARCH_PAGE_LIMIT, "result_offset", resultOffset)).build());
+        } catch (RuntimeException exception) {
+            throw sdkFailure(exception, false, SEARCH_TOOL);
+        }
+        return extractSearch(result);
+    }
+
+    private ScentRevFilteredSearchResponse extractSearch(CallToolResult result) {
+        if (result == null) {
+            throw failure(INVALID_RESPONSE, "ScentRev MCP returned no search tool result.");
+        }
+        if (Boolean.TRUE.equals(result.isError())) {
+            throw failure(TOOL_CALL, "ScentRev MCP search_fragrances_filtered reported isError=true.");
+        }
+        if (result.structuredContent() != null) {
+            try {
+                return convertSearch(objectMapper.valueToTree(result.structuredContent()));
+            } catch (IllegalArgumentException exception) {
+                throw failure(DTO_CONVERSION, "ScentRev MCP search structured content could not be converted to JSON.");
+            }
+        }
+        for (var content : result.content()) {
+            if (!(content instanceof TextContent textContent)) {
+                continue;
+            }
+            String text = textContent.text().strip();
+            if (!text.startsWith("{") && !text.startsWith("[")) {
+                continue;
+            }
+            JsonNode domain;
+            try {
+                domain = domainReader.readTree(text);
+            } catch (JsonProcessingException exception) {
+                continue;
+            }
+            if (domain.isObject() && (domain.has("results") || domain.hasNonNull("error"))) {
+                return convertSearch(domain);
+            }
+        }
+        throw failure(INVALID_RESPONSE, "ScentRev MCP returned no filtered search in structured content or valid textual JSON.");
+    }
+
+    private ScentRevFilteredSearchResponse convertSearch(JsonNode domain) {
+        if (domain != null && domain.isObject() && domain.hasNonNull("error")) {
+            String code = domain.path("error").path("code").asText();
+            if ("tool_not_found".equals(code) || "unknown_tool".equals(code)) {
+                throw failure(TOOL_NOT_FOUND, "ScentRev MCP search_fragrances_filtered tool was not found.");
+            }
+            throw failure(TOOL_CALL, "ScentRev MCP search_fragrances_filtered returned an error payload.");
+        }
+        if (domain == null || !domain.isObject() || !domain.path("results").isArray()) {
+            throw failure(INVALID_RESPONSE, "ScentRev MCP filtered search must contain a results array.");
+        }
+        // Reject coercion of pagination strings/fractions; missing fields are checked by discovery.
+        for (String field : List.of("offset", "limit", "total_returned")) {
+            JsonNode value = domain.path(field);
+            if (!value.isMissingNode() && !value.isNull()
+                    && (!value.isIntegralNumber() || !value.canConvertToInt())) {
+                throw failure(INVALID_RESPONSE, "ScentRev MCP filtered search has invalid numeric pagination metadata.");
+            }
+        }
+        for (String field : List.of("truncated", "partial")) {
+            JsonNode value = domain.path(field);
+            if (!value.isMissingNode() && !value.isNull() && !value.isBoolean()) {
+                throw failure(INVALID_RESPONSE, "ScentRev MCP filtered search has invalid boolean pagination metadata.");
+            }
+        }
+        try {
+            return objectMapper.treeToValue(domain, ScentRevFilteredSearchResponse.class);
+        } catch (JsonProcessingException | IllegalArgumentException exception) {
+            throw failure(DTO_CONVERSION, "ScentRev MCP filtered search could not be converted to ScentRevFilteredSearchResponse.");
+        }
     }
 
     private void initializeIfNeeded() {
@@ -211,7 +304,11 @@ public class ScentRevMcpClient implements AutoCloseable {
     }
 
     private static ScentRevMcpClientException sdkFailure(RuntimeException exception, boolean initializing) {
-        String phase = initializing ? " during initialization." : " during get_fragrance_profile.";
+        return sdkFailure(exception, initializing, PROFILE_TOOL);
+    }
+
+    private static ScentRevMcpClientException sdkFailure(RuntimeException exception, boolean initializing, String tool) {
+        String phase = initializing ? " during initialization." : " during " + tool + ".";
         // Classify SDK diagnostics; never retain raw messages, headers, bodies or causes.
         Throwable cause = exception;
         for (int depth = 0; cause != null && depth < 16; depth++, cause = cause.getCause()) {
@@ -225,7 +322,7 @@ public class ScentRevMcpClient implements AutoCloseable {
                 String message = Objects.toString(mcpError.getJsonRpcError().message(), "").toLowerCase(Locale.ROOT);
                 if (code == -32601 || (code == -32602
                         && (message.startsWith("unknown tool") || message.startsWith("tool not found")))) {
-                    return failure(TOOL_NOT_FOUND, "ScentRev MCP get_fragrance_profile tool was not found.");
+                    return failure(TOOL_NOT_FOUND, "ScentRev MCP " + tool + " tool was not found.");
                 }
             }
         }
@@ -237,7 +334,7 @@ public class ScentRevMcpClient implements AutoCloseable {
             }
         }
         return failure(initializing ? INITIALIZATION : TOOL_CALL,
-                initializing ? "ScentRev MCP initialization failed." : "ScentRev MCP get_fragrance_profile call failed.");
+                initializing ? "ScentRev MCP initialization failed." : "ScentRev MCP " + tool + " call failed.");
     }
 
     private static ScentRevMcpClientException failure(FailureType type, String message) {

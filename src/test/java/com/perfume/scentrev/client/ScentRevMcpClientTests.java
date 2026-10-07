@@ -423,6 +423,154 @@ class ScentRevMcpClientTests {
         when(sdkClient.callTool(any(CallToolRequest.class))).thenReturn(result);
     }
 
+    @Test
+    void filteredSearchUsesExactFourArgumentsAndObservedResponseFields() {
+        returns(searchResult());
+
+        var page = client.searchFragrancesFiltered("creed", 10);
+
+        assertThat(page.offset()).isEqualTo(10);
+        assertThat(page.limit()).isEqualTo(10);
+        assertThat(page.totalReturned()).isEqualTo(1);
+        assertThat(page.truncated()).isTrue();
+        assertThat(page.results()).singleElement().satisfies(row -> {
+            assertThat(row.fragranceSlug()).isEqualTo(SLUG);
+            assertThat(row.publicId()).isEqualTo("312329ca-0ad9-4a79-a586-2a4b815c18f7");
+            assertThat(row.name()).isEqualTo("Aventus");
+            assertThat(row.brandSlug()).isNull(); // Actual compact search omits this field.
+        });
+        var request = ArgumentCaptor.forClass(CallToolRequest.class);
+        verify(sdkClient).callTool(request.capture());
+        assertThat(request.getValue().name()).isEqualTo("search_fragrances_filtered");
+        assertThat(request.getValue().arguments()).containsExactlyEntriesOf(Map.of(
+                "filter_brand_slug", "creed", "min_rating_votes", 0, "result_limit", 10, "result_offset", 10));
+        assertThat(request.getValue().meta()).isNull();
+        verify(sdkClient).initialize();
+        verifyNoMoreInteractions(sdkClient);
+    }
+
+    @Test
+    void searchTextFallbackParsesEmptyPageAndOptionalBrandWithoutReadingPresentation() {
+        returns(new CallToolResult(List.of(new TextContent("<html>ignored</html>"), new TextContent("""
+                {"results":[],"truncated":false,"offset":0,"limit":10,"total_returned":0,"partial":false}
+                """)), false, null, null));
+        var page = client.searchFragrancesFiltered("creed", 0);
+        assertThat(page.results()).isEmpty();
+        assertThat(page.truncated()).isFalse();
+        assertThat(page.partial()).isFalse();
+    }
+
+    @Test
+    void searchAndProfilesReuseOneInitializedSession() {
+        when(sdkClient.callTool(any(CallToolRequest.class))).thenReturn(searchResult(), profileResult(), searchResult());
+        client.searchFragrancesFiltered("creed", 0);
+        client.getFragranceProfile(SLUG);
+        client.searchFragrancesFiltered("creed", 10);
+        verify(sdkClient).initialize();
+        verify(clientFactory).get();
+        verify(sdkClient, times(3)).callTool(any(CallToolRequest.class));
+        verifyNoMoreInteractions(clientFactory, sdkClient);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"{\"results\":null}", "{\"results\":{}}", "[]", "{}",
+            "{\"results\":[],\"offset\":\"10\"}", "{\"results\":[],\"offset\":1.5}",
+            "{\"results\":[],\"limit\":2147483648}", "{\"results\":[],\"truncated\":\"false\"}",
+            "{\"results\":[],\"partial\":1}"})
+    void rejectsMalformedStructuredSearch(String json) throws IOException {
+        returns(new CallToolResult(List.of(new TextContent("{\"results\":[]}")), false,
+                objectMapper.readValue(json, Object.class), null));
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), INVALID_RESPONSE, "filtered search");
+    }
+
+    @Test
+    void searchRejectsMalformedRowsAsDtoConversionFailure() {
+        returns(new CallToolResult(List.of(), false, Map.of("results", List.of(Map.of("fragrance_slug", List.of("bad")))), null));
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), DTO_CONVERSION, "ScentRevFilteredSearchResponse");
+    }
+
+    @Test
+    void searchRejectsNullToolResponse() {
+        returns(null);
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), INVALID_RESPONSE, "no search tool result");
+    }
+
+    @Test
+    void searchRejectsToolErrorWithoutEchoingProviderSecrets() {
+        returns(new CallToolResult(List.of(new TextContent(FAKE_KEY)), true, Map.of("error", FAKE_KEY), null));
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), TOOL_CALL, "search_fragrances_filtered");
+    }
+
+    @Test
+    void searchRejectsErrorEnvelopeWithoutEchoingProviderSecrets() {
+        returns(new CallToolResult(List.of(), false, Map.of("error", Map.of("code", "invalid_param", "message", FAKE_KEY)), null));
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), TOOL_CALL, "error payload");
+    }
+
+    @Test
+    void searchReportsMissingToolSafely() {
+        when(sdkClient.callTool(any(CallToolRequest.class)))
+                .thenThrow(McpError.builder(-32601).message(FAKE_KEY).build());
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), TOOL_NOT_FOUND, "search_fragrances_filtered");
+    }
+
+    @Test
+    void searchReportsTransportFailureSafely() {
+        when(sdkClient.callTool(any(CallToolRequest.class))).thenThrow(new McpTransportException(FAKE_KEY));
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), TRANSPORT, "during search_fragrances_filtered");
+    }
+
+    @Test
+    void searchReportsAuthenticationFailureSafely() {
+        var authentication = authenticationFailure(401);
+        when(sdkClient.callTool(any(CallToolRequest.class))).thenThrow(authentication);
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), AUTHENTICATION, "HTTP 401");
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t"})
+    void searchRejectsMissingBrandBeforeInitialization(String brand) {
+        assertFailure(() -> client.searchFragrancesFiltered(brand, 0), INVALID_REQUEST, "brand slug");
+        verifyNoInteractions(clientFactory, sdkClient);
+    }
+
+    @Test
+    void searchRejectsNegativeOffsetBeforeInitialization() {
+        assertFailure(() -> client.searchFragrancesFiltered("creed", -1), INVALID_REQUEST, "nonnegative offset");
+        verifyNoInteractions(clientFactory, sdkClient);
+    }
+
+    @Test
+    void searchRequiresKeyBeforeInitialization() {
+        properties.setApiKey(" ");
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), CONFIGURATION, "SCENTREV_API_KEY");
+        verifyNoInteractions(clientFactory, sdkClient);
+    }
+
+    @Test
+    void searchRejectsClosedClientBeforeInitialization() {
+        client.close();
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), CLOSED, "closed");
+        verifyNoInteractions(clientFactory, sdkClient);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"<html>only UI</html>", "{bad", "{\"results\":[]} {\"truncated\":false}"})
+    void searchRejectsMissingOrInvalidTextJson(String text) {
+        returns(new CallToolResult(List.of(new TextContent(text)), false, null, null));
+        assertFailure(() -> client.searchFragrancesFiltered("creed", 0), INVALID_RESPONSE, "valid textual JSON");
+    }
+
+    private static CallToolResult searchResult() {
+        // Observed compact response shape, reduced to one row; unused metrics/cursor are ignored.
+        return new CallToolResult(List.of(new TextContent("<html>ignored</html>")), false, Map.of(
+                "results", List.of(Map.of("fragrance_slug", SLUG, "public_id", "312329ca-0ad9-4a79-a586-2a4b815c18f7",
+                        "name", "Aventus", "rating", Map.of("score", 0.9))),
+                "offset", 10, "limit", 10, "truncated", true, "total_returned", 1,
+                "next_cursor", "ignored-provider-cursor", "unresolved", List.of()), null);
+    }
+
     private static CallToolResult profileResult() {
         return new CallToolResult(List.of(), false, minimalDomain(), null);
     }
