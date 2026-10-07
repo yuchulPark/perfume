@@ -1,0 +1,52 @@
+{
+  "identity": {
+    "name": "Daring",
+    "public_id": "fragrance-daring",
+    "brand_name": "Sample House",
+    "brand_slug": "sample-house",
+    "fragrance_slug": "sample-house-daring",
+    "description": null,
+    "release_year": null,
+    "reviews_count": 1,
+    "rating": {
+      "score": 0.4,
+      "category": "emerging",
+      "n_records": 1,
+      "reliability": "low"
+    }
+  },
+  "accords": {
+    "accords": [],
+    "public_id": "fragrance-daring",
+    "brand_slug": "sample-house",
+    "fragrance_name": "Daring",
+    "fragrance_slug": "sample-house-daring"
+  },
+  "perfumers": [],
+  "note_pyramid": {
+    "top": [],
+    "middle": [],
+    "base": [],
+    "public_id": "fragrance-daring",
+    "brand_slug": "sample-house",
+    "fragrance_name": "Daring",
+    "fragrance_slug": "sample-house-daring"
+  },
+  "performance": {
+    "name": "Daring",
+    "public_id": "fragrance-daring",
+    "brand_slug": "sample-house",
+    "fragrance_slug": "sample-house-daring"
+  },
+  "pros_cons": {
+    "pros": [],
+    "cons": [],
+    "source": "community"
+  },
+  "reminds_of": {
+    "public_id": "fragrance-daring",
+    "fragrance_name": "Daring",
+    "fragrance_slug": "sample-house-daring",
+    "reminds_of": []
+  }
+}

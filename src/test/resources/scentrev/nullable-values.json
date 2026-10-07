@@ -1,0 +1,31 @@
+{
+  "identity": {
+    "name": "Nullable values example",
+    "release_year": null,
+    "reviews_count": 4294967296,
+    "gender": null,
+    "rating": null
+  },
+  "accords": {
+    "accords": [{"name": "woody", "percentage": null, "score": null}]
+  },
+  "perfumers": [
+    {
+      "name": "Sample Perfumer",
+      "company": "nan",
+      "biography": "nan",
+      "perfumes_count": 4294967297,
+      "other_fragrances": null
+    }
+  ],
+  "note_pyramid": {"top": null, "middle": [], "base": []},
+  "performance": {
+    "longevity": {"score": null, "category": null, "n_records": null, "reliability": null},
+    "sillage": null,
+    "projection": null,
+    "time_of_day": {"scale": "provider_defined_scale", "score": null, "category": "new_category", "n_records": 4294967298}
+  },
+  "price_value": null,
+  "pros_cons": {"pros": null, "cons": [], "source": null},
+  "reminds_of": {"reminds_of": null}
+}

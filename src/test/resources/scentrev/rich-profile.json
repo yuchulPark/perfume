@@ -1,0 +1,149 @@
+{
+  "identity": {
+    "name": "Aventus",
+    "public_id": "fragrance-aventus",
+    "brand_name": "Creed",
+    "brand_slug": "creed",
+    "fragrance_slug": "creed-aventus",
+    "description": "A fruity fragrance with smoky and woody facets.",
+    "release_year": 2010,
+    "reviews_count": 26169,
+    "gender": {
+      "scale": "feminine_to_masculine",
+      "score": 0.89,
+      "category": "masculine",
+      "n_records": 1240
+    },
+    "rating": {
+      "score": 4.381234567890123456789,
+      "category": "highly_rated",
+      "n_records": 20000,
+      "reliability": "high"
+    }
+  },
+  "accords": {
+    "accords": [
+      {"name": "fruity", "percentage": 100, "score": 1.0},
+      {"name": "smoky", "percentage": 68, "score": 0.68},
+      {"name": "woody", "percentage": 67, "score": 0.67}
+    ],
+    "public_id": "fragrance-aventus",
+    "brand_slug": "creed",
+    "fragrance_name": "Aventus",
+    "fragrance_slug": "creed-aventus"
+  },
+  "perfumers": [
+    {
+      "name": "Olivier Creed",
+      "company": "Creed",
+      "biography": "A perfumer associated with the house of Creed.",
+      "perfumer_id": "p138",
+      "perfumes_count": 120,
+      "other_fragrances": [
+        {
+          "name": "Green Irish Tweed",
+          "public_id": "fragrance-green-irish-tweed",
+          "brand_name": "Creed",
+          "fragrance_slug": "creed-green-irish-tweed",
+          "rating": {
+            "score": 4.12,
+            "category": "liked",
+            "n_records": 103,
+            "reliability": "medium"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Erwin Creed",
+      "company": "nan",
+      "biography": "nan",
+      "perfumer_id": "p139",
+      "perfumes_count": 42
+    }
+  ],
+  "note_pyramid": {
+    "top": ["Pineapple", "Bergamot"],
+    "middle": ["Birch", "Jasmine"],
+    "base": ["Musk", "Oakmoss"],
+    "public_id": "fragrance-aventus",
+    "brand_slug": "creed",
+    "fragrance_name": "Aventus",
+    "fragrance_slug": "creed-aventus"
+  },
+  "performance": {
+    "name": "Aventus",
+    "public_id": "fragrance-aventus",
+    "brand_slug": "creed",
+    "fragrance_slug": "creed-aventus",
+    "longevity": {
+      "score": 0.83,
+      "category": "long_lasting",
+      "n_records": 1432,
+      "reliability": "high"
+    },
+    "sillage": {
+      "score": 0.74,
+      "category": "strong",
+      "n_records": 1301,
+      "reliability": "high"
+    },
+    "projection": {
+      "score": 0.785,
+      "category": "noticeable",
+      "n_records": 1301,
+      "reliability": "high",
+      "derived_from": "longevity_sillage"
+    },
+    "season": {
+      "scale": "relative_suitability",
+      "primary": {
+        "name": "spring",
+        "score": 0.94,
+        "category": "very_suitable",
+        "n_records": 1211
+      },
+      "by_season": {
+        "spring": {"score": 0.94, "category": "very_suitable", "n_records": 1211},
+        "summer": {"score": 0.81, "category": "suitable", "n_records": 1110},
+        "fall": {"score": 0.89, "category": "suitable", "n_records": 998},
+        "winter": {"score": 0.64, "category": "moderate", "n_records": 875}
+      }
+    },
+    "time_of_day": {
+      "scale": "day_to_night",
+      "score": 0.6,
+      "category": "versatile",
+      "n_records": 199
+    }
+  },
+  "price_value": {
+    "scale": "poor_to_great",
+    "score": 0.61,
+    "category": "fair",
+    "n_records": 602,
+    "reliability": "medium"
+  },
+  "pros_cons": {
+    "pros": [{"text": "Recognizable fruity opening."}],
+    "cons": [{"text": "Expensive for some reviewers."}],
+    "source": "community"
+  },
+  "reminds_of": {
+    "public_id": "fragrance-aventus",
+    "fragrance_name": "Aventus",
+    "fragrance_slug": "creed-aventus",
+    "reminds_of": [
+      {
+        "name": "Related Fragrance",
+        "public_id": "fragrance-related",
+        "fragrance_slug": "sample-related-fragrance",
+        "like_ratio": 0.81234567890123456789
+      }
+    ]
+  },
+  "_ui": {
+    "layout": "full_profile",
+    "presentation_only": true
+  }
+}

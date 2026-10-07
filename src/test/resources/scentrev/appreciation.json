@@ -1,0 +1,12 @@
+{
+  "name": "Aventus",
+  "public_id": "fragrance-aventus",
+  "brand_slug": "creed",
+  "appreciation": {
+    "score": 0.827,
+    "category": "beloved",
+    "n_records": 26169,
+    "reliability": "high"
+  },
+  "fragrance_slug": "creed-aventus"
+}
