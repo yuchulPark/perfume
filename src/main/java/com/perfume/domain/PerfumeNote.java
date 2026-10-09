@@ -55,4 +55,8 @@ public class PerfumeNote {
         this.layer = layer;
         this.position = position;
     }
+
+    public void updatePosition(Integer position) {
+        this.position = position;
+    }
 }

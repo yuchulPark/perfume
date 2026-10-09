@@ -49,6 +49,9 @@ public class Perfume {
     @Column(name = "reviews_count")
     private Long reviewsCount;
 
+    @Column(name = "image_url", columnDefinition = "text")
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "brand_id", nullable = false)
     private Brand brand;
@@ -62,5 +65,22 @@ public class Perfume {
         this.description = description;
         this.reviewsCount = reviewsCount;
         this.brand = brand;
+    }
+
+    /** Refresh provider-owned details without replacing the row or changing its Brand. */
+    public void updateScentRevDetails(String fragranceSlug, String name, Integer releaseYear,
+            String description, Long reviewsCount) {
+        this.fragranceSlug = fragranceSlug;
+        this.name = name;
+        this.releaseYear = releaseYear;
+        this.description = description;
+        this.reviewsCount = reviewsCount;
+    }
+
+    /** Only a supplied provider URL is accepted; absence never clears an existing URL. */
+    public boolean updateImageUrl(String suppliedUrl) {
+        if (suppliedUrl == null || suppliedUrl.isBlank() || suppliedUrl.equals(imageUrl)) { return false; }
+        imageUrl = suppliedUrl;
+        return true;
     }
 }

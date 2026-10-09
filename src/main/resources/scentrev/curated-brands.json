@@ -1,0 +1,3082 @@
+[
+    {
+        "canonicalBrandKey":  "curated-001",
+        "canonicalDisplayName":  "Creed",
+        "resolutionQuery":  "Creed",
+        "brandSlug":  "creed",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "User-confirmed successful Creed discovery/import and on-demand live validation.",
+        "reportedFragranceCount":  null,
+        "notes":  "Exact creed slug previously live-validated and present in trusted local Phase 1 data; no database lookup performed for this configuration.",
+        "sources":  [
+                        {
+                            "sourceIndex":  1,
+                            "rawLabel":  "크리드",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  2,
+                            "rawLabel":  "크리드 로얄 익스클루시브",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-003",
+        "canonicalDisplayName":  "Frederic Malle",
+        "resolutionQuery":  "Frederic Malle",
+        "brandSlug":  "frederic-malle",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed live review: provider canonical name Frederic Malle, brand_slug frederic-malle, observed fragrance_count 68. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  68,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  3,
+                            "rawLabel":  "프레데릭말",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-004",
+        "canonicalDisplayName":  "Byredo",
+        "resolutionQuery":  "Byredo",
+        "brandSlug":  "byredo",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed live review: provider canonical name Byredo, brand_slug byredo, observed fragrance_count 90. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  90,
+        "notes":  "Exact provider name and slug manually reviewed and approved; Night Veils remains source metadata for this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  4,
+                            "rawLabel":  "바이레도",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  5,
+                            "rawLabel":  "바이레도 나이트베일스 컬렉션",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-006",
+        "canonicalDisplayName":  "Tom Ford",
+        "resolutionQuery":  "Tom Ford",
+        "brandSlug":  "tom-ford",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed live review: provider canonical name Tom Ford, brand_slug tom-ford, observed fragrance_count 140. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  140,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  6,
+                            "rawLabel":  "톰포드",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-007",
+        "canonicalDisplayName":  "By Kilian",
+        "resolutionQuery":  "By Kilian",
+        "brandSlug":  "by-kilian",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed live review: provider canonical name By Kilian, brand_slug by-kilian, observed fragrance_count 105. Operator explicitly approved the candidate despite the previous Kilian name mismatch. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  105,
+        "notes":  "Display/query name aligned with approved provider name By Kilian; both original Korean labels remain unchanged and the boutique collection selects no additional parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  7,
+                            "rawLabel":  "바이 킬리안",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  8,
+                            "rawLabel":  "바이 킬리안 부띠크 익스클루시브",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-009",
+        "canonicalDisplayName":  "Louis Vuitton",
+        "resolutionQuery":  "Louis Vuitton",
+        "brandSlug":  "louis-vuitton",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed live review: provider canonical name Louis Vuitton, brand_slug louis-vuitton, observed fragrance_count 59. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  59,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  9,
+                            "rawLabel":  "루이비통",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-010",
+        "canonicalDisplayName":  "Maison Francis Kurkdjian",
+        "resolutionQuery":  "Maison Francis Kurkdjian",
+        "brandSlug":  "maison-francis-kurkdjian",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Maison Francis Kurkdjian, brand_slug maison-francis-kurkdjian, observed fragrance_count 65. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  65,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  10,
+                            "rawLabel":  "메종 프란시스 커정",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-011",
+        "canonicalDisplayName":  "Le Labo",
+        "resolutionQuery":  "Le Labo",
+        "brandSlug":  "le-labo",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Le Labo, brand_slug le-labo, observed fragrance_count 64. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  64,
+        "notes":  "Exact provider name and slug manually reviewed and approved; City Exclusives remains source metadata for this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  11,
+                            "rawLabel":  "르 라보",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  12,
+                            "rawLabel":  "르 라보 시티 익스클루시브",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-013",
+        "canonicalDisplayName":  "Serge Lutens",
+        "resolutionQuery":  "Serge Lutens",
+        "brandSlug":  "serge-lutens",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Serge Lutens, brand_slug serge-lutens, observed fragrance_count 113. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  113,
+        "notes":  "Exact provider name and slug manually reviewed and approved; all five original source labels remain grouped under this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  13,
+                            "rawLabel":  "세르주 루텐",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  14,
+                            "rawLabel":  "세르주 루텐 그라트시엘 컬렉션",
+                            "entryType":  "COLLECTION"
+                        },
+                        {
+                            "sourceIndex":  15,
+                            "rawLabel":  "세르주 루텐 레 조 드 뽈리떼쓰 컬렉션",
+                            "entryType":  "COLLECTION"
+                        },
+                        {
+                            "sourceIndex":  16,
+                            "rawLabel":  "세르주 루텐 벨자",
+                            "entryType":  "COLLECTION"
+                        },
+                        {
+                            "sourceIndex":  17,
+                            "rawLabel":  "세르주 루텐 금자",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-018",
+        "canonicalDisplayName":  "Memo Paris",
+        "resolutionQuery":  "Memo Paris",
+        "brandSlug":  "memo-paris",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Memo Paris, brand_slug memo-paris, observed fragrance_count 75. Operator explicitly reviewed the multiple candidates returned for Memo and approved Memo Paris despite the AMBIGUOUS resolver result. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  75,
+        "notes":  "Display/query name aligned with manually approved provider name Memo Paris; the original Korean raw label 메모 remains unchanged and no other Memo candidate is approved.",
+        "sources":  [
+                        {
+                            "sourceIndex":  18,
+                            "rawLabel":  "메모",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-019",
+        "canonicalDisplayName":  "Santa Maria Novella",
+        "resolutionQuery":  "Santa Maria Novella",
+        "brandSlug":  "santa-maria-novella",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Santa Maria Novella, brand_slug santa-maria-novella, observed fragrance_count 64. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  64,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  19,
+                            "rawLabel":  "산타 마리아 노벨라",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-020",
+        "canonicalDisplayName":  "Penhaligon\u0027s",
+        "resolutionQuery":  "Penhaligon\u0027s",
+        "brandSlug":  "penhaligon-s",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Penhaligon's, brand_slug penhaligon-s, observed fragrance_count 112. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  112,
+        "notes":  "Exact provider name and slug manually reviewed and approved; Portraits remains source metadata for this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  20,
+                            "rawLabel":  "펜할리곤스",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  21,
+                            "rawLabel":  "펜할리곤스 포트레이트 컬렉션",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-022",
+        "canonicalDisplayName":  "Goutal",
+        "resolutionQuery":  "Goutal",
+        "brandSlug":  "goutal",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Goutal, brand_slug goutal, observed fragrance_count 79. Operator confirmed this parent corresponds to the raw Annick Goutal / 아닉 구딸 label. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  79,
+        "notes":  "Approved provider display/query name Goutal retained; the original raw label 아닉 구딸 remains unchanged.",
+        "sources":  [
+                        {
+                            "sourceIndex":  22,
+                            "rawLabel":  "아닉 구딸",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-023",
+        "canonicalDisplayName":  "Diptyque",
+        "resolutionQuery":  "Diptyque",
+        "brandSlug":  "diptyque",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Diptyque, brand_slug diptyque, observed fragrance_count 102. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  102,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  23,
+                            "rawLabel":  "딥티크",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-024",
+        "canonicalDisplayName":  "Aesop",
+        "resolutionQuery":  "Aesop",
+        "brandSlug":  "aesop",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Aesop, brand_slug aesop, observed fragrance_count 18. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  18,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  24,
+                            "rawLabel":  "이솝",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-025",
+        "canonicalDisplayName":  "Atelier Cologne",
+        "resolutionQuery":  "Atelier Cologne",
+        "brandSlug":  "atelier-cologne",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Atelier Cologne, brand_slug atelier-cologne, observed fragrance_count 59. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  59,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  25,
+                            "rawLabel":  "아틀리에 코롱",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-026",
+        "canonicalDisplayName":  "Acqua di Parma",
+        "resolutionQuery":  "Acqua di Parma",
+        "brandSlug":  "acqua-di-parma",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Acqua di Parma, brand_slug acqua-di-parma, observed fragrance_count 106. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  106,
+        "notes":  "Exact provider name and slug manually reviewed and approved; Note di Colonia remains source metadata for this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  26,
+                            "rawLabel":  "아쿠아 디 파르마",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  27,
+                            "rawLabel":  "아쿠아 디 파르마 노트 디 콜로니아 컬렉션",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-028",
+        "canonicalDisplayName":  "Maison Margiela",
+        "resolutionQuery":  "Maison Martin Margiela",
+        "brandSlug":  "maison-martin-margiela",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review after retrying the historical name: provider canonical name Maison Martin Margiela, brand_slug maison-martin-margiela, observed fragrance_count 47. Operator confirmed this is the same perfume brand represented by the raw label 메종 마르지엘라. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  47,
+        "notes":  "Preferred display name Maison Margiela preserved separately from the approved provider/query identity Maison Martin Margiela; the original raw Korean label remains unchanged.",
+        "sources":  [
+                        {
+                            "sourceIndex":  28,
+                            "rawLabel":  "메종 마르지엘라",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-029",
+        "canonicalDisplayName":  "Kiehl\u0027s",
+        "resolutionQuery":  "Kiehl\u0027s",
+        "brandSlug":  "kiehl-s",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Kiehl's, brand_slug kiehl-s, observed fragrance_count 9. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  9,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  29,
+                            "rawLabel":  "키엘",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-030",
+        "canonicalDisplayName":  "Nicolai Parfumeur Createur",
+        "resolutionQuery":  "Nicolai Parfumeur Createur",
+        "brandSlug":  "nicolai-parfumeur-createur",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Nicolai Parfumeur Createur, brand_slug nicolai-parfumeur-createur, observed fragrance_count 79. Operator explicitly reviewed the multiple resolver candidates and approved this perfume brand for the raw label 니콜라이. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  79,
+        "notes":  "Display/query name aligned with manually approved provider name Nicolai Parfumeur Createur; the original raw label 니콜라이 remains unchanged and no other candidate is approved.",
+        "sources":  [
+                        {
+                            "sourceIndex":  30,
+                            "rawLabel":  "니콜라이",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-031",
+        "canonicalDisplayName":  "Jo Malone London",
+        "resolutionQuery":  "Jo Malone London",
+        "brandSlug":  "jo-malone-london",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Jo Malone London, brand_slug jo-malone-london, observed fragrance_count 212. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  212,
+        "notes":  "Exact provider name and slug manually reviewed and approved; all three original source labels remain grouped under this one parent, with no collaboration expansion.",
+        "sources":  [
+                        {
+                            "sourceIndex":  31,
+                            "rawLabel":  "조 말론",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  32,
+                            "rawLabel":  "조 말론 한정판",
+                            "entryType":  "COLLECTION"
+                        },
+                        {
+                            "sourceIndex":  33,
+                            "rawLabel":  "조 말론 레어티 컬렉션",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-034",
+        "canonicalDisplayName":  "Bvlgari",
+        "resolutionQuery":  "Bvlgari",
+        "brandSlug":  "bvlgari",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Bvlgari, brand_slug bvlgari, observed fragrance_count 151. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  151,
+        "notes":  "Exact provider name and slug manually reviewed and approved; the base and Le Gemme collection labels remain grouped under this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  34,
+                            "rawLabel":  "불가리 레젬메 컬렉션",
+                            "entryType":  "COLLECTION"
+                        },
+                        {
+                            "sourceIndex":  113,
+                            "rawLabel":  "불가리",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-035",
+        "canonicalDisplayName":  "Hermès",
+        "resolutionQuery":  "Hermès",
+        "brandSlug":  "herm-s",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved final direct get_identity evidence recorded 2026-10-08: Terre d'Hermes Parfum; fragrance_slug herm-s-terre-d-hermes-parfum; public_id 5002fec8-8aed-4c74-835f-3959edfcf645. The provider identity explicitly returned brand_name Hermès and brand_slug herm-s. The operator approves this exact provider identity for the existing Hermès parent.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preferred display/query Hermès, raw sources 에르메스 and 에르메상스, and the Hermessence collection grouping are preserved. Earlier Hermes/Hermès brand-query failures are historical only; final direct identity approval excludes this parent from active retry resolution. No fragrance count was supplied; it remains unknown. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  35,
+                            "rawLabel":  "에르메스",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  36,
+                            "rawLabel":  "에르메상스",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-037",
+        "canonicalDisplayName":  "Comme des Garcons",
+        "resolutionQuery":  "Comme des Garcons",
+        "brandSlug":  "comme-des-garcons",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Comme des Garcons, brand_slug comme-des-garcons, observed fragrance_count 107. Operator explicitly approved this candidate despite the prior accented Comme des Garçons name mismatch. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  107,
+        "notes":  "Display/query name aligned with approved provider name Comme des Garcons; the original Korean raw label remains unchanged.",
+        "sources":  [
+                        {
+                            "sourceIndex":  37,
+                            "rawLabel":  "꼼데가르송",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-038",
+        "canonicalDisplayName":  "Spectator",
+        "resolutionQuery":  "Spectator",
+        "brandSlug":  "spectator",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: the targeted Spectator query returned an exact candidate with provider canonical name Spectator, brand_slug spectator, observed fragrance_count 1. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  1,
+        "notes":  "Exact provider name and slug manually reviewed and approved; the original raw label 스펙테이터 remains unchanged and is now classified as a confirmed brand.",
+        "sources":  [
+                        {
+                            "sourceIndex":  38,
+                            "rawLabel":  "스펙테이터",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-039",
+        "canonicalDisplayName":  "The Different Company",
+        "resolutionQuery":  "The Different Company",
+        "brandSlug":  "the-different-company",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name The Different Company, brand_slug the-different-company, observed fragrance_count 36. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  36,
+        "notes":  "Exact provider name and slug manually reviewed and approved; the original raw label 더 디퍼런트 컴퍼니 remains unchanged.",
+        "sources":  [
+                        {
+                            "sourceIndex":  39,
+                            "rawLabel":  "더 디퍼런트 컴퍼니",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-040",
+        "canonicalDisplayName":  "Aerin",
+        "resolutionQuery":  "Aerin",
+        "brandSlug":  "aerin",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Aerin, brand_slug aerin, observed fragrance_count 42. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  42,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  40,
+                            "rawLabel":  "에어린",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-041",
+        "canonicalDisplayName":  "Chanel",
+        "resolutionQuery":  "Chanel",
+        "brandSlug":  "chanel",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Chanel, brand_slug chanel, observed fragrance_count 156. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  156,
+        "notes":  "Exact provider name and slug manually reviewed and approved; the base and exclusive collection labels remain grouped under this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  41,
+                            "rawLabel":  "샤넬",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  42,
+                            "rawLabel":  "샤넬 레 젝스클루시브",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-043",
+        "canonicalDisplayName":  "Guerlain",
+        "resolutionQuery":  "Guerlain",
+        "brandSlug":  "guerlain",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Guerlain, brand_slug guerlain, observed fragrance_count 575. Operator manually reviewed the multiple candidates and explicitly selected Guerlain, excluding Marcel Guerlain (brand_slug marcel-guerlain, observed fragrance_count 24). Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  575,
+        "notes":  "Only the operator-selected Guerlain candidate is approved; the base and exclusive collection labels remain grouped under this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  43,
+                            "rawLabel":  "겔랑",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  44,
+                            "rawLabel":  "겔랑 익스클루시브",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-045",
+        "canonicalDisplayName":  "Dior",
+        "resolutionQuery":  "Dior",
+        "brandSlug":  "dior",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Dior, brand_slug dior, observed fragrance_count 311. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  311,
+        "notes":  "Exact provider name and slug manually reviewed and approved; all three original Dior source labels, including the Maison Dior alias and private collection, remain grouped under this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  45,
+                            "rawLabel":  "디올",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  46,
+                            "rawLabel":  "메종 디올",
+                            "entryType":  "ALIAS"
+                        },
+                        {
+                            "sourceIndex":  47,
+                            "rawLabel":  "디올 라 콜렉션 프리베",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-048",
+        "canonicalDisplayName":  "Giorgio Armani",
+        "resolutionQuery":  "Giorgio Armani",
+        "brandSlug":  "giorgio-armani",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Giorgio Armani, brand_slug giorgio-armani, observed fragrance_count 257. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  257,
+        "notes":  "Exact provider name and slug manually reviewed and approved; Armani Privé remains source metadata for this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  48,
+                            "rawLabel":  "아르마니",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  49,
+                            "rawLabel":  "아르마니 프리베",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-050",
+        "canonicalDisplayName":  "Yves Saint Laurent",
+        "resolutionQuery":  "Yves Saint Laurent",
+        "brandSlug":  "yves-saint-laurent",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Yves Saint Laurent, brand_slug yves-saint-laurent, observed fragrance_count 278. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  278,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  50,
+                            "rawLabel":  "입생로랑",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-051",
+        "canonicalDisplayName":  "Gucci",
+        "resolutionQuery":  "Gucci",
+        "brandSlug":  "gucci",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Gucci, brand_slug gucci, observed fragrance_count 136. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  136,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  51,
+                            "rawLabel":  "구찌",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-052",
+        "canonicalDisplayName":  "Bottega Veneta",
+        "resolutionQuery":  "Bottega Veneta",
+        "brandSlug":  "bottega-veneta",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Bottega Veneta, brand_slug bottega-veneta, observed fragrance_count 41. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  41,
+        "notes":  "Exact provider name and slug manually reviewed and approved; the sole original collection label remains mapped to this one parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  52,
+                            "rawLabel":  "보테가 베네타 파르코 팔라디아노 컬렉션",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-053",
+        "canonicalDisplayName":  "Etat Libre d\u0027Orange",
+        "resolutionQuery":  "Etat Libre d\u0027Orange",
+        "brandSlug":  "etat-libre-d-orange",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Etat Libre d'Orange, brand_slug etat-libre-d-orange, observed fragrance_count 56. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  56,
+        "notes":  "Exact provider name and slug manually reviewed and approved; the original raw label is preserved exactly without punctuation normalization.",
+        "sources":  [
+                        {
+                            "sourceIndex":  53,
+                            "rawLabel":  "에따 리브르 도랑주",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-054",
+        "canonicalDisplayName":  "Olfactive Studio",
+        "resolutionQuery":  "Olfactive Studio",
+        "brandSlug":  "olfactive-studio",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Olfactive Studio, brand_slug olfactive-studio, observed fragrance_count 23. Approval recorded 2026-10-08. Operator correction recorded 2026-10-08: raw source occurrence 55 (올팩티브 프로젝트), formerly the unresolved parent curated-055, is an alternate source label for this same Olfactive Studio brand; merged as ALIAS without a separate provider query or identity.",
+        "reportedFragranceCount":  23,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request. Former parent curated-055 was removed after its sole source occurrence was merged here as an operator-confirmed alias; the raw label is unchanged and creates no additional parent import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  54,
+                            "rawLabel":  "올팩티브 스튜디오",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  55,
+                            "rawLabel":  "올팩티브 프로젝트",
+                            "entryType":  "ALIAS"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-056",
+        "canonicalDisplayName":  "Escentric Molecules",
+        "resolutionQuery":  "Escentric Molecules",
+        "brandSlug":  "escentric-molecules",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Escentric Molecules, brand_slug escentric-molecules, observed fragrance_count 26. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  26,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  56,
+                            "rawLabel":  "이센트릭 몰리큘즈",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-057",
+        "canonicalDisplayName":  "L\u0027Artisan Parfumeur",
+        "resolutionQuery":  "L\u0027Artisan Parfumeur",
+        "brandSlug":  "l-artisan-parfumeur",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name L'Artisan Parfumeur, brand_slug l-artisan-parfumeur, observed fragrance_count 131. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  131,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  57,
+                            "rawLabel":  "라티쟌 퍼퓨머",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-058",
+        "canonicalDisplayName":  "Terry de Gunzburg",
+        "resolutionQuery":  "Terry de Gunzburg",
+        "brandSlug":  "terry-de-gunzburg",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Terry de Gunzburg, brand_slug terry-de-gunzburg, observed fragrance_count 18. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  18,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  58,
+                            "rawLabel":  "테리 드 군즈버그",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-059",
+        "canonicalDisplayName":  "Miller et Bertaux",
+        "resolutionQuery":  "Miller et Bertaux",
+        "brandSlug":  "miller-et-bertaux",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Miller et Bertaux, brand_slug miller-et-bertaux, observed fragrance_count 21. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  21,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  59,
+                            "rawLabel":  "밀러 에 베르토",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-060",
+        "canonicalDisplayName":  "웨어 미",
+        "resolutionQuery":  "UERMI",
+        "brandSlug":  "uermi",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the completed targeted UERMI resolution: provider canonical name UERMI, brand_slug uermi, observed fragrance_count 26. Approval recorded 2026-10-08. The original raw label and preferred display name 웨어 미 are preserved.",
+        "reportedFragranceCount":  26,
+        "notes":  "Preferred display name and raw source label remain 웨어 미. Provider canonical/query identity UERMI and exact slug uermi were manually reviewed and approved; observed count retained without another provider request. The confirmed source identity is classified as BRAND.",
+        "sources":  [
+                        {
+                            "sourceIndex":  60,
+                            "rawLabel":  "웨어 미",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-061",
+        "canonicalDisplayName":  "Les Parfums de Rosine",
+        "resolutionQuery":  "Les Parfums de Rosine",
+        "brandSlug":  "les-parfums-de-rosine",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Les Parfums de Rosine, brand_slug les-parfums-de-rosine, observed fragrance_count 58. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  58,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  61,
+                            "rawLabel":  "로진느",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-062",
+        "canonicalDisplayName":  "Akro",
+        "resolutionQuery":  "Akro",
+        "brandSlug":  "akro",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Akro, brand_slug akro, observed fragrance_count 15. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  15,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  62,
+                            "rawLabel":  "AKRO",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-063",
+        "canonicalDisplayName":  "Sylvaine Delacourte",
+        "resolutionQuery":  "Sylvaine Delacourte",
+        "brandSlug":  "sylvaine-delacourte",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Sylvaine Delacourte, brand_slug sylvaine-delacourte, observed fragrance_count 15. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  15,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  63,
+                            "rawLabel":  "실밴느 드라꾸뜨",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-064",
+        "canonicalDisplayName":  "Aedes de Venustas",
+        "resolutionQuery":  "Aedes de Venustas",
+        "brandSlug":  "aedes-de-venustas",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved latest completed live review: provider canonical name Aedes de Venustas, brand_slug aedes-de-venustas, observed fragrance_count 15. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  15,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  64,
+                            "rawLabel":  "아이데스 데 베누스타스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-065",
+        "canonicalDisplayName":  "Arquiste",
+        "resolutionQuery":  "Arquiste",
+        "brandSlug":  "arquiste",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Arquiste, brand_slug arquiste, observed fragrance_count 30. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  30,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  65,
+                            "rawLabel":  "아르퀴스테",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-066",
+        "canonicalDisplayName":  "Astier de Villatte",
+        "resolutionQuery":  "Astier de Villatte",
+        "brandSlug":  "astier-de-villatte",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Astier de Villatte, brand_slug astier-de-villatte, observed fragrance_count 15. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  15,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  66,
+                            "rawLabel":  "아스티에 드 빌라트",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-067",
+        "canonicalDisplayName":  "Van Cleef \u0026 Arpels",
+        "resolutionQuery":  "Van Cleef \u0026 Arpels",
+        "brandSlug":  "van-cleef-arpels",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved final direct get_identity evidence recorded 2026-10-08: Bois Doré; fragrance_slug van-cleef-arpels-bois-dor; public_id 54a7bf82-0a09-4458-9cb3-22d754e1264b. The provider identity explicitly returned brand_name Van Cleef & Arpels and brand_slug van-cleef-arpels. The operator approves this exact provider identity for the existing parent.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preferred display/provider query Van Cleef & Arpels and the exact raw source are preserved. Earlier Van Cleef and Arpels/Van Cleef & Arpels retry guidance is historical only; this verified parent is excluded from active retries. No fragrance count was supplied; it remains unknown. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  67,
+                            "rawLabel":  "반 클리프 \u0026 아펠",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-068",
+        "canonicalDisplayName":  "Atkinsons",
+        "resolutionQuery":  "Atkinsons",
+        "brandSlug":  "atkinsons",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Atkinsons, brand_slug atkinsons, observed fragrance_count 79. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  79,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  68,
+                            "rawLabel":  "앳킨슨",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-069",
+        "canonicalDisplayName":  "Juliette Has A Gun",
+        "resolutionQuery":  "Juliette Has A Gun",
+        "brandSlug":  "juliette-has-a-gun",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Juliette Has A Gun, brand_slug juliette-has-a-gun, observed fragrance_count 39. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  39,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request. The existing base and Luxury Collection source entries remain grouped under this single parent.",
+        "sources":  [
+                        {
+                            "sourceIndex":  69,
+                            "rawLabel":  "줄리엣 해즈 어 건",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  70,
+                            "rawLabel":  "줄리엣 해즈 어 건 럭셔리 컬렉션",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-071",
+        "canonicalDisplayName":  "Jusbox",
+        "resolutionQuery":  "Jusbox",
+        "brandSlug":  "jusbox",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Jusbox, brand_slug jusbox, observed fragrance_count 22. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  22,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  71,
+                            "rawLabel":  "저스박스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-072",
+        "canonicalDisplayName":  "James Heeley",
+        "resolutionQuery":  "James Heeley",
+        "brandSlug":  "james-heeley",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name James Heeley, brand_slug james-heeley, observed fragrance_count 31. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  31,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  72,
+                            "rawLabel":  "제임스 힐리",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-073",
+        "canonicalDisplayName":  "A Lab on Fire",
+        "resolutionQuery":  "A Lab on Fire",
+        "brandSlug":  "a-lab-on-fire",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name A Lab on Fire, brand_slug a-lab-on-fire, observed fragrance_count 8. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  8,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  73,
+                            "rawLabel":  "어 랩 온 파이어",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-074",
+        "canonicalDisplayName":  "Amouroud",
+        "resolutionQuery":  "Amouroud",
+        "brandSlug":  "amouroud",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Amouroud, brand_slug amouroud, observed fragrance_count 29. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  29,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  74,
+                            "rawLabel":  "아무르우드",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-075",
+        "canonicalDisplayName":  "Balmain",
+        "resolutionQuery":  "Balmain Beauty",
+        "brandSlug":  "balmain-beauty",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed and approved provider canonical name Balmain Beauty, brand_slug balmain-beauty, observed fragrance_count 98, as the provider identity corresponding to the Balmain parent and original raw label 발망. The targeted resolver reported no exact Balmain canonical-name match; this provider-name variant was explicitly selected by the operator. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  98,
+        "notes":  "Preferred display name remains Balmain; approved provider canonical/query identity is Balmain Beauty. Original raw source is preserved under the existing parent; no separate Balmain Beauty parent was created and no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  75,
+                            "rawLabel":  "발망",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-076",
+        "canonicalDisplayName":  "Montale",
+        "resolutionQuery":  "Montale",
+        "brandSlug":  "montale",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Montale, brand_slug montale, observed fragrance_count 166. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  166,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  76,
+                            "rawLabel":  "몽탈",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-077",
+        "canonicalDisplayName":  "Loewe",
+        "resolutionQuery":  "Loewe",
+        "brandSlug":  "loewe",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Loewe, brand_slug loewe, observed fragrance_count 132. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  132,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  77,
+                            "rawLabel":  "로에베",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-078",
+        "canonicalDisplayName":  "Officine Universelle Buly",
+        "resolutionQuery":  "Buly 1803",
+        "brandSlug":  "buly-1803",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit mapping from the completed first unresolved-brand retry review: provider canonical name Buly 1803, brand_slug buly-1803, observed fragrance_count 24. The operator manually reviewed and approved this provider identity. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  24,
+        "notes":  "Preferred display Officine Universelle Buly preserved separately from the manually approved provider/query identity Buly 1803. Operator approval recorded 2026-10-08; original source and existing parent key preserved, with no additional Buly parent or provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  78,
+                            "rawLabel":  "불리 1803",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-079",
+        "canonicalDisplayName":  "Bond No. 9",
+        "resolutionQuery":  "Bond No 9",
+        "brandSlug":  "bond-no-9",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit mapping from the completed first unresolved-brand retry review: provider canonical name Bond No 9, brand_slug bond-no-9, observed fragrance_count 173. The operator manually reviewed and approved this provider identity. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  173,
+        "notes":  "Preferred display Bond No. 9 preserved separately from the approved provider/query identity Bond No 9. Operator approval recorded 2026-10-08. Historical retry guidance recorded 2026-10-08 listed Bond No. Nine; it is retained only as history and is inactive after verification. This parent is excluded from unresolved retry selection; no fallback was executed.",
+        "sources":  [
+                        {
+                            "sourceIndex":  79,
+                            "rawLabel":  "본드 넘버 나인",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-080",
+        "canonicalDisplayName":  "Cartier",
+        "resolutionQuery":  "Cartier",
+        "brandSlug":  "cartier",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Cartier, brand_slug cartier, observed fragrance_count 129. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  129,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  80,
+                            "rawLabel":  "까르띠에",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-081",
+        "canonicalDisplayName":  "Valentino",
+        "resolutionQuery":  "Valentino",
+        "brandSlug":  "valentino",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed the multiple provider candidates and explicitly approved provider canonical name Valentino, brand_slug valentino, observed fragrance_count 71. Valentino was selected over Mario Valentino, whose observed count was 3. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  71,
+        "notes":  "Operator explicitly selected Valentino for the original source parent after reviewing multiple candidates; Mario Valentino was not selected. Original raw source and parent identity remain unchanged; no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  81,
+                            "rawLabel":  "발렌티노",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-082",
+        "canonicalDisplayName":  "Etro",
+        "resolutionQuery":  "Etro",
+        "brandSlug":  "etro",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed the multiple/fuzzy provider candidates and explicitly approved provider canonical name Etro, brand_slug etro, observed fragrance_count 41. Etro was selected over Retrouvailles, Le Jardin Retrouve, and Parfums Retro. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  41,
+        "notes":  "Operator explicitly selected Etro for the original source parent after reviewing the fuzzy alternatives; no other candidate was selected. Original raw source and parent identity remain unchanged; no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  82,
+                            "rawLabel":  "에트로",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-083",
+        "canonicalDisplayName":  "Yves Rocher",
+        "resolutionQuery":  "Yves Rocher",
+        "brandSlug":  "yves-rocher",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Yves Rocher, brand_slug yves-rocher, observed fragrance_count 298. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  298,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  83,
+                            "rawLabel":  "이브로쉐",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-084",
+        "canonicalDisplayName":  "Jean Paul Gaultier",
+        "resolutionQuery":  "Jean Paul Gaultier",
+        "brandSlug":  "jean-paul-gaultier",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Jean Paul Gaultier, brand_slug jean-paul-gaultier, observed fragrance_count 178. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  178,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  84,
+                            "rawLabel":  "장 폴 고티에",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-085",
+        "canonicalDisplayName":  "Histoires de Parfums",
+        "resolutionQuery":  "Histoires de Parfums",
+        "brandSlug":  "histoires-de-parfums",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Histoires de Parfums, brand_slug histoires-de-parfums, observed fragrance_count 51. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  51,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  85,
+                            "rawLabel":  "이스뜨와 드 퍼퓸",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-086",
+        "canonicalDisplayName":  "Odin",
+        "resolutionQuery":  "Odin",
+        "brandSlug":  "odin",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed the fuzzy provider candidates and explicitly approved provider canonical name Odin, brand_slug odin, observed fragrance_count 16. Odin was selected over Friedemodin and RODIN Olio Lusso. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  16,
+        "notes":  "Operator explicitly selected Odin from the reviewed fuzzy candidates; Friedemodin and RODIN Olio Lusso were not selected. Original raw source and parent identity remain unchanged; no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  86,
+                            "rawLabel":  "오딘",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-087",
+        "canonicalDisplayName":  "Kenneth Cole",
+        "resolutionQuery":  "Kenneth Cole",
+        "brandSlug":  "kenneth-cole",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Kenneth Cole, brand_slug kenneth-cole, observed fragrance_count 32. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  32,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  87,
+                            "rawLabel":  "케네스콜",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-088",
+        "canonicalDisplayName":  "Givenchy",
+        "resolutionQuery":  "Givenchy",
+        "brandSlug":  "givenchy",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Givenchy, brand_slug givenchy, observed fragrance_count 290. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  290,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  88,
+                            "rawLabel":  "지방시",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-089",
+        "canonicalDisplayName":  "Armaf",
+        "resolutionQuery":  "Armaf",
+        "brandSlug":  "armaf",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed the fuzzy provider candidates and explicitly approved provider canonical name Armaf, brand_slug armaf, observed fragrance_count 353. Armaf was selected over Profumi d'Art X Armaf and Parmafragrance. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  353,
+        "notes":  "Operator explicitly selected Armaf from the reviewed fuzzy candidates; Profumi d'Art X Armaf and Parmafragrance were not selected. Original raw source and parent identity remain unchanged; no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  89,
+                            "rawLabel":  "알마프",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-090",
+        "canonicalDisplayName":  "퍼퓸 드 스퀘어",
+        "resolutionQuery":  null,
+        "brandSlug":  null,
+        "enabled":  false,
+        "verificationStatus":  "DISABLED",
+        "verificationEvidence":  null,
+        "reportedFragranceCount":  null,
+        "notes":  "Operator retirement recorded 2026-10-08: removed from curated preload scope. Preserve source occurrence 90 and raw label 퍼퓸 드 스퀘어 as historical traceability only. Disabled and excluded from resolution and import; no English provider identity, query, or slug was assigned.",
+        "sources":  [
+                        {
+                            "sourceIndex":  90,
+                            "rawLabel":  "퍼퓸 드 스퀘어",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-091",
+        "canonicalDisplayName":  "Versace",
+        "resolutionQuery":  "Versace",
+        "brandSlug":  "versace",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Versace, brand_slug versace, observed fragrance_count 87. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  87,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  91,
+                            "rawLabel":  "베르사체",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-092",
+        "canonicalDisplayName":  "Clean",
+        "resolutionQuery":  "Clean",
+        "brandSlug":  "clean",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed the multiple provider candidates and explicitly approved provider canonical name Clean, brand_slug clean, observed fragrance_count 99. Clean was selected over The Cleany. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  99,
+        "notes":  "Operator explicitly selected Clean from the reviewed provider candidates; The Cleany was not selected. Original raw source and parent identity remain unchanged; no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  92,
+                            "rawLabel":  "클린",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-093",
+        "canonicalDisplayName":  "Paco Rabanne",
+        "resolutionQuery":  "Rabanne",
+        "brandSlug":  "rabanne",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit mapping from the completed first unresolved-brand retry review: provider canonical name Rabanne, brand_slug rabanne, observed fragrance_count 152. The operator manually reviewed and approved this provider identity. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  152,
+        "notes":  "Preferred display Paco Rabanne preserved separately from the manually approved provider/query identity Rabanne. Operator approval recorded 2026-10-08; original source and existing parent key preserved, with no second Rabanne parent or provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  93,
+                            "rawLabel":  "파코라반",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-094",
+        "canonicalDisplayName":  "Elizabeth Arden",
+        "resolutionQuery":  "Elizabeth Arden",
+        "brandSlug":  "elizabeth-arden",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Elizabeth Arden, brand_slug elizabeth-arden, observed fragrance_count 116. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  116,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  94,
+                            "rawLabel":  "엘리자베스 아덴",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-095",
+        "canonicalDisplayName":  "Comptoir Sud Pacifique",
+        "resolutionQuery":  "Comptoir Sud Pacifique",
+        "brandSlug":  "comptoir-sud-pacifique",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Comptoir Sud Pacifique, brand_slug comptoir-sud-pacifique, observed fragrance_count 82. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  82,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  95,
+                            "rawLabel":  "꼼뜨와 수드 파시피크",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-096",
+        "canonicalDisplayName":  "스위스 컬렉션",
+        "resolutionQuery":  null,
+        "brandSlug":  null,
+        "enabled":  false,
+        "verificationStatus":  "DISABLED",
+        "verificationEvidence":  null,
+        "reportedFragranceCount":  null,
+        "notes":  "Operator retirement recorded 2026-10-08: removed from curated preload scope. Preserve source occurrence 96 and raw label 스위스 컬렉션 as historical traceability only. Disabled and excluded from resolution and import; no English provider identity, query, or slug was assigned.",
+        "sources":  [
+                        {
+                            "sourceIndex":  96,
+                            "rawLabel":  "스위스 컬렉션",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-097",
+        "canonicalDisplayName":  "Malizia",
+        "resolutionQuery":  "Malizia",
+        "brandSlug":  "malizia",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved collection-aware mapping from the completed first unresolved-brand retry review: provider canonical name Malizia, brand_slug malizia, observed fragrance_count 45. The operator manually reviewed and approved this provider identity. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  45,
+        "notes":  "Operator collection-aware approval recorded 2026-10-08: source occurrence 97, exact raw label 말라지아 봉봉, represents the Malizia / Malizia Bon Bons line and retains COLLECTION classification. Local inspection found no other Malizia normalized parent, so Case B uses existing curated-097 as the single provider-brand mapping Malizia. Former collection display 말라지아 봉봉 is retained as source/history, with unchanged grouping and no added parent, merge, duplicate provider import, or live request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  97,
+                            "rawLabel":  "말라지아 봉봉",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-098",
+        "canonicalDisplayName":  "Monotheme",
+        "resolutionQuery":  "Monotheme Venezia",
+        "brandSlug":  "monotheme-venezia",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed and approved provider canonical name Monotheme Venezia, brand_slug monotheme-venezia, observed fragrance_count 86, as the provider identity for the original Monotheme parent after the targeted Monotheme query returned this name variant. Preferred display name Monotheme and original raw source are preserved. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  86,
+        "notes":  "Preferred display name remains Monotheme; manually approved provider canonical/query identity is Monotheme Venezia. Original raw source is preserved under the existing parent; no separate Monotheme Venezia parent was created and no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  98,
+                            "rawLabel":  "모노템",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-099",
+        "canonicalDisplayName":  "Chabaud",
+        "resolutionQuery":  "Chabaud Maison de Parfum",
+        "brandSlug":  "chabaud-maison-de-parfum",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator manually reviewed and approved provider canonical name Chabaud Maison de Parfum, brand_slug chabaud-maison-de-parfum, observed fragrance_count 29, as the provider identity for the original Chabaud parent after the targeted Chabaud query returned this name variant. Preferred display name Chabaud and original raw source are preserved. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  29,
+        "notes":  "Preferred display name remains Chabaud; manually approved provider canonical/query identity is Chabaud Maison de Parfum. Original raw source is preserved under the existing parent; no duplicate Chabaud parent was created and no additional provider request was made.",
+        "sources":  [
+                        {
+                            "sourceIndex":  99,
+                            "rawLabel":  "샤보",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-100",
+        "canonicalDisplayName":  "Shanghai Tang",
+        "resolutionQuery":  "Shanghai Tang",
+        "brandSlug":  "shanghai-tang",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Shanghai Tang, brand_slug shanghai-tang, observed fragrance_count 13. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  13,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  100,
+                            "rawLabel":  "상하이탕",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-101",
+        "canonicalDisplayName":  "Innisfree",
+        "resolutionQuery":  "Innisfree",
+        "brandSlug":  "innisfree",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Innisfree, brand_slug innisfree, observed fragrance_count 15. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  15,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  101,
+                            "rawLabel":  "이니스프리",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-102",
+        "canonicalDisplayName":  "Thierry Mugler",
+        "resolutionQuery":  "Mugler",
+        "brandSlug":  "mugler",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit mapping from the completed first unresolved-brand retry review: provider canonical name Mugler, brand_slug mugler, observed fragrance_count 174. The operator manually reviewed and approved this provider identity. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  174,
+        "notes":  "Preferred display Thierry Mugler preserved separately from the manually approved provider/query identity Mugler. Operator approval recorded 2026-10-08; original source and existing parent key preserved, with no duplicate Mugler parent or provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  102,
+                            "rawLabel":  "티에리 뮈글러",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-103",
+        "canonicalDisplayName":  "4711",
+        "resolutionQuery":  "4711",
+        "brandSlug":  "4711",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved collection-aware mapping from the completed first unresolved-brand retry review: provider canonical name 4711, brand_slug 4711, observed fragrance_count 83. The operator manually reviewed and approved this provider identity. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  83,
+        "notes":  "Operator collection-aware approval recorded 2026-10-08: source occurrence 103, exact raw label 아쿠아 콜로니아, represents the Acqua Colonia line associated with provider brand 4711 and retains COLLECTION classification. Local inspection found no other 4711 normalized parent, so Case B uses existing curated-103 as the single provider-brand mapping 4711. Former collection display 아쿠아 콜로니아 is retained as source/history, with unchanged grouping and no added parent, merge, duplicate provider import, or live request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  103,
+                            "rawLabel":  "아쿠아 콜로니아",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-104",
+        "canonicalDisplayName":  "The Body Shop",
+        "resolutionQuery":  "The Body Shop",
+        "brandSlug":  "the-body-shop",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name The Body Shop, brand_slug the-body-shop, observed fragrance_count 183. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  183,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  104,
+                            "rawLabel":  "더 바디 샵",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-105",
+        "canonicalDisplayName":  "Anna Sui",
+        "resolutionQuery":  "Anna Sui",
+        "brandSlug":  "anna-sui",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Anna Sui, brand_slug anna-sui, observed fragrance_count 58. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  58,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  105,
+                            "rawLabel":  "안나 수이",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-106",
+        "canonicalDisplayName":  "Lanvin",
+        "resolutionQuery":  "Lanvin",
+        "brandSlug":  "lanvin",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Lanvin, brand_slug lanvin, observed fragrance_count 78. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  78,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  106,
+                            "rawLabel":  "랑방",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-107",
+        "canonicalDisplayName":  "Jimmy Choo",
+        "resolutionQuery":  "Jimmy Choo",
+        "brandSlug":  "jimmy-choo",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Jimmy Choo, brand_slug jimmy-choo, observed fragrance_count 48. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  48,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  107,
+                            "rawLabel":  "지미 추",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-108",
+        "canonicalDisplayName":  "Abercrombie \u0026 Fitch",
+        "resolutionQuery":  "Abercrombie & Fitch",
+        "brandSlug":  "abercrombie-fitch",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved final direct get_identity evidence recorded 2026-10-08: 8 Boho Blossom; fragrance_slug abercrombie-fitch-8-boho-blossom; public_id 35645322-bb48-4b34-a06c-c57741b2284a. The provider identity explicitly returned brand_name Abercrombie & Fitch and brand_slug abercrombie-fitch. The operator approves this exact provider identity for the existing parent.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preferred display and raw source are unchanged; provider/query identity is Abercrombie & Fitch. Earlier brand-query failures, the former Abercrombie and Fitch query, and the unexecuted Abercrombie Fitch fallback are inactive history only. This verified parent is excluded from active retries. No fragrance count was supplied; it remains unknown. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  108,
+                            "rawLabel":  "아베 크롬비 \u0026 피치",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-109",
+        "canonicalDisplayName":  "Lacoste",
+        "resolutionQuery":  "Lacoste",
+        "brandSlug":  "lacoste",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Lacoste, brand_slug lacoste, observed fragrance_count 75. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  75,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  109,
+                            "rawLabel":  "라코스테",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-110",
+        "canonicalDisplayName":  "Dsquared2",
+        "resolutionQuery":  "Dsquared",
+        "brandSlug":  "dsquared",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "MANUAL operator approval recorded 2026-10-08 from product-level ScentRev evidence: targeted query Original Wood returned fragrance_name Original Wood, fragrance_slug dsquared-original-wood, public_id 7a87dedf-e175-4ec4-a8c1-6724ed478ef8. The operator explicitly approves preferred brand Dsquared2 as provider identity Dsquared, brand_slug dsquared, based on this known Dsquared2 product, the exact dsquared- canonical fragrance slug prefix, and the already documented Dsquared fallback. This is not a direct get_identity brand confirmation or an inference from an unrelated fragrance.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preferred display Dsquared2 and raw source 디스퀘어드2 are preserved under the existing parent; provider/query identity is Dsquared. Repeated direct brand-resolution failures, the former DSQUARED2 query, and the earlier Dsquared fallback guidance are inactive history only. Final approval is explicitly manual product-level evidence, not a direct brand identity response. No second Dsquared parent was created; no fragrance count was supplied. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  110,
+                            "rawLabel":  "디스퀘어드2",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-111",
+        "canonicalDisplayName":  "Ed Hardy",
+        "resolutionQuery":  "Christian Audigier",
+        "brandSlug":  "christian-audigier",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved final direct get_identity evidence recorded 2026-10-08: Ed Hardy Villain for Women; fragrance_slug christian-audigier-ed-hardy-villain-for-women; public_id c48f3d19-2603-4ed7-959b-026260b5e691. The provider identity explicitly returned brand_name Christian Audigier and brand_slug christian-audigier for the Ed Hardy fragrance line. The operator approves this provider identity under existing curated-111, preserving preferred Ed Hardy and raw source 에드 하디. Local inspection found no other Christian Audigier parent or christian-audigier mapping, so Case B applies without a duplicate parent or import.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preferred/source-line display Ed Hardy and the exact Korean raw label 에드 하디 retain their existing source grouping. Provider/query identity is Christian Audigier with one verified christian-audigier import candidate. The earlier failed Ed Hardy brand query and licensing/association context are historical only; final approval relies on explicit provider identity evidence. No independent Ed Hardy slug or second parent was created. This verified parent is excluded from retries; fragrance count remains unknown. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  111,
+                            "rawLabel":  "에드 하디",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-112",
+        "canonicalDisplayName":  "Nautica",
+        "resolutionQuery":  "Nautica",
+        "brandSlug":  "nautica",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Nautica, brand_slug nautica, observed fragrance_count 32. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  32,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  112,
+                            "rawLabel":  "노티카",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-114",
+        "canonicalDisplayName":  "Issey Miyake",
+        "resolutionQuery":  "Issey Miyake",
+        "brandSlug":  "issey-miyake",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Issey Miyake, brand_slug issey-miyake, observed fragrance_count 118. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  118,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  114,
+                            "rawLabel":  "이세이 미야케",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-115",
+        "canonicalDisplayName":  "Kenzo",
+        "resolutionQuery":  "Kenzo",
+        "brandSlug":  "kenzo",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Kenzo, brand_slug kenzo, observed fragrance_count 170. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  170,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  115,
+                            "rawLabel":  "겐조",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-116",
+        "canonicalDisplayName":  "Carolina Herrera",
+        "resolutionQuery":  "Carolina Herrera",
+        "brandSlug":  "carolina-herrera",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Carolina Herrera, brand_slug carolina-herrera, observed fragrance_count 227. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  227,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  116,
+                            "rawLabel":  "케롤리나 헤레나(CH)",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-117",
+        "canonicalDisplayName":  "Mercedes-Benz",
+        "resolutionQuery":  "Mercedes-Benz",
+        "brandSlug":  "mercedes-benz",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Mercedes-Benz, brand_slug mercedes-benz, observed fragrance_count 49. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  49,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  117,
+                            "rawLabel":  "메르세데스 벤츠",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-118",
+        "canonicalDisplayName":  "Marc Jacobs",
+        "resolutionQuery":  "Marc Jacobs",
+        "brandSlug":  "marc-jacobs",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Marc Jacobs, brand_slug marc-jacobs, observed fragrance_count 127. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  127,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  118,
+                            "rawLabel":  "마크제이콥스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-119",
+        "canonicalDisplayName":  "Montblanc",
+        "resolutionQuery":  "Montblanc",
+        "brandSlug":  "montblanc",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Montblanc, brand_slug montblanc, observed fragrance_count 45. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  45,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  119,
+                            "rawLabel":  "몽 블랑",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-120",
+        "canonicalDisplayName":  "John Varvatos",
+        "resolutionQuery":  "John Varvatos",
+        "brandSlug":  "john-varvatos",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name John Varvatos, brand_slug john-varvatos, observed fragrance_count 26. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  26,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  120,
+                            "rawLabel":  "존바바토스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-121",
+        "canonicalDisplayName":  "Burberry",
+        "resolutionQuery":  "Burberry",
+        "brandSlug":  "burberry",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Burberry, brand_slug burberry, observed fragrance_count 104. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  104,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  121,
+                            "rawLabel":  "버버리",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-122",
+        "canonicalDisplayName":  "Ferrari",
+        "resolutionQuery":  "Ferrari",
+        "brandSlug":  "ferrari",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Ferrari, brand_slug ferrari, observed fragrance_count 37. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  37,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  122,
+                            "rawLabel":  "페라리",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-123",
+        "canonicalDisplayName":  "Dolce \u0026 Gabbana",
+        "resolutionQuery":  "Dolce&Gabbana",
+        "brandSlug":  "dolce-gabbana",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed second unresolved-brand retry review: provider canonical name Dolce&Gabbana, brand_slug dolce-gabbana, observed fragrance_count 151. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  151,
+        "notes":  "Preferred display Dolce & Gabbana is preserved separately from the approved provider/query identity Dolce&Gabbana. Operator approval recorded 2026-10-08; the original base source and Velvet collection remain under existing curated-123. Historical retry guidance listed Dolce and Gabbana, then Dolce Gabbana, then 돌체 앤 가바나; these are inactive history only after verification. This parent is excluded from unresolved retry selection. No fallback, additional parent, live request, or import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  123,
+                            "rawLabel":  "돌체 \u0026 가바나",
+                            "entryType":  "BRAND"
+                        },
+                        {
+                            "sourceIndex":  162,
+                            "rawLabel":  "돌체 \u0026 가바나 벨벳 컬렉션",
+                            "entryType":  "COLLECTION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-124",
+        "canonicalDisplayName":  "프레드릭 엠",
+        "resolutionQuery":  "Frederic M",
+        "brandSlug":  "frederic-m",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit manual candidate selection from the completed second unresolved-brand retry review: the ambiguous result contained Frederic Malle / frederic-malle / 68 (candidate A) and Frederic M / frederic-m / 50 (candidate B). The operator intentionally selected candidate B, provider canonical name Frederic M, brand_slug frederic-m, observed fragrance_count 50, over Frederic Malle. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  50,
+        "notes":  "Historical operator source correction recorded 2026-10-08 changed source occurrence 124 and display from 프레데릭 엠 to exactly 프레드릭 엠; that corrected source/display, original source classification, index, and parent key are preserved. The second retry review manually approved Frederic M as a separate provider brand, with query Frederic M and slug frederic-m. It remains independent of existing Frederic Malle (curated-003), with no alias merge, new parent, source change, live request, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  124,
+                            "rawLabel":  "프레드릭 엠",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-125",
+        "canonicalDisplayName":  "알레산드로",
+        "resolutionQuery":  "Alessandro",
+        "brandSlug":  "alessandro",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit manual candidate selection from the completed second unresolved-brand retry review: the operator selected candidate #2, standalone provider canonical name Alessandro, brand_slug alessandro, observed fragrance_count 1, over candidate #1 alessandro-dell-acqua / alessandro-dell-acqua / 3 (Alessandro Dell'Acqua) and candidate #3 Alessandro Della Torre / alessandro-della-torre / 1. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  1,
+        "notes":  "Historical operator source correction recorded 2026-10-08 changed source occurrence 125 and display from 알렉산드로 to exactly 알레산드로; that corrected source/display, original source classification, index, and parent key are preserved. The second retry review explicitly approved the standalone Alessandro provider identity and existing query. No expanded Alessandro identity, additional parent, source change, live request, or import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  125,
+                            "rawLabel":  "알레산드로",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-126",
+        "canonicalDisplayName":  "Amouage",
+        "resolutionQuery":  "Amouage",
+        "brandSlug":  "amouage",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Amouage, brand_slug amouage, observed fragrance_count 151. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  151,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  126,
+                            "rawLabel":  "아무아주",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-127",
+        "canonicalDisplayName":  "Clive Christian",
+        "resolutionQuery":  "Clive Christian",
+        "brandSlug":  "clive-christian",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Clive Christian, brand_slug clive-christian, observed fragrance_count 93. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  93,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  127,
+                            "rawLabel":  "클라이브 크리스찬",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-128",
+        "canonicalDisplayName":  "리퀴드 이미지네흐",
+        "resolutionQuery":  "Les Liquides Imaginaires",
+        "brandSlug":  "les-liquides-imaginaires",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit manual mapping from the completed second unresolved-brand retry review: query Liquides Imaginaires returned provider canonical name Les Liquides Imaginaires, brand_slug les-liquides-imaginaires, observed fragrance_count 45. Although the canonical name was not an exact query match, the operator manually confirmed this candidate as the intended fragrance house. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  45,
+        "notes":  "Preferred/source display 리퀴드 이미지네흐 remains exact under existing curated-128. The operator manually approved Les Liquides Imaginaires as the provider/query identity after reviewing the result for Liquides Imaginaires. Original source classification and grouping remain unchanged; no new normalized parent, live request, or import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  128,
+                            "rawLabel":  "리퀴드 이미지네흐",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-129",
+        "canonicalDisplayName":  "Lollia",
+        "resolutionQuery":  "Lollia",
+        "brandSlug":  "lollia",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Lollia, brand_slug lollia, observed fragrance_count 13. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  13,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  129,
+                            "rawLabel":  "롤리아",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-130",
+        "canonicalDisplayName":  "Mancera",
+        "resolutionQuery":  "Mancera",
+        "brandSlug":  "mancera",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Mancera, brand_slug mancera, observed fragrance_count 96. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  96,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  130,
+                            "rawLabel":  "만세라 (mancera)",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-131",
+        "canonicalDisplayName":  "Reyane Tradition",
+        "resolutionQuery":  "Reyane Tradition",
+        "brandSlug":  "reyane-tradition",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Reyane Tradition, brand_slug reyane-tradition, observed fragrance_count 67. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  67,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  131,
+                            "rawLabel":  "레이안 트레디션 (reyane tradition)",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-132",
+        "canonicalDisplayName":  "Paul Smith",
+        "resolutionQuery":  "Paul Smith",
+        "brandSlug":  "paul-smith",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Paul Smith, brand_slug paul-smith, observed fragrance_count 46. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  46,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  132,
+                            "rawLabel":  "폴 스미스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-133",
+        "canonicalDisplayName":  "미카로카",
+        "resolutionQuery":  "MIKA LOKKA",
+        "brandSlug":  null,
+        "enabled":  false,
+        "verificationStatus":  "DISABLED",
+        "verificationEvidence":  "Operator terminal resolution decision recorded 2026-10-08: the targeted brand-level MIKA LOKKA search found no usable provider mapping, and the final product-level Lady Muscat search returned NO_USABLE_RESULT. End ScentRev resolution with DISABLED status and enabled=false; retain a null verified slug and exclude this source from resolver selection and import. This decision establishes only that no usable ScentRev provider/catalog mapping was found in the targeted checks performed; it does not claim that the real-world brand does not exist.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preserve preferred/source display 미카로카, the original source occurrence and provenance classification, and intended identity MIKA LOKKA as historical query metadata. Earlier human spelling review and the unsuccessful brand query remain historical evidence; final Lady Muscat product search also found no usable result. This retained terminal definition has no active retry or provider import; no source was deleted and no alternate spelling or provider slug was invented. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  133,
+                            "rawLabel":  "미카로카",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-134",
+        "canonicalDisplayName":  "Illuminum",
+        "resolutionQuery":  "Illuminum",
+        "brandSlug":  "illuminum",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Illuminum, brand_slug illuminum, observed fragrance_count 42. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  42,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  134,
+                            "rawLabel":  "일루미넘",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-135",
+        "canonicalDisplayName":  "Solinotes",
+        "resolutionQuery":  "Solinotes",
+        "brandSlug":  "solinotes",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Solinotes, brand_slug solinotes, observed fragrance_count 37. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  37,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  135,
+                            "rawLabel":  "솔리 노트",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-136",
+        "canonicalDisplayName":  "Miller Harris",
+        "resolutionQuery":  "Miller Harris",
+        "brandSlug":  "miller-harris",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Miller Harris, brand_slug miller-harris, observed fragrance_count 77. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  77,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  136,
+                            "rawLabel":  "밀러 해리스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-137",
+        "canonicalDisplayName":  "Arrogance",
+        "resolutionQuery":  "Arrogance",
+        "brandSlug":  "arrogance",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Arrogance, brand_slug arrogance, observed fragrance_count 24. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  24,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  137,
+                            "rawLabel":  "아로강스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-138",
+        "canonicalDisplayName":  "Orlov Paris",
+        "resolutionQuery":  "Orlov Paris",
+        "brandSlug":  "orlov-paris",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Orlov Paris, brand_slug orlov-paris, observed fragrance_count 22. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  22,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  138,
+                            "rawLabel":  "오를로브 파리",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-139",
+        "canonicalDisplayName":  "클라우스 포르토",
+        "resolutionQuery":  "Claus Porto",
+        "brandSlug":  "claus-porto",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed second unresolved-brand retry review: provider canonical name Claus Porto, brand_slug claus-porto, observed fragrance_count 22. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  22,
+        "notes":  "Preferred/source display 클라우스 포르토 is preserved separately from the approved provider/query identity Claus Porto. Operator approval recorded 2026-10-08; original parent key, source classification, and grouping remain unchanged. No additional parent, live request, or import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  139,
+                            "rawLabel":  "클라우스 포르토",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-140",
+        "canonicalDisplayName":  "4160 Tuesdays",
+        "resolutionQuery":  "4160 Tuesdays",
+        "brandSlug":  "4160-tuesdays",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name 4160 Tuesdays, brand_slug 4160-tuesdays, observed fragrance_count 132. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  132,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  140,
+                            "rawLabel":  "4160 Tuesdays",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-141",
+        "canonicalDisplayName":  "Eisenberg",
+        "resolutionQuery":  "Eisenberg",
+        "brandSlug":  "eisenberg",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Eisenberg, brand_slug eisenberg, observed fragrance_count 37. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  37,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  141,
+                            "rawLabel":  "아이젠버그",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-142",
+        "canonicalDisplayName":  "Mirko Buffini",
+        "resolutionQuery":  "Mirko Buffini Firenze",
+        "brandSlug":  "mirko-buffini-firenze",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved manual mapping from the latest completed live review: provider canonical name Mirko Buffini Firenze, brand_slug mirko-buffini-firenze, observed fragrance_count 41. Approval recorded 2026-10-08. The operator explicitly reviewed and approved this provider identity for the preserved preferred display name Mirko Buffini.",
+        "reportedFragranceCount":  41,
+        "notes":  "Preferred display name Mirko Buffini preserved separately from the manually approved provider/query identity Mirko Buffini Firenze; all original raw labels remain unchanged and no additional parent was created.",
+        "sources":  [
+                        {
+                            "sourceIndex":  142,
+                            "rawLabel":  "미르코 부피니",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-143",
+        "canonicalDisplayName":  "Acqua dell\u0027Elba",
+        "resolutionQuery":  "Acqua dell Elba",
+        "brandSlug":  "acqua-dell-elba",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved manual mapping from the latest completed live review: provider canonical name Acqua dell Elba, brand_slug acqua-dell-elba, observed fragrance_count 18. Approval recorded 2026-10-08. The operator explicitly reviewed and approved this provider identity for the preserved preferred display name Acqua dell\u0027Elba.",
+        "reportedFragranceCount":  18,
+        "notes":  "Preferred display name Acqua dell\u0027Elba preserved separately from the manually approved provider/query identity Acqua dell Elba; all original raw labels remain unchanged and no additional parent was created.",
+        "sources":  [
+                        {
+                            "sourceIndex":  143,
+                            "rawLabel":  "아쿠아 델 엘바",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-144",
+        "canonicalDisplayName":  "메종 사이브라이트",
+        "resolutionQuery":  "Maison Sybarite",
+        "brandSlug":  "maison-sybarite",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed second unresolved-brand retry review: provider canonical name Maison Sybarite, brand_slug maison-sybarite, observed fragrance_count 6. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  6,
+        "notes":  "Preferred/source display 메종 사이브라이트 is preserved separately from the approved provider/query identity Maison Sybarite. Operator approval recorded 2026-10-08; original parent key, source classification, and grouping remain unchanged. No additional parent, live request, or import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  144,
+                            "rawLabel":  "메종 사이브라이트",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-145",
+        "canonicalDisplayName":  "조말론 \u0026 자라",
+        "resolutionQuery":  "Zara",
+        "brandSlug":  null,
+        "enabled":  false,
+        "verificationStatus":  "UNRESOLVED",
+        "verificationEvidence":  null,
+        "reportedFragranceCount":  null,
+        "notes":  "Operator source review recorded 2026-10-08: this raw source represents Zara fragrances created in collaboration with perfumer Jo Malone CBE. Local inspection found no separate Zara parent, so curated-145 remains the single unresolved collaboration candidate with reviewed query Zara, null slug, and enabled false. It is separate from Jo Malone London and must never use that brand identity or slug. No provider identity has been verified, and no new parent, live lookup, or fragrance import was created.",
+        "sources":  [
+                        {
+                            "sourceIndex":  145,
+                            "rawLabel":  "조말론 \u0026 자라",
+                            "entryType":  "COLLABORATION"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-146",
+        "canonicalDisplayName":  "Rancé 1795",
+        "resolutionQuery":  "Rance 1795",
+        "brandSlug":  "rance-1795",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved manual mapping from the latest completed live review: provider canonical name Rance 1795, brand_slug rance-1795, observed fragrance_count 41. Approval recorded 2026-10-08. The operator explicitly reviewed and approved this provider identity for the preserved preferred display name Rancé 1795.",
+        "reportedFragranceCount":  41,
+        "notes":  "Preferred display name Rancé 1795 preserved separately from the manually approved provider/query identity Rance 1795; all original raw labels remain unchanged and no additional parent was created.",
+        "sources":  [
+                        {
+                            "sourceIndex":  146,
+                            "rawLabel":  "랑세 1795",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-147",
+        "canonicalDisplayName":  "Chloé",
+        "resolutionQuery":  "Chloé",
+        "brandSlug":  "chlo",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved final direct get_identity evidence recorded 2026-10-08: Love, Chloe Eau Florale; fragrance_slug chlo-love-chloe-eau-florale; public_id 91bed0a1-4296-4304-ac31-148d1aa75a23. The provider identity explicitly returned brand_name Chloé and brand_slug chlo. The operator approves this exact provider identity for the existing parent, preserving preferred display Chloé.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preferred display Chloé and the exact raw source 끌로에 are preserved. Provider/query identity is Chloé; the previous unaccented Chloe retry is inactive history only. This verified parent is excluded from active retries. No fragrance count was supplied; it remains unknown. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  147,
+                            "rawLabel":  "끌로에",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-148",
+        "canonicalDisplayName":  "Davidoff",
+        "resolutionQuery":  "Davidoff",
+        "brandSlug":  "davidoff",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Davidoff, brand_slug davidoff, observed fragrance_count 111. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  111,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  148,
+                            "rawLabel":  "다비도프",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-149",
+        "canonicalDisplayName":  "Laura Mercier",
+        "resolutionQuery":  "Laura Mercier",
+        "brandSlug":  "laura-mercier",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Laura Mercier, brand_slug laura-mercier, observed fragrance_count 23. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  23,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  149,
+                            "rawLabel":  "로라 메르시에",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-150",
+        "canonicalDisplayName":  "Parfums de Marly",
+        "resolutionQuery":  "Parfums de Marly",
+        "brandSlug":  "parfums-de-marly",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Parfums de Marly, brand_slug parfums-de-marly, observed fragrance_count 46. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  46,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  150,
+                            "rawLabel":  "퍼퓸 드 말리",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-151",
+        "canonicalDisplayName":  "Roja Dove",
+        "resolutionQuery":  "Roja Dove",
+        "brandSlug":  "roja-dove",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Roja Dove, brand_slug roja-dove, observed fragrance_count 184. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  184,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  151,
+                            "rawLabel":  "로자 도브",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-152",
+        "canonicalDisplayName":  "Xerjoff",
+        "resolutionQuery":  "Xerjoff",
+        "brandSlug":  "xerjoff",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Xerjoff, brand_slug xerjoff, observed fragrance_count 184. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  184,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  152,
+                            "rawLabel":  "제르조프",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-153",
+        "canonicalDisplayName":  "Trudon",
+        "resolutionQuery":  "Trudon",
+        "brandSlug":  "trudon",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Trudon, brand_slug trudon, observed fragrance_count 15. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  15,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  153,
+                            "rawLabel":  "씨흐트루동 (메종 트루동)",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-154",
+        "canonicalDisplayName":  "Boucheron",
+        "resolutionQuery":  "Boucheron",
+        "brandSlug":  "boucheron",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Boucheron, brand_slug boucheron, observed fragrance_count 62. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  62,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  154,
+                            "rawLabel":  "부쉐론",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-155",
+        "canonicalDisplayName":  "Ramon Monegal",
+        "resolutionQuery":  "Ramon Monegal",
+        "brandSlug":  "ramon-monegal",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Ramon Monegal, brand_slug ramon-monegal, observed fragrance_count 61. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  61,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  155,
+                            "rawLabel":  "라몬 모네갈",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-156",
+        "canonicalDisplayName":  "Yohji Yamamoto",
+        "resolutionQuery":  "Yohji Yamamoto",
+        "brandSlug":  "yohji-yamamoto",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Yohji Yamamoto, brand_slug yohji-yamamoto, observed fragrance_count 29. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  29,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  156,
+                            "rawLabel":  "요지 야마모토",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-157",
+        "canonicalDisplayName":  "Azzaro",
+        "resolutionQuery":  "Azzaro",
+        "brandSlug":  "azzaro",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Azzaro, brand_slug azzaro, observed fragrance_count 104. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  104,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  157,
+                            "rawLabel":  "아자로",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-158",
+        "canonicalDisplayName":  "Electimuss",
+        "resolutionQuery":  "Electimuss",
+        "brandSlug":  "electimuss",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Electimuss, brand_slug electimuss, observed fragrance_count 40. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  40,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  158,
+                            "rawLabel":  "일렉티무스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-159",
+        "canonicalDisplayName":  "BDK Parfums",
+        "resolutionQuery":  "BDK Parfums",
+        "brandSlug":  "bdk-parfums",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name BDK Parfums, brand_slug bdk-parfums, observed fragrance_count 25. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  25,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  159,
+                            "rawLabel":  "BDK Parfums",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-160",
+        "canonicalDisplayName":  "Carner Barcelona",
+        "resolutionQuery":  "Carner Barcelona",
+        "brandSlug":  "carner-barcelona",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Carner Barcelona, brand_slug carner-barcelona, observed fragrance_count 35. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  35,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  160,
+                            "rawLabel":  "카너 바르셀로나",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-161",
+        "canonicalDisplayName":  "D.S. \u0026 Durga",
+        "resolutionQuery":  "DS&Durga",
+        "brandSlug":  "ds-durga",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved final direct get_identity evidence recorded 2026-10-08: Amber Kiso; fragrance_slug ds-durga-amber-kiso; public_id ef6f9492-fbb5-4f41-a721-f3cede69538f. The provider identity explicitly returned brand_name DS&Durga and brand_slug ds-durga. The operator approves this exact provider identity for the existing parent, preserving preferred display D.S. & Durga.",
+        "reportedFragranceCount":  null,
+        "notes":  "Preferred display D.S. & Durga and exact raw source DS & Durga (디에스앤더가) are preserved; provider/query identity is DS&Durga. Earlier D.S. and Durga/DS and Durga query failures and the unexecuted DS Durga and 디에스앤더가 fallback guidance are inactive history only. This verified parent is excluded from active retries. No fragrance count was supplied; it remains unknown. Applying this decision made no live request, database access, or import.",
+        "sources":  [
+                        {
+                            "sourceIndex":  161,
+                            "rawLabel":  "DS \u0026 Durga (디에스앤더가)",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-163",
+        "canonicalDisplayName":  "Initio Parfums Privés",
+        "resolutionQuery":  "Initio Parfums Prives",
+        "brandSlug":  "initio-parfums-prives",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved manual spelling variant from the latest completed live review: provider canonical name Initio Parfums Prives, brand_slug initio-parfums-prives, observed fragrance_count 25. Approval recorded 2026-10-08. The operator explicitly reviewed and approved the provider's unaccented identity for the preserved preferred display name Initio Parfums Privés.",
+        "reportedFragranceCount":  25,
+        "notes":  "Preferred display name Initio Parfums Privés preserved separately from the manually approved provider/query identity Initio Parfums Prives; all original raw labels remain unchanged and no additional parent was created.",
+        "sources":  [
+                        {
+                            "sourceIndex":  163,
+                            "rawLabel":  "이니시오 퍼퓸 프라이브스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-164",
+        "canonicalDisplayName":  "Kajal",
+        "resolutionQuery":  "Kajal",
+        "brandSlug":  "kajal",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Kajal, brand_slug kajal, observed fragrance_count 25. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  25,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  164,
+                            "rawLabel":  "카잘",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-165",
+        "canonicalDisplayName":  "Kierin NYC",
+        "resolutionQuery":  "Kierin",
+        "brandSlug":  "kierin",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved explicit manual mapping from the completed final unseen unresolved-brand review: the targeted query KIERIN returned provider canonical name Kierin, brand_slug kierin, observed fragrance_count 10. The operator manually confirmed that preferred brand Kierin NYC resolves to provider canonical brand Kierin. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  10,
+        "notes":  "Preferred display Kierin NYC and exact source label 키에린 뉴욕 (Kierin NYC) are preserved under existing curated-165. Provider/query identity is now Kierin following explicit operator approval recorded 2026-10-08. Original source classification and grouping remain unchanged; no second normalized parent, live request, or fragrance import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  165,
+                            "rawLabel":  "키에린 뉴욕 (Kierin NYC)",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-166",
+        "canonicalDisplayName":  "Lalique",
+        "resolutionQuery":  "Lalique",
+        "brandSlug":  "lalique",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Lalique, brand_slug lalique, observed fragrance_count 104. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  104,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  166,
+                            "rawLabel":  "라리끄",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-167",
+        "canonicalDisplayName":  "Nasomatto",
+        "resolutionQuery":  "Nasomatto",
+        "brandSlug":  "nasomatto",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Nasomatto, brand_slug nasomatto, observed fragrance_count 14. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  14,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  167,
+                            "rawLabel":  "나조마토",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-168",
+        "canonicalDisplayName":  "Nishane",
+        "resolutionQuery":  "Nishane",
+        "brandSlug":  "nishane",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Nishane, brand_slug nishane, observed fragrance_count 53. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  53,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  168,
+                            "rawLabel":  "니샤네",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-169",
+        "canonicalDisplayName":  "Rasasi",
+        "resolutionQuery":  "Rasasi",
+        "brandSlug":  "rasasi",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Rasasi, brand_slug rasasi, observed fragrance_count 388. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  388,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  169,
+                            "rawLabel":  "라사시",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-170",
+        "canonicalDisplayName":  "Royal Crown",
+        "resolutionQuery":  "Royal Crown",
+        "brandSlug":  "royal-crown",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Royal Crown, brand_slug royal-crown, observed fragrance_count 54. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  54,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  170,
+                            "rawLabel":  "로얄 크라운",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-171",
+        "canonicalDisplayName":  "Tiziana Terenzi",
+        "resolutionQuery":  "Tiziana Terenzi",
+        "brandSlug":  "tiziana-terenzi",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Tiziana Terenzi, brand_slug tiziana-terenzi, observed fragrance_count 126. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  126,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  171,
+                            "rawLabel":  "티지아나 테렌지",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-172",
+        "canonicalDisplayName":  "Viktor \u0026 Rolf",
+        "resolutionQuery":  "Viktor\u0026Rolf",
+        "brandSlug":  "viktor-rolf",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed final unseen unresolved-brand review: provider canonical name Viktor&Rolf, brand_slug viktor-rolf, observed fragrance_count 104. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  104,
+        "notes":  "Preferred display Viktor & Rolf is preserved separately from the approved provider/query identity Viktor&Rolf. Operator approval recorded 2026-10-08; the exact source, existing parent key, and grouping remain unchanged. Historical retry guidance listed Viktor and Rolf, then Viktor Rolf, then 빅터 앤 롤프; these are inactive history only after verification. This parent is excluded from unresolved retry selection. No fallback, additional parent, live request, or fragrance import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  172,
+                            "rawLabel":  "빅터 \u0026 롤프",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-173",
+        "canonicalDisplayName":  "Ex Nihilo",
+        "resolutionQuery":  "Ex Nihilo",
+        "brandSlug":  "ex-nihilo",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Ex Nihilo, brand_slug ex-nihilo, observed fragrance_count 81. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  81,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  173,
+                            "rawLabel":  "엑스니힐로",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-174",
+        "canonicalDisplayName":  "살롱 드 느바에",
+        "resolutionQuery":  "Salon de Nevaeh",
+        "brandSlug":  "salon-de-nevaeh",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved completed final unseen unresolved-brand review: provider canonical name Salon de Nevaeh, brand_slug salon-de-nevaeh, observed fragrance_count 22. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  22,
+        "notes":  "Preferred/source display 살롱 드 느바에 is preserved exactly and separately from the approved provider/query identity Salon de Nevaeh. Operator approval recorded 2026-10-08; the existing parent key, source classification, and grouping remain unchanged. No additional normalized parent, live request, or fragrance import occurred.",
+        "sources":  [
+                        {
+                            "sourceIndex":  174,
+                            "rawLabel":  "살롱 드 느바에",
+                            "entryType":  "UNRESOLVED"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-175",
+        "canonicalDisplayName":  "Nonfiction",
+        "resolutionQuery":  "Nonfiction",
+        "brandSlug":  "nonfiction",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Nonfiction, brand_slug nonfiction, observed fragrance_count 16. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  16,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  175,
+                            "rawLabel":  "논픽션",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-176",
+        "canonicalDisplayName":  "Gritti",
+        "resolutionQuery":  "Gritti",
+        "brandSlug":  "gritti",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Gritti, brand_slug gritti, observed fragrance_count 66. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  66,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  176,
+                            "rawLabel":  "그리티",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-177",
+        "canonicalDisplayName":  "The House of Oud",
+        "resolutionQuery":  "The House of Oud",
+        "brandSlug":  "the-house-of-oud",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name The House of Oud, brand_slug the-house-of-oud, observed fragrance_count 45. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  45,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  177,
+                            "rawLabel":  "더 하우스 오브 우드",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-178",
+        "canonicalDisplayName":  "Lorenzo Villoresi",
+        "resolutionQuery":  "Lorenzo Villoresi",
+        "brandSlug":  "lorenzo-villoresi",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Lorenzo Villoresi, brand_slug lorenzo-villoresi, observed fragrance_count 31. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  31,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  178,
+                            "rawLabel":  "로렌조 빌로레시",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-179",
+        "canonicalDisplayName":  "Robert Piguet",
+        "resolutionQuery":  "Robert Piguet",
+        "brandSlug":  "robert-piguet",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Robert Piguet, brand_slug robert-piguet, observed fragrance_count 46. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  46,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  179,
+                            "rawLabel":  "로베르트 피게",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-180",
+        "canonicalDisplayName":  "Bortnikoff",
+        "resolutionQuery":  "Bortnikoff",
+        "brandSlug":  "bortnikoff",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Bortnikoff, brand_slug bortnikoff, observed fragrance_count 64. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  64,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  180,
+                            "rawLabel":  "보트니코프",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-181",
+        "canonicalDisplayName":  "Swiss Arabian",
+        "resolutionQuery":  "Swiss Arabian",
+        "brandSlug":  "swiss-arabian",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Swiss Arabian, brand_slug swiss-arabian, observed fragrance_count 251. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  251,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  181,
+                            "rawLabel":  "스위스 아라비안",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-182",
+        "canonicalDisplayName":  "Ajmal",
+        "resolutionQuery":  "Ajmal",
+        "brandSlug":  "ajmal",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Ajmal, brand_slug ajmal, observed fragrance_count 349. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  349,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  182,
+                            "rawLabel":  "아즈말",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-183",
+        "canonicalDisplayName":  "The Merchant of Venice",
+        "resolutionQuery":  "The Merchant of Venice",
+        "brandSlug":  "the-merchant-of-venice",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name The Merchant of Venice, brand_slug the-merchant-of-venice, observed fragrance_count 116. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  116,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  183,
+                            "rawLabel":  "더 머천트 오브 베니스",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-184",
+        "canonicalDisplayName":  "Bois 1920",
+        "resolutionQuery":  "Bois 1920",
+        "brandSlug":  "bois-1920",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Bois 1920, brand_slug bois-1920, observed fragrance_count 62. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  62,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  184,
+                            "rawLabel":  "bois 1920",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-185",
+        "canonicalDisplayName":  "Attar Collection",
+        "resolutionQuery":  "Attar Collection",
+        "brandSlug":  "attar-collection",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Attar Collection, brand_slug attar-collection, observed fragrance_count 45. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  45,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  185,
+                            "rawLabel":  "아타르 컬렉션",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-186",
+        "canonicalDisplayName":  "MDCI Parfums",
+        "resolutionQuery":  "MDCI Parfums",
+        "brandSlug":  "mdci-parfums",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name MDCI Parfums, brand_slug mdci-parfums, observed fragrance_count 24. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  24,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  186,
+                            "rawLabel":  "MDCI Parfumes",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    },
+    {
+        "canonicalBrandKey":  "curated-187",
+        "canonicalDisplayName":  "Frapin",
+        "resolutionQuery":  "Frapin",
+        "brandSlug":  "frapin",
+        "enabled":  true,
+        "verificationStatus":  "VERIFIED",
+        "verificationEvidence":  "Operator-approved exact candidate from the latest completed live review: provider canonical name Frapin, brand_slug frapin, observed fragrance_count 21. Approval recorded 2026-10-08.",
+        "reportedFragranceCount":  21,
+        "notes":  "Exact provider name and slug manually reviewed and approved; observed fragrance count retained without another provider request.",
+        "sources":  [
+                        {
+                            "sourceIndex":  187,
+                            "rawLabel":  "프라팡 퍼퓸",
+                            "entryType":  "BRAND"
+                        }
+                    ]
+    }
+]

@@ -47,4 +47,11 @@ public class Perfumer {
         this.biography = biography;
         this.perfumesCount = perfumesCount;
     }
+
+    public void updateScentRevDetails(String name, String company, String biography, Long perfumesCount) {
+        this.name = name;
+        this.company = company;
+        this.biography = biography;
+        this.perfumesCount = perfumesCount;
+    }
 }

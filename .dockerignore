@@ -1,0 +1,16 @@
+# Allow only Maven build inputs; do not send the database dump or developer secrets.
+*
+!pom.xml
+!mvnw
+!.mvn/
+!.mvn/**
+!src/
+!src/**
+**/application-local.properties
+**/application-secret.properties
+**/.env
+**/.env.*
+**/*.dump
+**/*.backup
+**/*.log
+**/target/

@@ -60,4 +60,10 @@ public class PerfumeAccord {
         this.score = score;
         this.position = position;
     }
+
+    public void updateScentRevDetails(Integer percentage, BigDecimal score, Integer position) {
+        this.percentage = percentage;
+        this.score = score;
+        this.position = position;
+    }
 }

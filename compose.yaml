@@ -1,0 +1,86 @@
+name: perfume-dev
+
+services:
+  db:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-perfume}
+      POSTGRES_USER: ${DB_USERNAME:-perfume_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    ports:
+      # SSH forwards to this host-only port; never publish PostgreSQL on all interfaces.
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - data
+      # Port publishing needs a non-internal network. Only db joins this network.
+      - db-access
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-perfume}
+      DB_USERNAME: ${DB_USERNAME:-perfume_user}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      # Web deployment has no provider credential; the image also disables the importer.
+      SCENTREV_API_KEY: ""
+    expose:
+      - "8081"
+    networks:
+      - app
+      - data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # This uses only the stored catalog, with one item, and never invokes ScentRev.
+      test: ["CMD-SHELL", "curl --fail --silent --max-time 5 'http://127.0.0.1:8081/api/perfumes?size=1' > /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8088:80"
+    networks:
+      - web
+      - app
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+# Container/image/network names use the perfume-dev project; keep the DB volume fixed.
+# No container_name or stock resource is used.
+volumes:
+  pgdata:
+    name: perfume-dev_pgdata
+
+networks:
+  web:
+  db-access:
+  app:
+    internal: true
+  data:
+    internal: true

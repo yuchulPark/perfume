@@ -34,4 +34,9 @@ public class Brand {
         this.name = name;
         this.brandSlug = brandSlug;
     }
+
+    /** Change the display name while preserving this row's provider identity and relationships. */
+    public void updateName(String name) {
+        this.name = name;
+    }
 }

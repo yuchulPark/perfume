@@ -88,7 +88,7 @@ class ScentRevMcpClientTests {
     }
 
     @Test
-    void callsOnlyProfileToolWithExactPhase1Arguments() {
+    void callsOnlyProfileToolWithAllSupportedSections() {
         returns(profileResult());
 
         client.getFragranceProfile("canonical-slug-from-caller");
@@ -98,11 +98,43 @@ class ScentRevMcpClientTests {
         assertThat(request.getValue().name()).isEqualTo("get_fragrance_profile");
         assertThat(request.getValue().arguments()).containsExactlyEntriesOf(
                 Map.of("fragrance_slug", "canonical-slug-from-caller",
-                        "sections", List.of("identity", "perfumers", "notes", "accords"),
+                        "sections", List.of("identity", "performance", "appreciation", "notes", "note_pyramid",
+                                "accords", "perfumers", "pros_cons", "reminds_of", "price_value"),
                         "include_perfumer_portfolio", false));
         assertThat(request.getValue().meta()).isNull();
         verify(sdkClient).initialize();
         verifyNoMoreInteractions(sdkClient);
+    }
+
+    @Test
+    void keepsUnknownSourceFieldsAndOriginalPreciseNumbers() throws IOException {
+        var root = objectMapper.reader().with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).readTree(fixture());
+        ((com.fasterxml.jackson.databind.node.ObjectNode) root).putObject("future_section").put("unknown_field", "retained");
+        returns(new CallToolResult(List.of(), false, root, null));
+        var profile = client.getFragranceProfile(SLUG);
+        assertThat(profile.rawResponse().path("future_section").path("unknown_field").asText()).isEqualTo("retained");
+        assertThat(profile.rawResponse().path("identity").path("rating").path("score").decimalValue())
+                .isEqualByComparingTo("4.381234567890123456789");
+    }
+
+    @Test
+    void wearSummaryUsesExactSlugAndSameLazySessionWithoutAutomaticProfileCalls() {
+        returns(new CallToolResult(List.of(), false, Map.of("fragrance_slug", SLUG, "public_id", "id-aventus",
+                "brand_slug", "creed", "season", Map.of("summer", Map.of("score", 0.8))), null));
+        assertThat(client.getWearSummary(SLUG).path("season").path("summer").path("score").decimalValue()).isEqualByComparingTo("0.8");
+        var request = ArgumentCaptor.forClass(CallToolRequest.class);
+        verify(sdkClient).callTool(request.capture());
+        assertThat(request.getValue().name()).isEqualTo("get_wear_summary");
+        assertThat(request.getValue().arguments()).containsExactlyEntriesOf(Map.of("fragrance_slug", SLUG));
+        verify(sdkClient).initialize();
+        verifyNoMoreInteractions(sdkClient);
+    }
+
+    @Test
+    void wearSummaryProviderErrorStopsWithoutRetryAndDoesNotExposePayload() {
+        returns(new CallToolResult(List.of(), false, Map.of("error", Map.of("code", "forbidden", "message", FAKE_KEY)), null));
+        assertFailure(() -> client.getWearSummary(SLUG), TOOL_CALL, "get_wear_summary");
+        verify(sdkClient, times(1)).callTool(any());
     }
 
     @Test

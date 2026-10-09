@@ -40,6 +40,13 @@ build/
 application-local.properties
 application-secret.properties
 
+### Database backups ###
+/backups/
+*.dump
+*.backup
+/.perfume-db-ready
+/.perfume-deploy.lock
+
 ### Logs ###
 *.log
 

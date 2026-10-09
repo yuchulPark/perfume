@@ -1,5 +1,7 @@
 package com.perfume.scentrev.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,8 @@ import com.perfume.scentrev.service.ScentRevBrandImportException.Stage;
 /** One brand, sequential profiles, fail fast, and one existing mapper transaction per fragrance. */
 @Service
 public class ScentRevBrandPhase1ImportService {
+
+    private static final Logger log = LoggerFactory.getLogger(ScentRevBrandPhase1ImportService.class);
 
     private final ScentRevBrandDiscoveryService discoveryService;
     private final ScentRevMcpClient client;
@@ -28,6 +32,7 @@ public class ScentRevBrandPhase1ImportService {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public ScentRevBrandImportResult importBrand(String brandSlug) {
         ScentRevBrandDiscoveryResult discovery = discoveryService.discoverBrandFragrances(brandSlug);
+        log.info("Brand {}: {} unique fragrances discovered", brandSlug, discovery.uniqueFragranceCount());
         int processed = 0;
         for (var fragrance : discovery.fragrances()) {
             String slug = fragrance.fragranceSlug();
@@ -57,6 +62,9 @@ public class ScentRevBrandPhase1ImportService {
                         "Phase 1 persistence failed; earlier successful imports remain committed.");
             }
             processed++; // The proxied mapper has returned, including its transaction commit.
+            if (processed % 50 == 0 || processed == discovery.uniqueFragranceCount()) {
+                log.info("Brand {}: {} / {} fragrances processed", brandSlug, processed, discovery.uniqueFragranceCount());
+            }
         }
         return new ScentRevBrandImportResult(discovery, processed);
     }
