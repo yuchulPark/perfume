@@ -4,7 +4,7 @@
 
 ## 고정 구성과 보호 범위
 
-- GitHub: https://github.com/yuchulPark/perfume.git, 브랜치 develop
+- GitHub: https://github.com/yuchulPark/perfume.git, 브랜치 main
 - Compose 프로젝트: perfume-dev
 - PostgreSQL 17 서비스: db, 볼륨: perfume-dev_pgdata
 - DB: perfume, 사용자: perfume_user
@@ -45,7 +45,7 @@ withCredentials 범위에서만 SSH/DB 자격증명을 사용하고 셸 추적�
 
 ## 최초 배포: DB 이전은 운영자가 수동 수행
 
-먼저 로컬 변경 파일을 검토하여 향수 저장소 develop에 Commit/Push합니다. 아래 명령은 운영자가 Ubuntu에서 실행할 안내이며 구현 중에는 실행하지 않았습니다.
+먼저 로컬 변경 파일을 검토하여 향수 저장소 main에 Commit/Push합니다. 아래 명령은 운영자가 Ubuntu에서 실행할 안내이며 구현 중에는 실행하지 않았습니다.
 
 1. /srv/perfume이 없으면 생성하고 배포 SSH 계정에 이 디렉터리의 권한을 부여합니다. 예시 계정 devops는 실제 계정으로 바꿉니다.
 
@@ -57,7 +57,7 @@ sudo install -d -o devops -g devops -m 0750 /srv/perfume
 
 ~~~bash
 cd /srv/perfume
-git clone --branch develop https://github.com/yuchulPark/perfume.git .
+git clone --branch main https://github.com/yuchulPark/perfume.git .
 if [ ! -f .env ]; then
     cp .env.example .env
 fi
@@ -95,20 +95,22 @@ Pipeline은 이 표식을 생성하거나 수정하지 않습니다. DB/볼륨/�
 
 ## 새 Jenkins Pipeline 등록
 
-1. 기존 Jenkins에서 New Item → 이름 perfume-develop → Pipeline을 선택합니다. 주식 Job을 복제하거나 수정하지 않습니다.
+1. 기존 Jenkins에서 New Item → 이름 perfume-main → Pipeline을 선택합니다. 주식 Job을 복제하거나 수정하지 않습니다.
 2. Definition: Pipeline script from SCM, SCM: Git.
 3. Repository URL: https://github.com/yuchulPark/perfume.git. 비공개 저장소라면 위 SCM Credentials를 선택합니다.
-4. Branch Specifier: */develop. Script Path: Jenkinsfile. 기본 refspec이 origin/develop을 가져오는지 확인합니다.
+4. Branch Specifier: */main. Script Path: Jenkinsfile. 기본 refspec이 origin/main을 가져오는지 확인합니다.
 5. 저장 후 최초 DB 이전·표식·Credentials 설정이 끝난 상태에서 Build Now를 실행합니다.
-6. 최초 실행부터 새 Job에만 H/5 * * * * SCM polling이 등록됩니다. 이후 develop 변경을 약 5분 주기로 감지합니다. 기존 Jenkins 전역 설정이나 주식 트리거는 변경하지 않습니다.
+6. 최초 실행부터 새 Job에만 H/5 * * * * SCM polling이 등록됩니다. 이후 main 변경을 약 5분 주기로 감지합니다. 기존 Jenkins 전역 설정이나 주식 트리거는 변경하지 않습니다.
 
-별도 GitHub Webhook이나 SSH Agent 플러그인은 필수로 추가하지 않습니다. 중복 배포는 disableConcurrentBuilds와 /srv/perfume/.perfume-deploy.lock으로 차단합니다. 체크아웃한 커밋 SHA를 서버 develop 이력에서 확인하고 그 SHA만 배포하므로 테스트 이후 추가된 다른 커밋을 자동으로 섞지 않습니다.
+이미 등록한 향수 Job이 있으면 새 Job을 중복 생성하지 말고 기존 Job 이름을 perfume-main으로 변경한 뒤 Branch Specifier를 */main으로 수정하세요. 제한된 refspec을 사용 중이라면 refs/heads/main:refs/remotes/origin/main으로 맞춥니다. 이 저장소 변경만으로 Jenkins에 등록된 Job 이름이나 SCM 설정이 자동으로 바뀌지는 않습니다.
+
+별도 GitHub Webhook이나 SSH Agent 플러그인은 필수로 추가하지 않습니다. 중복 배포는 disableConcurrentBuilds와 /srv/perfume/.perfume-deploy.lock으로 차단합니다. 체크아웃한 커밋 SHA를 서버 main 이력에서 확인하고 그 SHA만 배포하므로 테스트 이후 추가된 다른 커밋을 자동으로 섞지 않습니다.
 
 브라우저: http://SERVER_IP:8088. 배포 후 backend/frontend healthy, REST 응답, 동일한 DB 컨테이너 ID를 확인합니다.
 
 ## 이후 코드 재배포와 실패 대응
 
-develop에 Push하면 같은 Pipeline이 코드/이미지만 갱신합니다. 서버 .env, backups, .perfume-db-ready 및 PostgreSQL 볼륨을 보존하며 dump를 재복원하지 않습니다. incoming 커밋에 .env/덤프/백업/운영 표식이 들어 있으면 Git reset 이전에 거부합니다.
+main에 Push하면 같은 Pipeline이 코드/이미지만 갱신합니다. 서버 .env, backups, .perfume-db-ready 및 PostgreSQL 볼륨을 보존하며 dump를 재복원하지 않습니다. incoming 커밋에 .env/덤프/백업/운영 표식이 들어 있으면 Git reset 이전에 거부합니다.
 
 서버 Git 작업사본은 자동 배포용으로 유지하고 소스 수정을 서버에서 직접 하지 않습니다. Git reset은 테스트한 커밋의 추적 소스만 갱신합니다. 보호된 운영 파일이 아닌 추적 소스의 현지 수정은 유지되지 않습니다.
 

@@ -74,7 +74,7 @@ if [[ "$action" == check ]]; then
     exit 0
 fi
 
-git fetch --no-tags origin develop
+git fetch --no-tags origin main
 git cat-file -e "$revision^{commit}"
 git merge-base --is-ancestor "$revision" FETCH_HEAD
 # Inspect incoming paths before reset can overwrite operator-managed files.

@@ -26,19 +26,19 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '20'))
     }
 
-    // Only this new job polls its configured develop branch; no global Jenkins change.
+    // Only this new job polls its configured main branch; no global Jenkins change.
     triggers {
         pollSCM('H/5 * * * *')
     }
 
     stages {
-        stage('Checkout develop') {
+        stage('Checkout main') {
             steps {
                 checkout scm
                 script {
                     env.PERFUME_REVISION = sh(returnStdout: true, script: '''
                         set -eu
-                        test "$(git rev-parse HEAD)" = "$(git rev-parse origin/develop)"
+                        test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
                         git rev-parse HEAD
                     ''').trim()
                 }

@@ -32,7 +32,7 @@ DB_URL, DB_USERNAME, DB_PASSWORD 환경변수를 재사용합니다. DB_URL은 C
 
 Ubuntu 24.04에 Docker Engine, Buildx 및 Compose 플러그인을 준비하세요. 기존 Docker 설치가 있다면 그대로 사용합니다. [공식 설치 안내](https://docs.docker.com/engine/install/ubuntu/)
 
-프로젝트 전체를 서버의 /srv/perfume에 준비하세요. Jenkins 자동 배포에는 develop 브랜치의 Git 작업사본이 필요하며 [향수 Jenkins 배포 문서](jenkins-perfume-deployment.md)의 최초 clone 절차를 사용합니다. 현재 미추적 src/frontend/배포 파일도 Commit/Push에 포함해야 합니다. .mvn, mvnw, pom.xml, src, frontend의 소스와 package-lock.json이 필요합니다. Windows node_modules, target, dist, .env는 서버로 복사할 필요가 없습니다.
+프로젝트 전체를 서버의 /srv/perfume에 준비하세요. Jenkins 자동 배포에는 main 브랜치의 Git 작업사본이 필요하며 [향수 Jenkins 배포 문서](jenkins-perfume-deployment.md)의 최초 clone 절차를 사용합니다. 현재 미추적 src/frontend/배포 파일도 Commit/Push에 포함해야 합니다. .mvn, mvnw, pom.xml, src, frontend의 소스와 package-lock.json이 필요합니다. Windows node_modules, target, dist, .env는 서버로 복사할 필요가 없습니다.
 
 ~~~bash
 cd /srv/perfume
