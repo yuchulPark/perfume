@@ -9,6 +9,9 @@
 | db | PostgreSQL 17, postgres:17-bookworm | Docker 내부 5432, Ubuntu 127.0.0.1:15432 → 5432 | pgdata named volume |
 | backend | Temurin Java 17 JDK + 기존 Maven Wrapper → Java 17 JRE | Docker 내부 8081 | 기존 DB 사용 |
 | frontend | Node 24 + npm ci + Vite → Nginx stable-alpine | 서버 8088 → 컨테이너 80 | 빌드된 정적 파일 |
+| ollama | Ollama 0.40.4, CPU 기반 | Docker 내부 11434, 호스트 미게시 | perfume-dev_ollama-data |
+
+Ollama 최초 설정, 두 Qwen3 모델의 수동 다운로드 및 내부 API 테스트는 [Ollama 인프라 문서](ollama-infrastructure.md)를 따릅니다. Jenkins는 기존처럼 backend/frontend만 배포합니다.
 
 외부에는 frontend의 8088만 게시합니다. PostgreSQL은 Ubuntu 호스트의 127.0.0.1:15432에만 바인딩하므로 Windows에서 SERVER_IP:15432로 직접 연결하지 않습니다. SSH 터널로만 접속하며 서버 방화벽에 15432를 개방하지 않습니다. Nginx는 원래 URI와 검색 파라미터를 유지하여 /api 요청을 backend:8081로 전달하며, 상세 URL 새로고침은 index.html로 처리합니다. React 코드와 이미지 Placeholder는 그대로입니다. backend는 db:5432의 perfume DB에 perfume_user로 연결합니다. [Docker 로컬 포트 바인딩](https://docs.docker.com/engine/network/port-publishing/)
 
@@ -26,7 +29,7 @@ backend 이미지의 기본 실행 인수는 다음과 같습니다. 기존 appl
 --spring.jpa.show-sql=false
 ~~~
 
-DB_URL, DB_USERNAME, DB_PASSWORD 환경변수를 재사용합니다. DB_URL은 Compose가 Docker 서비스명으로 생성합니다. 호스트의 Windows localhost 주소나 SSH 터널 포트를 전달하지 않습니다. 웹 서비스에는 SCENTREV_API_KEY를 빈 값으로 전달하고 Import 옵션을 제공하지 않습니다. 기존 MCP 클라이언트는 호출 시에만 초기화됩니다. backend의 app/data 네트워크는 internal이므로 일반 인터넷 경로도 없습니다. DB에만 별도 일반 bridge 네트워크 db-access를 연결하여 호스트 포트 게시를 지원합니다. frontend는 DB 네트워크에 연결하지 않습니다. healthcheck는 저장된 향수 1개를 조회하는 REST API만 사용합니다.
+DB_URL, DB_USERNAME, DB_PASSWORD 환경변수를 재사용합니다. DB_URL은 Compose가 Docker 서비스명으로 생성합니다. 호스트의 Windows localhost 주소나 SSH 터널 포트를 전달하지 않습니다. 웹 서비스에는 SCENTREV_API_KEY를 빈 값으로 전달하고 Import 옵션을 제공하지 않습니다. 기존 MCP 클라이언트는 호출 시에만 초기화됩니다. backend의 app/data/ai 네트워크는 internal이므로 일반 인터넷 경로도 없습니다. DB에만 별도 일반 bridge 네트워크 db-access를 연결하여 호스트 포트 게시를 지원합니다. Ollama는 backend와 ai를 공유하고, 모델 수동 다운로드를 위해 전용 ollama-download bridge도 사용합니다. frontend는 DB/ai 네트워크에 연결하지 않습니다. backend healthcheck는 저장된 향수 1개를 조회하는 REST API만 사용합니다.
 
 ## 서버 준비
 

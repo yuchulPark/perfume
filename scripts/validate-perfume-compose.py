@@ -14,14 +14,17 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume"):
     require(bool(expected_password), "Jenkins DB password credential is missing.")
     require(config["name"] == "perfume-dev", "Compose project must be perfume-dev.")
     services = config["services"]
-    require(set(services) == {"db", "backend", "frontend"}, "Unexpected Compose services.")
+    require(set(services) == {"db", "backend", "frontend", "ollama"}, "Unexpected Compose services.")
     require(all(not s.get("container_name") for s in services.values()), "Fixed container names are prohibited.")
     db, backend, frontend = (services[name] for name in ("db", "backend", "frontend"))
+    ollama = services["ollama"]
     require(backend.get("image") in (None, "perfume-dev-backend", "perfume-dev-backend:latest")
             and frontend.get("image") in (None, "perfume-dev-frontend", "perfume-dev-frontend:latest"), "Unexpected application image names.")
     require(db["image"] == "postgres:17-bookworm", "Unexpected PostgreSQL image.")
-    require(set(config["volumes"]) == {"pgdata"}, "Unexpected volume definitions.")
+    require(set(config["volumes"]) == {"pgdata", "ollama-data"}, "Unexpected volume definitions.")
     require(config["volumes"]["pgdata"]["name"] == "perfume-dev_pgdata", "DB volume must be perfume-dev_pgdata.")
+    require(config["volumes"]["ollama-data"]["name"] == "perfume-dev_ollama-data", "Unexpected Ollama model volume.")
+    require(all(not v.get("external") for v in config["volumes"].values()), "External volumes are prohibited.")
     mounts = db["volumes"]
     require(len(mounts) == 1 and mounts[0]["type"] == "volume"
             and mounts[0]["source"] == "pgdata"
@@ -36,12 +39,40 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume"):
     require(not backend.get("ports"), "Backend must not publish a host port.")
     require(not backend.get("volumes") and not frontend.get("volumes"), "Unexpected application bind mounts.")
     networks = config["networks"]
-    require(set(networks) == {"app", "data", "db-access", "web"}, "Unexpected network definitions.")
+    require(set(networks) == {"app", "data", "db-access", "web", "ai", "ollama-download"}, "Unexpected network definitions.")
     for name, network in networks.items():
         require(network["name"] == "perfume-dev_" + name, "Unexpected network name.")
-        require(bool(network.get("internal")) == (name in {"app", "data"}), "Unexpected network isolation.")
-    for name, expected in (("db", {"data", "db-access"}), ("backend", {"app", "data"}), ("frontend", {"app", "web"})):
+        require(not network.get("external"), "External networks are prohibited.")
+        require(bool(network.get("internal")) == (name in {"app", "data", "ai"}), "Unexpected network isolation.")
+    for name, expected in (("db", {"data", "db-access"}), ("backend", {"app", "data", "ai"}),
+                           ("frontend", {"app", "web"}), ("ollama", {"ai", "ollama-download"})):
         require(set(services[name]["networks"]) == expected, "Unexpected service network attachment.")
+        require(not services[name].get("network_mode"), "Service network overrides are prohibited.")
+    require(ollama["image"] == "ollama/ollama:0.40.4" and not ollama.get("build"), "Unexpected Ollama image.")
+    require(not ollama.get("ports"), "Ollama must not publish a host port.")
+    model_mounts = ollama["volumes"]
+    require(len(model_mounts) == 1 and model_mounts[0]["type"] == "volume"
+            and model_mounts[0]["source"] == "ollama-data"
+            and model_mounts[0]["target"] == "/root/.ollama"
+            and not model_mounts[0].get("read_only"), "Unexpected Ollama model mount.")
+    require(not ollama.get("privileged") and not ollama.get("devices") and not ollama.get("gpus")
+            and ollama.get("runtime") in (None, "runc")
+            and not ollama.get("deploy", {}).get("resources", {}).get("reservations", {}).get("devices"),
+            "Ollama must run without GPU access or privileged mode.")
+    # Compose versions render byte values as either JSON integers or decimal strings.
+    require(float(ollama.get("cpus", 0)) == 3.0 and str(ollama.get("mem_limit")) == str(6 * 1024 ** 3),
+            "Ollama must retain its CPU and memory limits.")
+    require(ollama.get("environment") == {
+        "OLLAMA_HOST": "0.0.0.0:11434", "OLLAMA_NO_CLOUD": "1", "OLLAMA_VULKAN": "0",
+        "OLLAMA_NUM_PARALLEL": "1", "OLLAMA_MAX_LOADED_MODELS": "1",
+        "OLLAMA_CONTEXT_LENGTH": "4096", "OLLAMA_KEEP_ALIVE": "5m",
+    }, "Unexpected Ollama runtime settings.")
+    require(ollama.get("healthcheck", {}).get("test") == ["CMD", "ollama", "list"],
+            "Ollama healthcheck must not pull or load models.")
+    require(not ollama.get("depends_on") and not ollama.get("post_start"), "Ollama setup must be manual.")
+    require(set(backend.get("depends_on") or {}) <= {"db"}
+            and set(frontend.get("depends_on") or {}) <= {"backend"},
+            "Application startup must not depend on Ollama.")
     db_env, app_env = db["environment"], backend["environment"]
     require(db_env["POSTGRES_DB"] == "perfume" and db_env["POSTGRES_USER"] == "perfume_user", "Unexpected DB identity.")
     require(app_env["DB_URL"] == "jdbc:postgresql://db:5432/perfume"

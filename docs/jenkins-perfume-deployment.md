@@ -16,6 +16,8 @@ Pipeline은 체크아웃 → 서버 사전 검사 → 오프라인 배포 보호
 
 배포는 기존 DB의 상태·인증·Phase 1/2 테이블 존재를 읽기 쿼리로 확인한 뒤 backend/frontend만 --no-deps로 갱신합니다. DB 컨테이너 ID와 .env 해시가 유지되는지도 확인합니다. DB 생성/기동/복원, 비밀번호 변경, 자동 DDL, down, Git clean, 볼륨 삭제 및 Docker 전역 정리는 Pipeline에 없습니다. [Compose --no-deps](https://docs.docker.com/reference/cli/docker/compose/up/)
 
+Ollama 서비스와 `perfume-dev_ollama-data` 모델 볼륨은 [Ollama 인프라 문서](ollama-infrastructure.md)에 따라 운영자가 수동 설정합니다. Pipeline에는 Ollama 시작/교체나 모델 다운로드를 추가하지 않습니다. Compose 보호 검사는 Ollama의 외부 포트 미게시, 전용 볼륨·네트워크, CPU 실행 및 자원 상한도 검증합니다. backend의 새 내부 `ai` 네트워크 연결은 다음 정상 앱 배포에서 적용됩니다.
+
 ## 기존 실행 환경 확인
 
 기존 주식 Job이 사용하는 Jenkins 컨테이너명 jenkins, Docker CLI/소켓 접근, WORKSPACE가 포함된 Jenkins 볼륨을 재사용합니다. Docker Python 테스트 컨테이너는 --volumes-from jenkins로 작업공간을 읽습니다. 다른 컨테이너명/에이전트를 쓰는 경우 향수 Jenkinsfile만 맞추며 기존 Jenkins 컨테이너는 수정하지 않습니다.
@@ -117,6 +119,8 @@ main에 Push하면 같은 Pipeline이 코드/이미지만 갱신합니다. 서�
 사전 검사/테스트/이미지 빌드 실패 시 기존 앱 교체를 시작하지 않습니다. 앱 교체 후 health 검사에 실패하면 Job을 확인하고 이전 정상 코드/이미지로 앱만 수동 복구합니다. DB 롤백·스키마 변경·백업 덮어쓰기·자동 데이터 삭제는 수행하지 않습니다. DB를 교체/복원할 운영 작업 중에는 향수 Job만 중지하고 작업 후 표식과 접속을 다시 검증하세요.
 
 ## 로컬 검증
+
+아래 Java/React/Groovy 결과는 기존 배포 구성 단계의 기록입니다. Ollama 추가 단계에서는 배포 보호 테스트 19개와 Compose 검증을 통과했으며 상세 범위와 실행하지 못한 검증은 [Ollama 인프라 문서](ollama-infrastructure.md)에 기록했습니다.
 
 - Compose 모델의 프로젝트명/볼륨/포트/네트워크/비밀번호 일치 및 Import 비활성화 보호 검증.
 - 배포 보호 Python 테스트 10개 통과. Bash 스크립트 2개, 문서 Bash 블록 10개, Jenkins 셸 단계 6개 문법 검사 통과.
