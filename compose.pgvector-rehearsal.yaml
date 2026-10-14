@@ -1,0 +1,42 @@
+# Standalone rehearsal. Never combine this file with compose.yaml using -f.
+name: perfume-pgvector-rehearsal
+
+services:
+  rehearsal-db:
+    image: perfume-pgvector-rehearsal-db:pg${POSTGRES_SERVER_VERSION:?Set exact running PostgreSQL version}-vector0.8.7
+    build:
+      context: ./docker/pgvector
+      dockerfile: Dockerfile
+      args:
+        POSTGRES_BASE_IMAGE: ${POSTGRES_BASE_IMAGE:?Set running PostgreSQL image digest}
+        POSTGRES_SERVER_VERSION: ${POSTGRES_SERVER_VERSION:?Set exact running PostgreSQL version}
+    restart: "no"
+    cpus: 1.0
+    mem_limit: 2g
+    environment:
+      POSTGRES_DB: perfume_pgvector_rehearsal
+      POSTGRES_USER: perfume_pgvector_admin
+      POSTGRES_PASSWORD: ${PGVECTOR_TEST_PASSWORD:?Set a separate test password}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=${PGVECTOR_TEST_LOCALE:?Set verified source libc locale}
+      # Passed only to the guarded verification commands, not to initdb.
+      REHEARSAL_EXPECTED_SERVER_VERSION_NUM: ${POSTGRES_SERVER_VERSION_NUM:?Set running server_version_num}
+    # No published port, source-volume mount, backup mount or automatic extension.
+    volumes:
+      - rehearsal-pgdata:/var/lib/postgresql/data
+    networks:
+      - rehearsal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  rehearsal-pgdata:
+    name: perfume-pgvector-rehearsal_pgdata
+
+networks:
+  rehearsal:
+    name: perfume-pgvector-rehearsal_rehearsal
+    internal: true

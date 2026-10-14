@@ -47,6 +47,8 @@ pipeline {
 
         stage('Deployment preflight') {
             steps {
+                // The server checks the existing DB against its operator-owned image approval.
+                // Image verification/approval and DB replacement are never Pipeline actions.
                 sh '''
                     set -eu
                     command -v docker >/dev/null
@@ -96,6 +98,7 @@ pipeline {
 
         stage('Deploy perfume applications') {
             steps {
+                // jenkins-deploy.sh uses --no-deps for backend/frontend and preserves the DB ID.
                 script {
                     runPerfumeServer('deploy')
                 }

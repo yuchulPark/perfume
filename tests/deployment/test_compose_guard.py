@@ -224,7 +224,7 @@ class DeploymentGuardTests(unittest.TestCase):
     def test_repository_compose_matches_guard_without_starting_containers(self):
         project_directory = SCRIPT.parents[1]
         environment = dict(os.environ)
-        for key in ("COMPOSE_FILE", "COMPOSE_PROJECT_NAME", "COMPOSE_PROFILES", "DB_NAME", "DB_USERNAME", "DB_PASSWORD"):
+        for key in ("COMPOSE_FILE", "COMPOSE_PROJECT_NAME", "COMPOSE_PROFILES", "DB_NAME", "DB_USERNAME", "DB_PASSWORD", "PERFUME_DB_IMAGE"):
             environment.pop(key, None)
         environment["DB_PASSWORD"] = PASSWORD
         result = subprocess.run([

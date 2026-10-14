@@ -21,7 +21,7 @@ exec 9>.perfume-deploy.lock
 flock -n 9 || { echo "Another perfume deployment holds the lock." >&2; exit 1; }
 
 # Do not inherit a different project's Compose or DB settings from the SSH session.
-unset COMPOSE_FILE COMPOSE_PROJECT_NAME COMPOSE_PROFILES DB_NAME DB_USERNAME DB_PASSWORD DB_URL SCENTREV_API_KEY
+unset COMPOSE_FILE COMPOSE_PROJECT_NAME COMPOSE_PROFILES DB_NAME DB_USERNAME DB_PASSWORD DB_URL SCENTREV_API_KEY PERFUME_DB_IMAGE
 export GIT_TERMINAL_PROMPT=0
 compose() {
     docker compose --project-name perfume-dev --project-directory "$deploy_directory" \
@@ -29,6 +29,17 @@ compose() {
 }
 env_hash="$(sha256sum .env)"
 ready_hash="$(sha256sum .perfume-db-ready)"
+approval_file="$deploy_directory/.env.pgvector-approval.json"
+approval_hash_now() {
+    test ! -L "$approval_file"
+    if [[ -e "$approval_file" ]]; then
+        test -f "$approval_file"
+        sha256sum "$approval_file"
+    else
+        printf 'absent\n'
+    fi
+}
+approval_hash="$(approval_hash_now)"
 test "$(git rev-parse --show-toplevel)" = "$deploy_directory"
 if git ls-files --error-unmatch .env >/dev/null 2>&1; then
     echo "Refusing deployment: server .env is tracked by Git." >&2
@@ -41,7 +52,17 @@ esac
 
 verify_configuration() {
     compose config --quiet
-    compose config --format json | python3 scripts/validate-perfume-compose.py
+    # The first deployment receives this script over SSH BEFORE the server checkout
+    # has the new validator. Keep that initial preflight compatible with the old CLI.
+    if python3 scripts/validate-perfume-compose.py --help | grep -q -- '--db-container'; then
+        configured_db_image="$(compose config --format json | python3 scripts/validate-perfume-compose.py \
+            --deploy-directory "$deploy_directory" --approval-file "$approval_file" --print-db-image)"
+        pgvector_guard=true
+    else
+        compose config --format json | python3 scripts/validate-perfume-compose.py --deploy-directory "$deploy_directory"
+        configured_db_image=postgres:17-bookworm
+        pgvector_guard=false
+    fi
 }
 verify_database() {
     docker volume inspect perfume-dev_pgdata >/dev/null
@@ -53,17 +74,36 @@ verify_database() {
     test "$(docker inspect --format '{{.State.Health.Status}}' "$db_id")" = healthy
     test "$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql/data"}}{{.Type}} {{.Name}}{{end}}{{end}}' "$db_id")" = "volume perfume-dev_pgdata"
     test "$(docker port "$db_id" 5432/tcp)" = "127.0.0.1:15432"
+    # Read-only image/file inspection: no pull, Docker run, or DB lifecycle action.
+    if [[ "$pgvector_guard" == true ]]; then
+        docker inspect --format '{{json .}}' "$db_id" | python3 scripts/validate-perfume-compose.py \
+            --db-container --expected-db-image "$configured_db_image" --approval-file "$approval_file"
+    else
+        # Upgrade preflight permits only the known original digest, never pgvector.
+        running_image_id="$(docker inspect --format '{{.Image}}' "$db_id")"
+        docker image inspect --format '{{json .RepoDigests}}' "$running_image_id" | python3 -c '
+import json, sys
+expected = "sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826"
+assert any(value in ("postgres@" + expected, "docker.io/library/postgres@" + expected) for value in json.load(sys.stdin))
+'
+    fi
     # Only a read query. Verify TCP authentication and restored Phase 1/2 tables.
     db_identity="$(printf '%s' "$PERFUME_EXPECTED_DB_PASSWORD" | docker exec -i "$db_id" sh -c '
         PGPASSWORD="$(cat)"; export PGPASSWORD
         exec psql -X -h 127.0.0.1 -U perfume_user -d perfume -At -v ON_ERROR_STOP=1 -c "
             SELECT current_database() || chr(124) || current_user || chr(124) ||
-                (current_setting('\''server_version_num'\'')::integer / 10000)::text || chr(124) ||
+                current_setting('\''server_version_num'\'') || chr(124) ||
                 (to_regclass('\''public.brands'\'') IS NOT NULL)::text || chr(124) ||
                 (to_regclass('\''public.perfumes'\'') IS NOT NULL)::text || chr(124) ||
-                (to_regclass('\''public.perfume_provider_payloads'\'') IS NOT NULL)::text;"
+                (to_regclass('\''public.perfume_provider_payloads'\'') IS NOT NULL)::text || chr(124) ||
+                coalesce((SELECT extversion FROM pg_extension WHERE extname = '\''vector'\''), '\''none'\'');"
     ')"
-    test "$db_identity" = "perfume|perfume_user|17|true|true|true"
+    expected_identity='perfume|perfume_user|170011|true|true|true'
+    if [[ "$configured_db_image" == postgres:17-bookworm || "$configured_db_image" == postgres:17-bookworm@sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826 ]]; then
+        test "$db_identity" = "$expected_identity|none"
+    else
+        [[ "$db_identity" == "$expected_identity|none" || "$db_identity" == "$expected_identity|0.8.7" ]]
+    fi
 }
 verify_configuration
 verify_database
@@ -93,7 +133,9 @@ for path in paths:
 git reset --hard "$revision"
 test "$(sha256sum .env)" = "$env_hash"
 test "$(sha256sum .perfume-db-ready)" = "$ready_hash"
+test "$(approval_hash_now)" = "$approval_hash"
 verify_configuration
+test "$pgvector_guard" = true
 
 compose build backend frontend
 docker image inspect --format '{{json .Config}}' perfume-dev-backend \
@@ -107,6 +149,7 @@ verify_database
 test "$db_id" = "$original_db_id"
 test "$(sha256sum .env)" = "$env_hash"
 test "$(sha256sum .perfume-db-ready)" = "$ready_hash"
+test "$(approval_hash_now)" = "$approval_hash"
 curl --fail --silent --show-error --max-time 15 http://127.0.0.1:8088/healthz >/dev/null
 curl --fail --silent --show-error --max-time 15 'http://127.0.0.1:8088/api/perfumes?size=1' >/dev/null
 compose ps backend frontend

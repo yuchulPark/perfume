@@ -2,7 +2,9 @@ name: perfume-dev
 
 services:
   db:
-    image: postgres:17-bookworm
+    # Operator-managed override only; Jenkins never pulls or recreates this service.
+    # A pgvector override must be an Image ID recorded in .env.pgvector-approval.json.
+    image: ${PERFUME_DB_IMAGE:-postgres:17-bookworm}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-perfume}

@@ -6,12 +6,22 @@
 
 | 서비스 | 빌드/실행 | 포트 | 영구 저장 |
 | --- | --- | --- | --- |
-| db | PostgreSQL 17, postgres:17-bookworm | Docker 내부 5432, Ubuntu 127.0.0.1:15432 → 5432 | pgdata named volume |
+| db | 기본 postgres:17-bookworm; 검증 대상 17.11 | Docker 내부 5432, Ubuntu 127.0.0.1:15432 → 5432 | perfume-dev_pgdata |
 | backend | Temurin Java 17 JDK + 기존 Maven Wrapper → Java 17 JRE | Docker 내부 8081 | 기존 DB 사용 |
 | frontend | Node 24 + npm ci + Vite → Nginx stable-alpine | 서버 8088 → 컨테이너 80 | 빌드된 정적 파일 |
 | ollama | Ollama 0.40.4, CPU 기반 | Docker 내부 11434, 호스트 미게시 | perfume-dev_ollama-data |
 
 Ollama 최초 설정, 두 Qwen3 모델의 수동 다운로드 및 내부 API 테스트는 [Ollama 인프라 문서](ollama-infrastructure.md)를 따릅니다. Jenkins는 기존처럼 backend/frontend만 배포합니다.
+
+## 기존 운영 DB의 pgvector 이미지 전환 준비
+
+이미 실행 중인 `/srv/perfume` DB의 이미지 전환은 [pgvector 운영 전환 문서](pgvector-production-deployment.md)를 따릅니다. 아래 최초 생성·이전·복원 절차를 기존 운영 볼륨에 다시 실행하지 않습니다.
+
+`PERFUME_DB_IMAGE`가 없거나 빈 값이면 기존 `postgres:17-bookworm`이 선택됩니다. pgvector 이미지는 운영자가 서버에 보관한 `.env.pgvector-approval.json`의 **전체 Image ID**로 지정합니다. Compose 치환 자체는 임의 문자열을 허용하므로 실행 전 보호 검사기를 통과해야 합니다. 태그·임의 digest·미승인 Image ID는 배포 검사에서 거부합니다. 확인된 원본 17.11 digest 참조는 extension 생성 전 수동 롤백용으로 허용합니다.
+
+Jenkins는 운영 `.env`나 승인 파일을 작성하지 않고, DB 이미지를 pull/build하거나 DB를 시작·재시작·재생성하지 않습니다. 승인 기록·환경변수 설정·실제 DB 전환은 운영자의 수동 작업입니다. Git Push만으로 DB 이미지를 교체하지 않으며, 이미지·버전·볼륨·네트워크 또는 승인 파일이 예상과 다르면 배포를 중단합니다.
+
+이번 설정 준비에서는 운영 서버 접속·DB 변경·운영 `.env` 변경·Commit/Push·Jenkins Job 실행을 수행하지 않았습니다. 리허설 성공 기록은 사용자가 제공한 결과이며 원격으로 재실행하지 않았습니다.
 
 외부에는 frontend의 8088만 게시합니다. PostgreSQL은 Ubuntu 호스트의 127.0.0.1:15432에만 바인딩하므로 Windows에서 SERVER_IP:15432로 직접 연결하지 않습니다. SSH 터널로만 접속하며 서버 방화벽에 15432를 개방하지 않습니다. Nginx는 원래 URI와 검색 파라미터를 유지하여 /api 요청을 backend:8081로 전달하며, 상세 URL 새로고침은 index.html로 처리합니다. React 코드와 이미지 Placeholder는 그대로입니다. backend는 db:5432의 perfume DB에 perfume_user로 연결합니다. [Docker 로컬 포트 바인딩](https://docs.docker.com/engine/network/port-publishing/)
 
