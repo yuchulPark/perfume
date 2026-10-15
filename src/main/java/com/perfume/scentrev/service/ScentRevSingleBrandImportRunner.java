@@ -20,6 +20,7 @@ public class ScentRevSingleBrandImportRunner implements ApplicationRunner {
     public static final String ENABLED_PROPERTY = "scentrev.brand-import";
     public static final String SLUG_PROPERTY = "scentrev.brand-import.brand-slug";
     public static final String DELAY_PROPERTY = "scentrev.brand-import.delay-ms";
+    public static final String SKIP_EXISTING_PROPERTY = "scentrev.brand-import.skip-existing";
     private final ScentRevSingleBrandImportService importer;
     private final Environment environment;
 
@@ -60,7 +61,7 @@ public class ScentRevSingleBrandImportRunner implements ApplicationRunner {
             throw new IllegalArgumentException("scentrev.brand-import.brand-slugs is no longer supported; use brand-slug for exactly one verified brand.");
         }
         return ScentRevSingleBrandImportOptions.parse(environment.getProperty(SLUG_PROPERTY),
-                environment.getProperty(DELAY_PROPERTY));
+                environment.getProperty(DELAY_PROPERTY), environment.getProperty(SKIP_EXISTING_PROPERTY));
     }
 
     private static void printResult(ScentRevSingleBrandImportResult result) {
@@ -73,13 +74,15 @@ public class ScentRevSingleBrandImportRunner implements ApplicationRunner {
                         + "perfumesUnchanged          = %d%nperfumesProcessed          = %d%nperfumersProcessed         = %d%n"
                         + "notesProcessed             = %d%naccordsProcessed           = %d%nperfumePerfumerLinks       = %d%n"
                         + "perfumeNoteLinks           = %d%nperfumeAccordLinks         = %d%ntotalMcpCalls              = %d%n"
+                        + "existingSkipped            = %d%nnewCandidates              = %s%nskipExistingEnabled        = %s%n"
                         + "completed                  = %s%n==================================================%n",
                 result.brandName(), result.providerBrandName(), result.brandSlug(), result.discoveryPages(), result.pagesCommitted(),
                 result.providerReportedTotal() == null ? "not supplied (total_returned is per page)" : result.providerReportedTotal(),
                 result.rawResults(), result.duplicateDiscoveryCount(), result.uniqueFragrancesDiscovered(), result.profilesFetched(), result.skippedForeignBrand(),
                 result.perfumesInserted(), result.perfumesUpdated(), result.perfumesUnchanged(), result.perfumesProcessed(),
                 result.perfumersProcessed(), result.notesProcessed(), result.accordsProcessed(), result.perfumePerfumerLinks(),
-                result.perfumeNoteLinks(), result.perfumeAccordLinks(), result.totalMcpCalls(), result.completed());
+                result.perfumeNoteLinks(), result.perfumeAccordLinks(), result.totalMcpCalls(), result.existingSkipped(),
+                result.newCandidates() == null ? "not evaluated (skip-existing=false)" : result.newCandidates(), result.skipExistingEnabled(), result.completed());
         if (!result.completed()) {
             System.err.printf("stoppedStage = %s%nstoppedOffset = %s%nstoppedFragranceSlug = %s%n",
                     result.stoppedStage(), result.stoppedOffset(), result.stoppedFragranceSlug());

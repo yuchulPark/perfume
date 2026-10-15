@@ -160,6 +160,13 @@ public class ScentRevPhase1ImportService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ScentRevPhase1PageImportResult importPageForSeededBrand(Long brandId, String brandSlug,
             List<ScentRevFragranceProfileResponse> profiles) {
+        return importPageForSeededBrand(brandId, brandSlug, profiles, false);
+    }
+
+    /** Insert-only mode refuses late/uncertain matches before mutating any existing perfume or child data. */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public ScentRevPhase1PageImportResult importPageForSeededBrand(Long brandId, String brandSlug,
+            List<ScentRevFragranceProfileResponse> profiles, boolean insertOnly) {
         validateProfilePageForBrand(brandSlug, profiles);
         Brand brand = brandRepository.findById(brandId)
                 .filter(existing -> brandSlug.equals(existing.getBrandSlug()))
@@ -183,6 +190,9 @@ public class ScentRevPhase1ImportService {
                 if (perfume.getBrand() == null || !brandId.equals(perfume.getBrand().getId())
                         || !brandSlug.equals(perfume.getBrand().getBrandSlug())) {
                     throw new IdentityConflictException("Existing perfume belongs to another Brand; reassignment is prohibited.");
+                }
+                if (insertOnly) {
+                    throw new IdentityConflictException("A fetched profile matches an existing perfume in skip-existing mode; no existing data may be updated. Review identities or rerun discovery.");
                 }
                 Integer releaseYear = identity.releaseYear() != null ? identity.releaseYear() : perfume.getReleaseYear();
                 String description = identity.description() != null && !identity.description().isBlank() ? identity.description() : perfume.getDescription();

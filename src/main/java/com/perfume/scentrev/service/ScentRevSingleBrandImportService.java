@@ -31,13 +31,15 @@ public class ScentRevSingleBrandImportService {
     private final ScentRevCuratedBrandConfiguration configuration;
     private final ScentRevMcpClient client;
     private final ScentRevPhase1ImportService persistence;
+    private final ScentRevExistingPerfumeLookup existingLookup;
 
     public ScentRevSingleBrandImportService(BrandRepository brands, ScentRevCuratedBrandConfiguration configuration,
-            ScentRevMcpClient client, ScentRevPhase1ImportService persistence) {
+            ScentRevMcpClient client, ScentRevPhase1ImportService persistence, ScentRevExistingPerfumeLookup existingLookup) {
         this.brands = brands;
         this.configuration = configuration;
         this.client = client;
         this.persistence = persistence;
+        this.existingLookup = existingLookup;
     }
 
     /** Local preflight only: require a verified curated identity and seeded Brand before discovery. */
@@ -65,7 +67,7 @@ public class ScentRevSingleBrandImportService {
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public ScentRevSingleBrandImportResult importBrand(ScentRevSingleBrandImportOptions options) {
-        var progress = new Progress(options.brandSlug(), options.delayMs());
+        var progress = new Progress(options.brandSlug(), options.delayMs(), options.skipExisting());
         try {
             var brand = validateBrand(options.brandSlug());
             progress.brandName = brand.brandName();
@@ -94,14 +96,30 @@ public class ScentRevSingleBrandImportService {
                 if (page.truncated() && before == progress.unique) {
                     throw new IllegalArgumentException("Repeated/non-progressing truncated page introduced no new fragrance identities.");
                 }
+                var matches = ScentRevExistingPerfumeLookup.Matches.empty();
+                if (options.skipExisting() && !newFragrances.isEmpty()) {
+                    progress.stage = "EXISTING_LOOKUP";
+                    matches = existingLookup.find(brand, newFragrances);
+                    progress.newCandidates += matches.newCandidateSlugs().size();
+                }
                 var profiles = new ArrayList<ScentRevFragranceProfileResponse>();
                 int profilePosition = 0;
+                int profileTarget = newFragrances.size() - matches.existingPublicIdsBySlug().size();
                 int skippedBefore = progress.skippedForeignBrand;
                 for (var fragrance : newFragrances) {
+                    var existingId = matches.existingPublicIdsBySlug().get(fragrance.fragranceSlug());
+                    if (existingId != null) {
+                        progress.stage = "EXISTING_LOOKUP";
+                        progress.currentSlug = fragrance.fragranceSlug();
+                        rememberPublicIdentity(fragrance, existingId, progress);
+                        progress.existingSkipped++;
+                        System.err.printf("%nSKIPPED EXISTING PERFUME%nfragranceSlug = %s%n", fragrance.fragranceSlug());
+                        continue;
+                    }
                     progress.stage = "PROFILE";
                     progress.currentSlug = fragrance.fragranceSlug();
                     System.err.printf("%nPROFILE [%d/%d]%nname = %s%nslug = %s%n", ++profilePosition,
-                            newFragrances.size(), oneLine(fragrance.name()), fragrance.fragranceSlug());
+                            profileTarget, oneLine(fragrance.name()), fragrance.fragranceSlug());
                     var profile = progress.request(() -> client.getFragranceProfile(fragrance.fragranceSlug()));
                     progress.profiles++;
                     if (!validateDiscoveredProfile(fragrance, profile, progress)) {
@@ -129,7 +147,9 @@ public class ScentRevSingleBrandImportService {
                     persistence.validateProfilePageForBrand(progress.brandSlug, profiles);
                     progress.stage = "PERSISTENCE";
                     progress.currentSlug = null;
-                    var committed = persistence.importPageForSeededBrand(brand.brandId(), progress.brandSlug, profiles);
+                    var committed = options.skipExisting()
+                            ? persistence.importPageForSeededBrand(brand.brandId(), progress.brandSlug, profiles, true)
+                            : persistence.importPageForSeededBrand(brand.brandId(), progress.brandSlug, profiles);
                     progress.committedPages++;
                     progress.inserted += committed.perfumesInserted();
                     progress.updated += committed.perfumesUpdated();
@@ -217,16 +237,20 @@ public class ScentRevSingleBrandImportService {
         if (!canonicalSlug(identity.brandSlug())) {
             throw new IllegalArgumentException("Profile brand identity is missing or malformed; a foreign brand cannot be confirmed.");
         }
+        rememberPublicIdentity(fragrance, identity.publicId(), progress);
+        return progress.brandSlug.equals(identity.brandSlug());
+    }
+
+    private static void rememberPublicIdentity(Fragrance fragrance, String publicId, Progress progress) {
         String knownId = progress.publicIdsBySlug.get(fragrance.fragranceSlug());
-        if (knownId != null && !knownId.equals(identity.publicId())) {
+        if (knownId != null && !knownId.equals(publicId)) {
             throw new IllegalArgumentException("Profile public ID conflicts with another occurrence of the discovered slug.");
         }
-        if (fragrance.publicId() == null && !progress.seenPublicIds.add(identity.publicId())
-                && !identity.publicId().equals(knownId)) {
+        if (fragrance.publicId() == null && !progress.seenPublicIds.add(publicId)
+                && !publicId.equals(knownId)) {
             throw new IllegalArgumentException("Profile resolved a conflicting public ID already associated with another discovery result.");
         }
-        progress.publicIdsBySlug.put(fragrance.fragranceSlug(), identity.publicId());
-        return progress.brandSlug.equals(identity.brandSlug());
+        progress.publicIdsBySlug.put(fragrance.fragranceSlug(), publicId);
     }
 
     private static boolean canonicalSlug(String slug) {
@@ -237,16 +261,20 @@ public class ScentRevSingleBrandImportService {
     private static class Progress {
         private final String brandSlug;
         private final long delayMs;
+        private final boolean skipExisting;
         private String brandName, providerName, currentSlug;
         private String stage = "BRAND_VALIDATION";
         private int offset, pages, committedPages, rawResults, duplicates, unique, profiles, inserted, updated, unchanged;
         private int perfumerLinks, noteLinks, accordLinks, calls, skippedForeignBrand;
+        private int existingSkipped, newCandidates;
         private Long lastRequestFinished;
         private final Set<String> seenSlugs = new HashSet<>();
         private final Set<String> seenPublicIds = new HashSet<>();
         private final Map<String, String> publicIdsBySlug = new HashMap<>();
         private final Set<String> perfumerIds = new HashSet<>(), noteNames = new HashSet<>(), accordNames = new HashSet<>();
-        private Progress(String brandSlug, long delayMs) { this.brandSlug = brandSlug; this.delayMs = delayMs; }
+        private Progress(String brandSlug, long delayMs, boolean skipExisting) {
+            this.brandSlug = brandSlug; this.delayMs = delayMs; this.skipExisting = skipExisting;
+        }
         private <T> T request(Supplier<T> call) {
             if (lastRequestFinished != null) {
                 long remaining = TimeUnit.MILLISECONDS.toNanos(delayMs) - (System.nanoTime() - lastRequestFinished);
@@ -267,7 +295,8 @@ public class ScentRevSingleBrandImportService {
             return new ScentRevSingleBrandImportResult(brandName, providerName, brandSlug, pages, committedPages,
                     rawResults, duplicates, unique, null, profiles, skippedForeignBrand, inserted, updated, unchanged,
                     perfumerIds.size(), noteNames.size(), accordNames.size(), perfumerLinks, noteLinks, accordLinks,
-                    calls, completed, completed ? null : stage, completed ? null : offset, completed ? null : currentSlug);
+                    calls, completed, completed ? null : stage, completed ? null : offset, completed ? null : currentSlug,
+                    existingSkipped, skipExisting ? newCandidates : null, skipExisting);
         }
     }
 }

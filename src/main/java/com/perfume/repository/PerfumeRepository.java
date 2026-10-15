@@ -14,6 +14,18 @@ import com.perfume.domain.Perfume;
 
 public interface PerfumeRepository extends JpaRepository<Perfume, Long> {
 
+    long countByBrand_Id(Long brandId);
+
+    /** Global identifier matches expose cross-brand conflicts; scalar rows never load lazy associations. */
+    @Query("""
+            select p.id as id, p.scentrevPublicId as publicId, p.fragranceSlug as fragranceSlug,
+                   b.id as brandId, b.brandSlug as brandSlug
+            from Perfume p join p.brand b
+            where p.fragranceSlug in :slugs or p.scentrevPublicId in :publicIds
+            """)
+    List<PerfumeImportIdentityProjection> findImportIdentities(@Param("slugs") Collection<String> slugs,
+            @Param("publicIds") Collection<String> publicIds);
+
     /** Scalar page with an explicit count query; no lazy Brand access or collection pagination. */
     @Query(value = """
             select p.id as id, p.scentrevPublicId as publicId, p.fragranceSlug as fragranceSlug,

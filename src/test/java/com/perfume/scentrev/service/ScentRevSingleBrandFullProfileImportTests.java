@@ -190,7 +190,8 @@ class ScentRevSingleBrandFullProfileImportTests {
             assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
             writes.add(transactions.current); return call.getArgument(0);
         }).when(store.metricRepo).save(any());
-        var service = transactional(new ScentRevSingleBrandImportService(brandRepo, new ScentRevCuratedBrandConfiguration(store.mapper), client, persistence), transactions);
+        var service = transactional(new ScentRevSingleBrandImportService(brandRepo, new ScentRevCuratedBrandConfiguration(store.mapper), client, persistence,
+                mock(ScentRevExistingPerfumeLookup.class)), transactions);
         new TransactionTemplate(transactions).executeWithoutResult(ambient -> {
             assertThat(service.importBrand(options()).perfumesUpdated()).isEqualTo(1);
             assertThat(transactions.current).isEqualTo(1); ambient.setRollbackOnly();
@@ -214,7 +215,8 @@ class ScentRevSingleBrandFullProfileImportTests {
             when(brands.findByBrandSlug("creed")).thenReturn(Optional.of(store.perfume.getBrand()));
             when(persistence.importPageForSeededBrand(eq(2L), eq("creed"), anyList()))
                     .thenReturn(new ScentRevPhase1PageImportResult(0, 1, 0, Set.of(), Set.of(), Set.of(), 0, 0, 0));
-            service = new ScentRevSingleBrandImportService(brands, new ScentRevCuratedBrandConfiguration(store.mapper), client, persistence);
+            service = new ScentRevSingleBrandImportService(brands, new ScentRevCuratedBrandConfiguration(store.mapper), client, persistence,
+                    mock(ScentRevExistingPerfumeLookup.class));
         }
     }
     @SuppressWarnings("unchecked")

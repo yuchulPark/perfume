@@ -7,6 +7,7 @@ public record ScentRevSingleBrandImportResult(String brandName, String providerB
         int perfumesInserted, int perfumesUpdated, int perfumesUnchanged,
         int perfumersProcessed, int notesProcessed, int accordsProcessed,
         int perfumePerfumerLinks, int perfumeNoteLinks, int perfumeAccordLinks,
-        int totalMcpCalls, boolean completed, String stoppedStage, Integer stoppedOffset, String stoppedFragranceSlug) {
+        int totalMcpCalls, boolean completed, String stoppedStage, Integer stoppedOffset, String stoppedFragranceSlug,
+        int existingSkipped, Integer newCandidates, boolean skipExistingEnabled) {
     public int perfumesProcessed() { return perfumesInserted + perfumesUpdated + perfumesUnchanged; }
 }
