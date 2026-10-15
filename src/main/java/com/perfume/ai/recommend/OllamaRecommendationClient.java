@@ -34,6 +34,7 @@ public class OllamaRecommendationClient {
         @Override public String toString() { return "OllamaRecommendationRequest[stream=false]"; }
     }
     public String generate(RecommendationPromptBuilder.Prompt prompt) {
+        OllamaRecommendationDiagnostics.started(prompt, options);
         verifyModel();
         checkInterrupted();
         var response = request("chat", client.post().uri("/api/chat").contentType(MediaType.APPLICATION_JSON).body(new ChatRequest(
@@ -70,22 +71,27 @@ public class OllamaRecommendationClient {
     }
     private JsonNode request(String stage, RestClient.RequestHeadersSpec<?> request) {
         long started = System.nanoTime();
+        int[] httpStatus = {0};
+        boolean[] responseComplete = {false};
         try {
             checkInterrupted();
             return request.exchange((sent, response) -> {
+                httpStatus[0] = response.getStatusCode().value();
                 if (!response.getStatusCode().is2xxSuccessful()) { throw new RecommendationFailure(RecommendationFailure.Code.LLM_HTTP_ERROR); }
                 var bytes = response.getBody().readNBytes(MAX_RESPONSE_BYTES + 1);
                 if (bytes.length > MAX_RESPONSE_BYTES) { throw invalid(); }
+                responseComplete[0] = true;
                 JsonNode json;
                 try { json = mapper.readTree(bytes); }
                 catch (JsonProcessingException invalidJson) { throw invalid(); }
                 if (json == null || !json.isObject() || json.has("error")) { throw invalid(); }
+                if ("chat".equals(stage)) { OllamaRecommendationDiagnostics.received(json, (System.nanoTime() - started) / 1_000_000, httpStatus[0]); }
                 return json;
             });
         } catch (RecommendationFailure known) {
-            failed(stage, started, known.code()); throw known;
+            failed(stage, started, known.code(), httpStatus[0], responseComplete[0]); throw known;
         } catch (RestClientException failure) {
-            var code = classify(failure); failed(stage, started, code); throw new RecommendationFailure(code);
+            var code = classify(failure); failed(stage, started, code, httpStatus[0], responseComplete[0]); throw new RecommendationFailure(code);
         }
     }
     private static RecommendationFailure.Code classify(RestClientException failure) {
@@ -104,8 +110,9 @@ public class OllamaRecommendationClient {
     static void checkInterrupted() {
         if (Thread.currentThread().isInterrupted()) { throw new RecommendationFailure(RecommendationFailure.Code.RECOMMEND_INTERRUPTED); }
     }
-    private static void failed(String stage, long started, RecommendationFailure.Code code) {
-        log.warn("Ollama recommendation failed: stage={}, code={}, elapsedMs={}", stage, code, (System.nanoTime() - started) / 1_000_000);
+    private static void failed(String stage, long started, RecommendationFailure.Code code, int httpStatus, boolean responseComplete) {
+        log.warn("Ollama recommendation failed: stage={}, code={}, elapsedMs={}, httpStatus={}, responseComplete={}, serverMetricsAvailable=false",
+                stage, code, (System.nanoTime() - started) / 1_000_000, httpStatus, responseComplete);
     }
     private static RecommendationFailure invalid() { return new RecommendationFailure(RecommendationFailure.Code.LLM_INVALID_RESPONSE); }
     private static RecommendationFailure mismatch() { return new RecommendationFailure(RecommendationFailure.Code.MODEL_MISMATCH); }

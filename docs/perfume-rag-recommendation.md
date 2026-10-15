@@ -85,6 +85,8 @@ LLM 호출 전후 `/api/tags`의 정확한 모델명과 전체 SHA-256 manifest 
 
 API 입력 DTO, 출력 DTO, 프롬프트/근거 record, LLM 요청 record의 toString은 민감 본문을 제외한다. 실패 로그에는 고정 단계·코드·경과 시간만 기록한다. 질문·전체 프롬프트·LLM 답변·벡터·키·비밀번호의 DB 저장은 없고 HTTP body/driver TRACE/프록시 본문 로깅을 켜지 않는다.
 
+LLM 타임아웃 원인을 나누는 안전한 메타데이터 로그와 본문 없는 수동 스트리밍 측정은 [RAG 지연 진단 문서](ollama-rag-diagnostics.md)를 참고한다. 최종 응답이 없으면 서버의 최종 처리 통계를 알 수 없으며, 진단 추가로 현재 호출 옵션/검증/기한을 변경하지 않는다.
+
 ## 활성화 설정·CPU 제한·오류
 
 기본값은 `perfume.ai.recommend.enabled=false`다. 유효한 추천 요청은 `503 / RECOMMEND_DISABLED`이고 추천 클라이언트·실행기·근거 repository bean을 만들거나 추가 DB/모델 조회를 하지 않는다. 검색 기능만 켠 상태에서도 추천 자원을 만들지 않는다.
