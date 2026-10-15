@@ -7,6 +7,8 @@ COPY mvnw pom.xml ./
 # A Windows checkout may contain CRLF or lack the Linux executable permission.
 RUN sed -i 's/\r$//' mvnw && chmod 0755 mvnw
 COPY src/ src/
+# Read by PerfumeEmbeddingMigrationTests; kept outside resources and the runtime stage.
+COPY docs/sql/perfume-embeddings-v1.sql docs/sql/perfume-embeddings-v1.sql
 # Run the ordinary suite. No API key, live-test gates or database credentials are supplied.
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -B -ntp package
 

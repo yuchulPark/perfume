@@ -6,6 +6,12 @@
 !.mvn/**
 !src/
 !src/**
+# Keep the migration test input without admitting other documentation or SQL files.
+!docs/
+docs/*
+!docs/sql/
+docs/sql/*
+!docs/sql/perfume-embeddings-v1.sql
 **/application-local.properties
 **/application-secret.properties
 **/.env
