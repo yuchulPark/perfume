@@ -12,6 +12,8 @@ public class ScentRevMcpClientException extends RuntimeException {
         AUTHENTICATION,
         TOOL_NOT_FOUND,
         TOOL_CALL,
+        RATE_LIMIT,
+        SERVER_OUTPUT_SCHEMA,
         INVALID_RESPONSE,
         DTO_CONVERSION,
         TRANSPORT,
@@ -20,11 +22,17 @@ public class ScentRevMcpClientException extends RuntimeException {
 
     private final FailureType failureType;
     private final Integer statusCode;
+    private final Long retryAfterMs;
 
     ScentRevMcpClientException(FailureType failureType, Integer statusCode, String message) {
+        this(failureType, statusCode, message, null);
+    }
+
+    ScentRevMcpClientException(FailureType failureType, Integer statusCode, String message, Long retryAfterMs) {
         super(message);
         this.failureType = failureType;
         this.statusCode = statusCode;
+        this.retryAfterMs = retryAfterMs;
     }
 
     public FailureType getFailureType() {
@@ -34,5 +42,10 @@ public class ScentRevMcpClientException extends RuntimeException {
     /** Null when the failure has no known HTTP status. */
     public Integer getStatusCode() {
         return statusCode;
+    }
+
+    /** Provider hint in milliseconds, never an instruction to retry; null when absent or invalid. */
+    public Long getRetryAfterMs() {
+        return retryAfterMs;
     }
 }

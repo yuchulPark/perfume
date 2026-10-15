@@ -90,7 +90,9 @@ class ScentRevTargetedBrandClientTests {
         when(sdk.callTool(any())).thenReturn(new CallToolResult(List.of(), false,
                 Map.of("error", code, "message", "SECRET-PROVIDER-MESSAGE"), null));
         assertThatThrownBy(() -> client().searchBrands("Creed", 10)).isInstanceOf(ScentRevMcpClientException.class)
-                .hasMessage("ScentRev MCP list_brands returned an error payload.").hasNoCause();
+                .hasMessage("rate_limit".equals(code)
+                        ? "ScentRev MCP list_brands request limit or API quota exceeded. No automatic retry was made."
+                        : "ScentRev MCP list_brands returned an error payload.").hasNoCause();
         verify(sdk).initialize();
         verify(sdk).callTool(any());
         verifyNoMoreInteractions(sdk);

@@ -9,8 +9,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -41,6 +45,10 @@ import io.modelcontextprotocol.spec.McpTransportException;
 /** Focused synchronous profile/search operations over a lazily initialized, reusable SDK client. */
 public class ScentRevMcpClient implements AutoCloseable {
 
+    private static final Logger log = LoggerFactory.getLogger(ScentRevMcpClient.class);
+    private static final int MAX_DIAGNOSTIC_LENGTH = 512;
+    private static final Set<String> RATE_LIMIT_CODES = Set.of("rate_limit", "rate_limited", "rate_limit_exceeded",
+            "too_many_requests", "quota_exceeded", "quota_exhausted", "429");
     private static final String PROFILE_TOOL = "get_fragrance_profile";
     private static final String WEAR_TOOL = "get_wear_summary";
     public static final List<String> PROFILE_SECTIONS = List.of("identity", "performance", "appreciation", "notes",
@@ -115,7 +123,7 @@ public class ScentRevMcpClient implements AutoCloseable {
                     .arguments(Map.of("fragrance_slug", fragranceSlug)).build());
         } catch (RuntimeException exception) { throw sdkFailure(exception, false, WEAR_TOOL); }
         if (result == null || Boolean.TRUE.equals(result.isError())) {
-            throw failure(TOOL_CALL, "ScentRev MCP get_wear_summary returned no result or isError=true.");
+            throw toolFailure(WEAR_TOOL, errorDiagnostic(result), "ScentRev MCP get_wear_summary returned no result or isError=true.");
         }
         JsonNode domain = null;
         if (result.structuredContent() != null) {
@@ -134,8 +142,10 @@ public class ScentRevMcpClient implements AutoCloseable {
         if (domain == null || !domain.isObject()) { throw failure(INVALID_RESPONSE, "ScentRev MCP returned no wear summary object."); }
         if (domain.hasNonNull("error")) {
             String code = domain.path("error").isTextual() ? domain.path("error").asText() : domain.path("error").path("code").asText();
-            throw failure("tool_not_found".equals(code) || "unknown_tool".equals(code) ? TOOL_NOT_FOUND : TOOL_CALL,
-                    "ScentRev MCP get_wear_summary returned an error payload.");
+            if ("tool_not_found".equals(code) || "unknown_tool".equals(code)) {
+                throw failure(TOOL_NOT_FOUND, "ScentRev MCP get_wear_summary returned an error payload.");
+            }
+            throw toolFailure(WEAR_TOOL, domain, "ScentRev MCP get_wear_summary returned an error payload.");
         }
         return domain.deepCopy();
     }
@@ -164,7 +174,7 @@ public class ScentRevMcpClient implements AutoCloseable {
     private ScentRevSearchResponse extractUserSearch(CallToolResult result) {
         if (result == null) { throw failure(INVALID_RESPONSE, "ScentRev MCP returned no search result."); }
         if (Boolean.TRUE.equals(result.isError())) {
-            throw failure(TOOL_CALL, "ScentRev MCP search_fragrances reported isError=true.");
+            throw toolFailure(USER_SEARCH_TOOL, errorDiagnostic(result), "ScentRev MCP search_fragrances reported isError=true.");
         }
         if (result.structuredContent() != null) {
             JsonNode domain;
@@ -195,7 +205,7 @@ public class ScentRevMcpClient implements AutoCloseable {
             if ("tool_not_found".equals(code) || "unknown_tool".equals(code)) {
                 throw failure(TOOL_NOT_FOUND, "ScentRev MCP search_fragrances tool was not found.");
             }
-            throw failure(TOOL_CALL, "ScentRev MCP search_fragrances returned an error payload.");
+            throw toolFailure(USER_SEARCH_TOOL, domain, "ScentRev MCP search_fragrances returned an error payload.");
         }
         if (domain == null || !domain.isObject() || !domain.path("results").isArray()) {
             throw failure(INVALID_RESPONSE, "ScentRev MCP search must contain a results array.");
@@ -246,7 +256,7 @@ public class ScentRevMcpClient implements AutoCloseable {
             throw failure(INVALID_RESPONSE, "ScentRev MCP returned no search tool result.");
         }
         if (Boolean.TRUE.equals(result.isError())) {
-            throw failure(TOOL_CALL, "ScentRev MCP search_fragrances_filtered reported isError=true.");
+            throw toolFailure(SEARCH_TOOL, errorDiagnostic(result), "ScentRev MCP search_fragrances_filtered reported isError=true.");
         }
         if (result.structuredContent() != null) {
             try {
@@ -269,7 +279,8 @@ public class ScentRevMcpClient implements AutoCloseable {
             } catch (JsonProcessingException exception) {
                 continue;
             }
-            if (domain.isObject() && (domain.has("results") || domain.hasNonNull("error"))) {
+            if (domain.isObject() && (domain.has("results") || domain.hasNonNull("error")
+                    || diagnosticFailureType(domain) != TOOL_CALL)) {
                 return convertSearch(domain);
             }
         }
@@ -277,12 +288,16 @@ public class ScentRevMcpClient implements AutoCloseable {
     }
 
     private ScentRevFilteredSearchResponse convertSearch(JsonNode domain) {
+        // An explicit restriction is never an empty/successful page, even when isError is false.
+        if (domain != null && domain.isObject() && diagnosticFailureType(domain) != TOOL_CALL) {
+            throw toolFailure(SEARCH_TOOL, domain, "ScentRev MCP search_fragrances_filtered returned an error payload.");
+        }
         if (domain != null && domain.isObject() && domain.hasNonNull("error")) {
             String code = domain.path("error").path("code").asText();
             if ("tool_not_found".equals(code) || "unknown_tool".equals(code)) {
                 throw failure(TOOL_NOT_FOUND, "ScentRev MCP search_fragrances_filtered tool was not found.");
             }
-            throw failure(TOOL_CALL, "ScentRev MCP search_fragrances_filtered returned an error payload.");
+            throw toolFailure(SEARCH_TOOL, domain, "ScentRev MCP search_fragrances_filtered returned an error payload.");
         }
         if (domain == null || !domain.isObject() || !domain.path("results").isArray()) {
             throw failure(INVALID_RESPONSE, "ScentRev MCP filtered search must contain a results array.");
@@ -359,7 +374,7 @@ public class ScentRevMcpClient implements AutoCloseable {
             throw failure(INVALID_RESPONSE, "ScentRev MCP returned no brand-list tool result.");
         }
         if (Boolean.TRUE.equals(result.isError())) {
-            throw failure(TOOL_CALL, "ScentRev MCP list_brands reported isError=true.");
+            throw toolFailure(BRANDS_TOOL, errorDiagnostic(result), "ScentRev MCP list_brands reported isError=true.");
         }
         if (result.structuredContent() != null) {
             JsonNode domain;
@@ -401,7 +416,7 @@ public class ScentRevMcpClient implements AutoCloseable {
             if ("tool_not_found".equals(code) || "unknown_tool".equals(code)) {
                 throw failure(TOOL_NOT_FOUND, "ScentRev MCP list_brands tool was not found.");
             }
-            throw failure(TOOL_CALL, "ScentRev MCP list_brands returned an error payload.");
+            throw toolFailure(BRANDS_TOOL, domain, "ScentRev MCP list_brands returned an error payload.");
         }
         if (domain == null || !domain.isObject() || !domain.path("brands").isArray()) {
             throw failure(INVALID_RESPONSE, "ScentRev MCP brand list must contain a brands array.");
@@ -482,7 +497,7 @@ public class ScentRevMcpClient implements AutoCloseable {
             throw failure(INVALID_RESPONSE, "ScentRev MCP returned no tool result.");
         }
         if (Boolean.TRUE.equals(result.isError())) {
-            throw failure(TOOL_CALL, "ScentRev MCP get_fragrance_profile reported isError=true.");
+            throw toolFailure(PROFILE_TOOL, errorDiagnostic(result), "ScentRev MCP get_fragrance_profile reported isError=true.");
         }
         if (result.structuredContent() != null) {
             JsonNode domain;
@@ -525,7 +540,7 @@ public class ScentRevMcpClient implements AutoCloseable {
             if ("tool_not_found".equals(code) || "unknown_tool".equals(code)) {
                 throw failure(TOOL_NOT_FOUND, "ScentRev MCP get_fragrance_profile tool was not found.");
             }
-            throw failure(TOOL_CALL, "ScentRev MCP get_fragrance_profile returned an error payload.");
+            throw toolFailure(PROFILE_TOOL, domain, "ScentRev MCP get_fragrance_profile returned an error payload.");
         }
         if (domain == null || !domain.isObject() || !domain.path("identity").isObject()) {
             throw failure(INVALID_RESPONSE, "ScentRev MCP profile must contain an identity object.");
@@ -552,13 +567,13 @@ public class ScentRevMcpClient implements AutoCloseable {
         return value == null || value.isBlank();
     }
 
-    private static ScentRevMcpClientException sdkFailure(RuntimeException exception, boolean initializing) {
+    private ScentRevMcpClientException sdkFailure(RuntimeException exception, boolean initializing) {
         return sdkFailure(exception, initializing, PROFILE_TOOL);
     }
 
-    private static ScentRevMcpClientException sdkFailure(RuntimeException exception, boolean initializing, String tool) {
+    private ScentRevMcpClientException sdkFailure(RuntimeException exception, boolean initializing, String tool) {
         String phase = initializing ? " during initialization." : " during " + tool + ".";
-        // Classify SDK diagnostics; never retain raw messages, headers, bodies or causes.
+        // Preserve authentication/tool-not-found handling and inspect explicit restriction/schema diagnostics.
         Throwable cause = exception;
         for (int depth = 0; cause != null && depth < 16; depth++, cause = cause.getCause()) {
             if (cause instanceof McpHttpClientTransportAuthorizationException authentication) {
@@ -573,6 +588,20 @@ public class ScentRevMcpClient implements AutoCloseable {
                         && (message.startsWith("unknown tool") || message.startsWith("tool not found")))) {
                     return failure(TOOL_NOT_FOUND, "ScentRev MCP " + tool + " tool was not found.");
                 }
+                JsonNode diagnostic = protocolDiagnostic(mcpError);
+                FailureType type = diagnosticFailureType(diagnostic);
+                if (type != TOOL_CALL) {
+                    Long retryAfterMs = type == RATE_LIMIT ? retryAfterMs(diagnostic) : null;
+                    logToolFailure(tool, exception, type, retryAfterMs);
+                    return diagnosticFailure(type, tool, retryAfterMs);
+                }
+            }
+            // SDK 2.0.1 drops HTTP headers/body for this 4xx error; do not invent a Retry-After value.
+            if (cause instanceof McpTransportException
+                    && "Invalid request. Status code: 429".equals(cause.getMessage())) {
+                logToolFailure(tool, exception, RATE_LIMIT, null);
+                return new ScentRevMcpClientException(RATE_LIMIT, 429,
+                        "ScentRev MCP request limit exceeded (HTTP 429)" + phase);
             }
         }
         cause = exception;
@@ -582,8 +611,145 @@ public class ScentRevMcpClient implements AutoCloseable {
                 return failure(TRANSPORT, "ScentRev MCP transport failed" + phase);
             }
         }
+        if (!initializing) { logToolFailure(tool, exception, TOOL_CALL, null); }
         return failure(initializing ? INITIALIZATION : TOOL_CALL,
                 initializing ? "ScentRev MCP initialization failed." : "ScentRev MCP " + tool + " call failed.");
+    }
+
+    private JsonNode errorDiagnostic(CallToolResult result) {
+        // Read diagnostics without converting an error result into successful domain data.
+        if (result != null && result.structuredContent() != null) {
+            try {
+                JsonNode domain = objectMapper.valueToTree(result.structuredContent());
+                if (hasErrorDiagnostic(domain)) { return domain; }
+            } catch (IllegalArgumentException ignored) { }
+        }
+        String plainMessage = null;
+        if (result != null && result.content() != null) {
+            for (var content : result.content()) {
+                if (!(content instanceof TextContent text) || text.text() == null) { continue; }
+                String value = text.text().strip();
+                if (value.startsWith("{")) {
+                    try {
+                        JsonNode domain = domainReader.readTree(value);
+                        if (hasErrorDiagnostic(domain)) { return domain; }
+                    } catch (JsonProcessingException ignored) { }
+                } else if (plainMessage == null && !value.startsWith("[") && !value.startsWith("<")) {
+                    plainMessage = value;
+                }
+            }
+        }
+        return objectMapper.createObjectNode().put("message", plainMessage);
+    }
+
+    private ScentRevMcpClientException toolFailure(String tool, JsonNode domain, String fallbackMessage) {
+        FailureType type = diagnosticFailureType(domain);
+        logToolFailure(tool, domain);
+        return type == TOOL_CALL ? failure(TOOL_CALL, fallbackMessage)
+                : diagnosticFailure(type, tool, type == RATE_LIMIT ? retryAfterMs(domain) : null);
+    }
+
+    private static ScentRevMcpClientException diagnosticFailure(FailureType type, String tool, Long retryAfterMs) {
+        String message = type == SERVER_OUTPUT_SCHEMA
+                ? "ScentRev MCP " + tool + " server outputSchema validation failed; the provider must fix its response/schema contract."
+                : "ScentRev MCP " + tool + " request limit or API quota exceeded."
+                        + (retryAfterMs == null ? "" : " Provider retry hint: " + retryAfterMs + " ms.")
+                        + " No automatic retry was made.";
+        return new ScentRevMcpClientException(type, null, message, retryAfterMs);
+    }
+
+    private static FailureType diagnosticFailureType(JsonNode domain) {
+        JsonNode error = domain.hasNonNull("error") ? domain.path("error") : domain;
+        String code = diagnosticValue(error.isValueNode() ? error : error.path("code"));
+        // Schema field names (quota/retry_after_ms) alone are not evidence of a request limit.
+        if (isOutputValidationMessage(diagnosticValue(domain.path("message")))
+                || isOutputValidationMessage(diagnosticValue(error.path("message")))) {
+            return SERVER_OUTPUT_SCHEMA;
+        }
+        return code != null && RATE_LIMIT_CODES.contains(code.toLowerCase(Locale.ROOT)) ? RATE_LIMIT : TOOL_CALL;
+    }
+
+    private static boolean isOutputValidationMessage(String message) {
+        return message != null && message.strip().toLowerCase(Locale.ROOT).startsWith("output validation error:");
+    }
+
+    private static Long retryAfterMs(JsonNode domain) {
+        JsonNode error = domain.path("error");
+        JsonNode retry = error.has("retry_after_ms") ? error.path("retry_after_ms") : domain.path("retry_after_ms");
+        return retry.isIntegralNumber() && retry.canConvertToLong() && retry.longValue() >= 0 ? retry.longValue() : null;
+    }
+
+    private JsonNode protocolDiagnostic(McpError exception) {
+        var diagnostic = objectMapper.createObjectNode();
+        Object data = exception.getJsonRpcError().data();
+        if (data instanceof Map<?, ?> || data instanceof JsonNode) {
+            try {
+                JsonNode candidate = objectMapper.valueToTree(data);
+                if (candidate.isObject()) { diagnostic.setAll((com.fasterxml.jackson.databind.node.ObjectNode) candidate); }
+            } catch (IllegalArgumentException ignored) { }
+        }
+        if (!diagnostic.hasNonNull("code")) { diagnostic.put("code", exception.getJsonRpcError().code()); }
+        if (!diagnostic.hasNonNull("message") || isOutputValidationMessage(exception.getJsonRpcError().message())) {
+            diagnostic.put("message", exception.getJsonRpcError().message());
+        }
+        return diagnostic;
+    }
+
+    private static boolean hasErrorDiagnostic(JsonNode domain) {
+        return domain != null && domain.isObject()
+                && (domain.hasNonNull("error") || domain.hasNonNull("code") || domain.hasNonNull("message"));
+    }
+
+    private void logToolFailure(String tool, JsonNode domain) {
+        JsonNode error = domain.hasNonNull("error") ? domain.path("error") : domain;
+        String code = diagnosticValue(error.isValueNode() ? error : error.path("code"));
+        String message = diagnosticValue(error.path("message"));
+        if (message == null) { message = diagnosticValue(domain.path("message")); }
+        FailureType type = diagnosticFailureType(domain);
+        log.warn("ScentRev MCP " + type + " tool={} serverCode={} serverMessage={} retryAfterMs={}",
+                tool, safeDiagnostic(code), safeDiagnostic(message), type == RATE_LIMIT ? retryAfterMs(domain) : null);
+    }
+
+    private static String diagnosticValue(JsonNode value) {
+        return value.isTextual() || value.isNumber() ? value.asText() : null;
+    }
+
+    private void logToolFailure(String tool, RuntimeException exception, FailureType type, Long retryAfterMs) {
+        String code = null, message = null;
+        StringBuilder causes = new StringBuilder();
+        // Bound traversal even for cyclic causes; never log Throwable/toString or JSON-RPC data.
+        Throwable cause = exception;
+        for (int depth = 0; cause != null && depth < 16; depth++, cause = cause.getCause()) {
+            if (depth > 0) { causes.append(" -> "); }
+            String causeMessage = cause.getMessage();
+            // Throwable(cause) messages can contain McpError.toString(), including private RPC data.
+            if (cause.getCause() != null && causeMessage != null
+                    && causeMessage.startsWith(cause.getCause().getClass().getName())) {
+                causeMessage = "(see nested cause)";
+            }
+            causes.append(cause.getClass().getName()).append(": ").append(safeDiagnostic(causeMessage));
+            if (code == null && cause instanceof McpError mcpError && mcpError.getJsonRpcError() != null) {
+                code = Integer.toString(mcpError.getJsonRpcError().code());
+                message = mcpError.getJsonRpcError().message();
+            }
+        }
+        log.warn("ScentRev MCP " + type + " tool={} serverCode={} serverMessage={} causes={} retryAfterMs={}",
+                tool, safeDiagnostic(code), safeDiagnostic(message), causes.toString(), retryAfterMs);
+    }
+
+    private String safeDiagnostic(String value) {
+        if (value == null || value.isBlank()) { return "(not supplied)"; }
+        String safe = value;
+        if (!isBlank(properties.getApiKey())) { safe = safe.replace(properties.getApiKey(), "[REDACTED]"); }
+        safe = safe.replaceAll("(?i)\\b(Bearer|Basic)\\s+[^\\s\"',;<>}\\]]+", "$1 [REDACTED]")
+                .replaceAll("(?i)(\\b(?:authorization|proxy-authorization|(?:set-)?cookie)\\b[\"']?\\s*[:=]\\s*)"
+                        + "(?:\"[^\"\\r\\n]*\"|'[^'\\r\\n]*'|[^\\r\\n]*)", "$1[REDACTED]")
+                .replaceAll("(?i)(\\b(?:x-api-key|api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|token|password)"
+                        + "\\b[\"']?\\s*[:=]\\s*)(?:\"[^\"\\r\\n]*\"|'[^'\\r\\n]*'|[^\\s,;}&]+)", "$1[REDACTED]")
+                .replaceAll("(?i)(https?://)[^\\s/]+@", "$1[REDACTED]@")
+                .replaceAll("[\\p{Cntrl}\\p{Zl}\\p{Zp}]", " ").strip();
+        // Redact before truncating so a credential crossing the boundary cannot leak a prefix.
+        return safe.substring(0, Math.min(safe.length(), MAX_DIAGNOSTIC_LENGTH));
     }
 
     private static ScentRevMcpClientException failure(FailureType type, String message) {

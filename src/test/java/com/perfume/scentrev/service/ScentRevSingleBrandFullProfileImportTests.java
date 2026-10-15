@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
@@ -31,6 +32,45 @@ import com.perfume.scentrev.dto.ScentRevFragranceProfileResponse;
 
 /** Mocked network and persistence only; exercises the existing single-brand orchestration. */
 class ScentRevSingleBrandFullProfileImportTests {
+    @ParameterizedTest
+    @EnumSource(value = ScentRevMcpClientException.FailureType.class, names = {"RATE_LIMIT", "SERVER_OUTPUT_SCHEMA"})
+    void discoveryRestrictionsStopBeforeProfileRequestsOrPersistence(ScentRevMcpClientException.FailureType type) {
+        var fixture = new Fixture();
+        var restriction = mock(ScentRevMcpClientException.class);
+        when(restriction.getFailureType()).thenReturn(type);
+        when(fixture.client.searchFragrancesFiltered("creed", 0)).thenThrow(restriction);
+
+        var failure = catchThrowableOfType(() -> fixture.service.importBrand(options()), ScentRevSingleBrandImportException.class);
+
+        assertThat(failure.getResult().stoppedStage()).isEqualTo("DISCOVERY");
+        assertThat(failure.getResult().pagesCommitted()).isZero();
+        assertThat(failure.getResult().totalMcpCalls()).isEqualTo(1);
+        assertThat(failure).hasMessageContaining(type.name());
+        verify(fixture.client).searchFragrancesFiltered("creed", 0);
+        verifyNoMoreInteractions(fixture.client);
+        verifyNoInteractions(fixture.persistence);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ScentRevMcpClientException.FailureType.class, names = {"RATE_LIMIT", "SERVER_OUTPUT_SCHEMA"})
+    void profileRestrictionsStopBeforeWearRequestsOrPageWrites(ScentRevMcpClientException.FailureType type) {
+        var fixture = new Fixture();
+        var restriction = mock(ScentRevMcpClientException.class);
+        when(restriction.getFailureType()).thenReturn(type);
+        when(fixture.client.searchFragrancesFiltered("creed", 0)).thenReturn(page(0, true, "creed-aventus"));
+        when(fixture.client.getFragranceProfile("creed-aventus")).thenThrow(restriction);
+
+        var failure = catchThrowableOfType(() -> fixture.service.importBrand(options()), ScentRevSingleBrandImportException.class);
+
+        assertThat(failure.getResult().stoppedStage()).isEqualTo("PROFILE");
+        assertThat(failure.getResult().pagesCommitted()).isZero();
+        assertThat(failure.getResult().totalMcpCalls()).isEqualTo(2);
+        verify(fixture.client).searchFragrancesFiltered("creed", 0);
+        verify(fixture.client).getFragranceProfile("creed-aventus");
+        verifyNoMoreInteractions(fixture.client);
+        verifyNoInteractions(fixture.persistence);
+    }
+
     @Test
     void fullProfileUsesNoRedundantWearRequestAndKeepsRequestDelay() throws IOException {
         var fixture = new Fixture(); var completedRequests = new ArrayList<Long>();
