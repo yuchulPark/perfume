@@ -16,12 +16,22 @@ final class OllamaRecommendationDiagnostics {
         int bytes = prompt.messages().stream().mapToInt(message -> message.get("content").getBytes(StandardCharsets.UTF_8).length).sum();
         log.info("Ollama recommendation diagnostics: event=request, stream=false, format=json, think=false, truncate=false, "
                         + "messageCount={}, messageContentBytes={}, systemBytes={}, queryMessageBytes={}, evidenceMessageBytes={}, "
-                        + "contextSources={}, allowedSentences={}, omitted={}, optimizationMode={}, maxEvidenceCandidates={}, inputBudgetBytes={}, numCtx={}, maxOutputTokens={}, numThreads=3, "
+                        + "selectionFormat=source-fact-id, contextSources={}, allowedSentences={}, omitted={}, optimizationMode={}, maxEvidenceCandidates={}, inputBudgetBytes={}, numCtx={}, maxOutputTokens={}, numThreads=3, "
                         + "readTimeoutMs={}, generationTimeoutMs={}",
                 prompt.messages().size(), bytes, messageBytes(prompt, 0), messageBytes(prompt, 1), messageBytes(prompt, 2),
                 prompt.allowed().stream().map(RecommendationEvidenceFormatter.Sentence::source).distinct().count(), prompt.allowed().size(), prompt.omitted(),
                 options.optimizationMode(), options.maxEvidenceCandidates(), options.inputBudgetBytes(),
                 PerfumeRecommendationOptions.CONTEXT_TOKENS, options.maxOutputTokens(), options.readTimeout().toMillis(), options.generationTimeout().toMillis());
+    }
+
+    static void validationFailed(RecommendationValidationReason reason, RecommendationPromptBuilder.Prompt prompt,
+            int maxCandidates, int selectedCount, long elapsedMs) {
+        log.warn("Ollama recommendation diagnostics: event=validation_failed, stage=validation, validationReason={}, "
+                        + "optimizationMode={}, contextSources={}, allowedFacts={}, selectedCount={}, elapsedMs={}",
+                reason, maxCandidates == 1 ? "compact" : "two-candidate",
+                prompt.allowed().stream().map(RecommendationEvidenceFormatter.Sentence::source).distinct().count(),
+                prompt.allowed().stream().filter(sentence -> !sentence.identity()).count(),
+                selectedCount >= 0 ? selectedCount : "unavailable", elapsedMs);
     }
 
     static void received(JsonNode response, long elapsedMs, int httpStatus) {

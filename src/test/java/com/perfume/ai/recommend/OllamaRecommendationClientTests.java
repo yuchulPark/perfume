@@ -32,7 +32,7 @@ class OllamaRecommendationClientTests {
             assertThat(json.path("stream").booleanValue()).isFalse(); assertThat(json.path("think").booleanValue()).isFalse();
             assertThat(json.path("truncate").booleanValue()).isFalse(); assertThat(json.path("format").asText()).isEqualTo("json");
             assertThat(json.path("options").path("num_ctx").intValue()).isEqualTo(4096);
-            assertThat(json.path("options").path("num_predict").intValue()).isEqualTo(256);
+            assertThat(json.path("options").path("num_predict").intValue()).isEqualTo(128);
             assertThat(json.path("options").path("temperature").doubleValue()).isEqualTo(0.2);
             assertThat(json.path("options").path("num_thread").intValue()).isEqualTo(3);
             assertThat(json.path("messages")).hasSize(3); assertThat(json.has("tools")).isFalse(); assertThat(json.has("context")).isFalse();
@@ -66,7 +66,7 @@ class OllamaRecommendationClientTests {
             case "wrong-model" -> json.put("model", "other-model"); case "incomplete" -> json.put("done", false);
             case "role" -> message.put("role", "user"); case "tool" -> message.putArray("tool_calls").addObject().put("name", "do-something");
             case "thinking" -> message.put("thinking", "private-thoughts"); case "length" -> json.put("done_reason", "length");
-            case "prompt-overflow" -> json.put("prompt_eval_count", 4096); case "output-overflow" -> json.put("eval_count", 513);
+            case "prompt-overflow" -> json.put("prompt_eval_count", 4096); case "output-overflow" -> json.put("eval_count", 129);
             case "bad-count" -> json.put("eval_count", "1"); case "error" -> json.put("error", "private-response");
         }
         String body = switch (kind) { case "json" -> "{\"private-response\":"; case "extra-json" -> json + " {}"; case "oversize" -> " ".repeat(65537); default -> json.toString(); };

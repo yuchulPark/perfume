@@ -37,16 +37,15 @@ class RecommendationPromptOptimizationTests {
         }
         assertThat(measurements.get("systemBytes")).isLessThan(576);
         measurements.put("defaultInputBytes2", builder().build(QUERY, snapshots(2)).inputBytes());
-        var report = Path.of("target/phase1-validation/rag-cpu-after.json");
+        var report = Path.of("target/phase1-validation/rag-cpu-current.json");
         Files.createDirectories(report.getParent());
         Files.writeString(report, MAPPER.writeValueAsString(measurements));
     }
     @ParameterizedTest @ValueSource(ints = {1, 2})
     void completeJsonContainsExactlyOneGroundedFactPerExplainedPerfume(int candidates) {
         var builder = builder(candidates); var prompt = builder.build(QUERY, snapshots(candidates));
-        var answer = allPairs(prompt);
-        var rendered = builder.validateAndRender(jsonAnswer(answer), prompt);
-        assertThat(answer.lines().count()).isEqualTo(2L * candidates);
+        var rendered = builder.validateAndRender(allPicks(prompt), prompt);
+        assertThat(rendered.lines().filter(line -> prompt.allowed().stream().anyMatch(row -> row.text().equals(line))).count()).isEqualTo(2L * candidates);
         assertThat(rendered).startsWith(RecommendationPromptBuilder.INTRO).contains(RecommendationPromptBuilder.LIMITATION);
         for (int i = 1; i <= candidates; i++) { assertThat(rendered).contains("Stored " + i, "[" + i + "]"); }
         var facts = prompt.allowed().stream().filter(row -> row.source() == 1 && !row.identity()).map(RecommendationEvidenceFormatter.Sentence::text).toList();
@@ -64,7 +63,7 @@ class RecommendationPromptOptimizationTests {
             RecommendationPromptBuilder.Prompt prompt = call.getArgument(0);
             assertThat(prompt.allowed().stream().map(RecommendationEvidenceFormatter.Sentence::source).distinct().toList())
                     .containsExactlyElementsOf(IntStream.rangeClosed(1, candidates).boxed().toList());
-            assertThat(prompt.omitted()).isTrue(); return jsonAnswer(allPairs(prompt));
+            assertThat(prompt.omitted()).isTrue(); return allPicks(prompt);
         });
         try (var service = new PerfumeRecommendationService(search, repository, builder(candidates), llm, settings(256, candidates))) {
             var result = service.recommend(new PerfumeSemanticSearchRequest(QUERY, 5));
@@ -115,8 +114,8 @@ class RecommendationPromptOptimizationTests {
         assertThat(prompt.allowed()).hasSize(3).extracting(RecommendationEvidenceFormatter.Sentence::text)
                 .anyMatch(value -> value.contains("지속력 평가가 없어")).anyMatch(value -> value.contains("계절 평가가 없어"))
                 .noneMatch(value -> value.contains("Lemon") || value.contains("score:") || value.contains("long description"));
-        for (var sentence : prompt.allowed().stream().filter(row -> !row.identity()).toList()) {
-            assertThat(builder.validateAndRender(jsonAnswer(prompt.allowed().get(0).text() + "\n" + sentence.text()), prompt))
+        for (int factId : new int[]{1, 2}) {
+            assertThat(builder.validateAndRender(pick(1, factId), prompt))
                     .contains("확정할 수 없습니다.", RecommendationPromptBuilder.LIMITATION);
         }
     }
@@ -140,10 +139,9 @@ class RecommendationPromptOptimizationTests {
     private static List<RecommendationEvidence> snapshots(int count) {
         return IntStream.rangeClosed(1, count).mapToObj(RecommendationTestSupport::evidence).toList();
     }
-    private static String allPairs(RecommendationPromptBuilder.Prompt prompt) {
-        return String.join("\n", prompt.allowed().stream().filter(RecommendationEvidenceFormatter.Sentence::identity).flatMap(identity ->
-                java.util.stream.Stream.of(identity.text(), prompt.allowed().stream()
-                        .filter(row -> row.source() == identity.source() && !row.identity()).findFirst().orElseThrow().text())).toList());
+    private static String allPicks(RecommendationPromptBuilder.Prompt prompt) {
+        return "{\"picks\":[" + String.join(",", prompt.allowed().stream().filter(RecommendationEvidenceFormatter.Sentence::identity)
+                .map(row -> "{\"source\":" + row.source() + ",\"factId\":1}").toList()) + "]}";
     }
     private static PerfumeRecommendationOptions settings(int tokens, int candidates) {
         return PerfumeRecommendationOptions.from(new MockEnvironment().withProperty("perfume.ai.search.enabled", "true")

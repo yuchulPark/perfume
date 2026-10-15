@@ -39,7 +39,7 @@ class PerfumeRecommendationConfigurationTests {
                         var options = context.getBean(PerfumeRecommendationOptions.class); assertThat(options.modelDigest()).isNotEqualTo(context.getBean(PerfumeSemanticSearchOptions.class).model().digest());
                         assertThat(options.readTimeout().toMillis()).isEqualTo(180000); assertThat(options.generationTimeout().toMillis()).isEqualTo(300000);
                         assertThat(options.requestTimeout().toMillis()).isEqualTo(420000); assertThat(options.maxConcurrent()).isEqualTo(1);
-                        assertThat(options.maxOutputTokens()).isEqualTo(256); assertThat(options.maxEvidenceCandidates()).isEqualTo(1);
+                        assertThat(options.maxOutputTokens()).isEqualTo(128); assertThat(options.maxEvidenceCandidates()).isEqualTo(1);
                         assertThat(options.inputBudgetBytes()).isEqualTo(2560); assertThat(options.optimizationMode()).isEqualTo("compact");
                     } else { assertThat(context).doesNotHaveBean(OllamaRecommendationClient.class).doesNotHaveBean(JdbcRecommendationEvidenceRepository.class); }
                     var search = context.getBean(PerfumeSemanticSearchOptions.class);

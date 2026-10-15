@@ -85,9 +85,13 @@ class PerfumeRecommendationServiceTests {
         verify(adapter).embed("여름 향수"); verify(vectors).search(vector, EMBEDDING, 5); verifyNoMoreInteractions(adapter, vectors);
         verify(fixture.statement, never()).executeUpdate();
     }
-    @Test void unsupportedClaimsAreNotReturnedAsGroundedAnswers() {
-        ready(); when(llm.generate(any())).thenReturn(jsonAnswer("Stored 1은 24시간 지속됩니다. [1]"));
+    @ParameterizedTest @ValueSource(strings = {"{\"answer\":\"Stored 1은 24시간 지속됩니다. [1]\"}",
+            "{\"picks\":[{\"source\":1,\"factId\":99}]}", "{\"picks\":[{\"source\":2,\"factId\":1}]}",
+            "{\"picks\":[{\"source\":1,\"factId\":1}],\"answer\":\"Stored 1은 24시간 지속됩니다. [1]\"}"})
+    void unsupportedClaimsOrSelectionsFailWithoutRegeneration(String generated) {
+        ready(); when(llm.generate(any())).thenReturn(generated);
         try (var service = service(options())) { assertFailure(service, RecommendationFailure.Code.GENERATION_FAILED); }
+        verify(llm).generate(any()); verifyNoMoreInteractions(llm);
     }
     @Test void unknownInternalFailuresAreSanitizedRatherThanEmptySuccesses() {
         ready(); when(llm.generate(any())).thenThrow(new IllegalStateException("private-prompt-password-answer"));

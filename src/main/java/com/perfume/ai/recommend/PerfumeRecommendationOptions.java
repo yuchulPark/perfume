@@ -42,7 +42,7 @@ public record PerfumeRecommendationOptions(String model, String modelDigest, URI
                 env.getProperty(PREFIX + "model-digest"), url, duration(env, "connect-timeout-ms", 3000),
                 duration(env, "read-timeout-ms", 180000), duration(env, "generation-timeout-ms", 300000),
                 duration(env, "request-timeout-ms", 420000), env.getProperty(PREFIX + "db-timeout-seconds", Integer.class, 5),
-                env.getProperty(PREFIX + "max-concurrent", Integer.class, 1), env.getProperty(PREFIX + "max-output-tokens", Integer.class, 256),
+                env.getProperty(PREFIX + "max-concurrent", Integer.class, 1), env.getProperty(PREFIX + "max-output-tokens", Integer.class, 128),
                 env.getProperty(PREFIX + "temperature", Double.class, 0.2), env.getProperty(PREFIX + "max-evidence-candidates", Integer.class, 1),
                 env.getProperty(PREFIX + "max-input-bytes", Integer.class, 2560));
     }

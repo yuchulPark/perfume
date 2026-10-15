@@ -15,7 +15,7 @@ final class RecommendationTestSupport {
     static PerfumeRecommendationOptions options() { return options(300000, 420000); }
     static PerfumeRecommendationOptions options(long generationMs, long totalMs) {
         return new PerfumeRecommendationOptions("qwen3:4b-instruct", "b".repeat(64), URI.create("http://ollama:11434"),
-                Duration.ofMillis(3000), Duration.ofMillis(180000), Duration.ofMillis(generationMs), Duration.ofMillis(totalMs), 5, 1, 256, 0.2, 1, 2560);
+                Duration.ofMillis(3000), Duration.ofMillis(180000), Duration.ofMillis(generationMs), Duration.ofMillis(totalMs), 5, 1, 128, 0.2, 1, 2560);
     }
     static Hit hit(long id) { return new Hit(id, "Stored " + id, "Stored Brand", 1.0 / id); }
     static String text(long id) {
@@ -28,9 +28,9 @@ final class RecommendationTestSupport {
     static RecommendationPromptBuilder.Prompt prompt() { return builder().build("여름 향수", List.of(evidence(1))); }
     static String generated(RecommendationPromptBuilder.Prompt prompt) {
         var identity = prompt.allowed().stream().filter(RecommendationEvidenceFormatter.Sentence::identity).findFirst().orElseThrow();
-        var fact = prompt.allowed().stream().filter(row -> row.source() == identity.source() && !row.identity()).findFirst().orElseThrow();
-        return jsonAnswer(identity.text() + "\n" + fact.text());
+        return pick(identity.source(), 1);
     }
+    static String pick(int source, int factId) { return "{\"picks\":[{\"source\":" + source + ",\"factId\":" + factId + "}]}"; }
     static String jsonAnswer(String answer) {
         try { return MAPPER.writeValueAsString(java.util.Map.of("answer", answer)); }
         catch (JsonProcessingException failure) { throw new AssertionError(failure); }

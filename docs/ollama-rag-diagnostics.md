@@ -1,6 +1,6 @@
 # RAG 3차 LLM 지연 진단
 
-이 문서는 안전한 메타데이터 진단과 수동 측정 절차다. 후속 [CPU 최적화](ollama-rag-cpu-optimization.md)에서 프롬프트·근거량·출력 상한을 축소했다. 실제 Ollama/DB/ScentRev 호출, 컨테이너 작업, SSH, Commit/Push, Jenkins 실행은 하지 않았다. 타임아웃·재시도·모델·기본 비활성화와 엄격한 근거 검증은 유지한다.
+이 문서는 안전한 메타데이터 진단과 수동 측정 절차다. 후속 [CPU 최적화](ollama-rag-cpu-optimization.md)에서 프롬프트·근거량을 축소했고, 현재는 [번호 선택·검증 실패 분류](ollama-rag-fact-selection.md)를 적용했다. 실제 Ollama/DB/ScentRev 호출, 컨테이너 작업, SSH, Commit/Push, Jenkins 실행은 하지 않았다. 타임아웃·재시도·모델·기본 비활성화와 엄격한 근거 검증은 유지한다.
 
 ## 현재 판단과 확인한 코드
 
@@ -8,9 +8,11 @@
 
 후속 운영자 진단의 가상 1개/128토큰/stream=true 요청은 전체 약 129초, 첫 content 98.98초, load 62.75초, prompt 평가 0.085초/278토큰, 생성 30.21초/78토큰(2.58 tokens/s), stop/HTTP 200이었다. 단계 합과 전체 시간의 약 36초 차이는 아직 설명되지 않았다. 이를 queue 시간이나 로딩 시간으로 확정하지 않는다. cpu.stat의 누적 throttling 수치와 oom_kill=0만으로 개별 요청 지연 원인을 확정할 수도 없다. 요청 전후 증가량을 추가로 측정한다.
 
+최근 실제 RAG는 약 197.04초 후 GENERATION_FAILED였지만 Ollama HTTP 200/done=true/stop을 받았고 실패 단계가 validation이었다. 이는 해당 요청의 Java 검증 실패까지 확인한 것이며 세부 위반은 이전 로그로 확정할 수 없다. [번호 선택·내부 validationReason](ollama-rag-fact-selection.md)으로 후속 요청부터 원인을 분류한다.
+
 `OllamaRecommendationClient`는 tags → chat → tags를 순차 호출하며 자동 재시도하지 않는다. 서버 시간 지표는 기존 안전 진단에 유지한다. 비스트리밍은 종료 전 토큰 진행을 볼 수 없으므로 최종 응답을 받지 못한 타임아웃 로그만으로 로딩/프롬프트 평가/생성을 나눌 수 없다.
 
-실제 입력은 system, USER_QUERY, EVIDENCE_DATA의 3개 메시지다. 현재 기본 content 합은 UTF-8 최대 2560바이트이며 출력과 별도 예산이다. 기본 1개 후보/허용 3문장 이내에서 identity+사실/불확실성 하나를 출력한다. 출력 상한은 256토큰이며 128/192/512도 명시적으로 선택할 수 있다. byte 수는 정확한 tokenizer 수치나 template 포함 길이가 아니다. 짧은 관측에서 prompt 평가가 짧았으므로 입력 축소만으로 62.75초의 load 구간이나 미확인 36초가 해결된다고 주장하지 않는다.
+실제 입력은 system, USER_QUERY, EVIDENCE_DATA의 3개 메시지다. 현재 기본 content 합은 UTF-8 최대 2560바이트이며 출력과 별도 예산이다. 서버는 기본 1개 후보/허용 3문장 이내를 보관하고 LLM은 사실/불확실성 번호만 선택한다. 출력 상한은 128토큰이며 192/256/512도 선택할 수 있다. identity와 최종 한국어 문장은 Java가 조립한다. byte 수는 정확한 tokenizer 수치나 template 포함 길이가 아니다. 짧은 관측에서 prompt 평가가 짧았으므로 입력 축소만으로 62.75초의 load 구간이나 미확인 36초가 해결된다고 주장하지 않는다.
 
 ## Ollama 0.40.4 호환성 확인
 
@@ -20,7 +22,7 @@
 | --- | --- | --- |
 | ChatRequest | model, messages, stream=false, format=json | 해당 필드 존재 |
 | ChatRequest | think=false, truncate=false, keep_alive=5m | 해당 필드 존재; think는 명시적 false와 미지정 구분 |
-| options | num_ctx=4096, num_predict=256(현재 기본), num_thread=3, temperature=0.2 | Options/Runner 정의에 존재 |
+| options | num_ctx=4096, num_predict=128(현재 기본), num_thread=3, temperature=0.2 | Options/Runner 정의에 존재 |
 
 정의상 사용 가능한 옵션이며 제거·치환하지 않았다. 다만 저장소 소스가 실제 실행 바이너리와 같은지는 `/api/version` 및 이미지 ID로 별도 확인해야 한다. `think=false`의 실제 효과는 모델 capability/template에도 의존한다. `num_predict`는 최대 생성 수이고 응답 시간 보장은 아니다.
 
@@ -32,6 +34,7 @@
 
 - `event=request`: optimizationMode(compact/two-candidate), maxEvidenceCandidates, inputBudgetBytes, 메시지 개수와 구간별 UTF-8 바이트, 실제 문맥 후보 수, 허용 문장 수, 생략 여부, context/출력/스레드/시간 상한.
 - `event=response`: HTTP 상태·본문 수신 완료·done·허용된 종료 사유와 실제 서버 수치.
+- `event=validation_failed`: 내부 고정 validationReason, optimizationMode, contextSources, allowedFacts, selectedCount, elapsedMs. 공개 코드는 GENERATION_FAILED를 유지한다. 질문/본문/필드명/잘못된 값은 출력하지 않는다.
 - 기존 실패 로그: `httpStatus`, `responseComplete`, `serverMetricsAvailable=false` 추가. HTTP 200 후 본문 읽기 타임아웃도 확인 가능.
 
 | 서버 필드 | 로그 단위/해석 |
@@ -126,17 +129,16 @@ try:
     source = pathlib.Path("src/main/java/com/perfume/ai/recommend/RecommendationPromptBuilder.java").read_text(encoding="utf-8")
     declaration = re.search(r'static final String SYSTEM\s*=\s*(.*?);\r?\n', source, re.S).group(1)
     system = "".join(json.loads(part) for part in re.findall(r'"(?:\\.|[^"\\])*"', declaration))
-    system += f" At most {min(candidates,2)} perfume(s)."
+    system += f" At most {min(candidates,2)} source(s)."
 except Exception:
     raise SystemExit("SYSTEM_TEMPLATE_UNAVAILABLE") from None
-blocks = [{"source":i,"sentences":[
-    f"진단 후보 {i} (가상 브랜드)는 검색된 후보입니다. [{i}]",
-    f"저장된 탑 노트는 «Bergamot»입니다. [{i}]",
-    f"이 근거에는 지속력 평가가 없어 지속력을 확정할 수 없습니다. [{i}]"
+blocks = [{"source":i,"name":f"진단 후보 {i}","brand":"가상 브랜드","facts":[
+    {"factId":1,"text":f"저장된 탑 노트는 «Bergamot»입니다. [{i}]"},
+    {"factId":2,"text":f"이 근거에는 지속력 평가가 없어 지속력을 확정할 수 없습니다. [{i}]"}
 ]} for i in range(1,candidates+1)]
 messages = [{"role":"system","content":system},
     {"role":"user","content":"USER_QUERY " + json.dumps("저장된 노트가 있는 후보를 짧게 비교",ensure_ascii=False)},
-    {"role":"user","content":"EVIDENCE_DATA " + json.dumps(blocks,ensure_ascii=False,separators=(",",":"))}]
+    {"role":"user","content":"EVIDENCE_DATA " + json.dumps({"candidates":blocks},ensure_ascii=False,separators=(",",":"))}]
 if sum(len(message["content"].encode()) for message in messages) > 2560:
     raise SystemExit("DIAGNOSTIC_INPUT_BUDGET_EXCEEDED")
 print(json.dumps({"model":"qwen3:4b-instruct","messages":messages,"stream":mode=="stream", "format":"json",
@@ -162,12 +164,12 @@ run_rag_diagnostic() {
 다음 명령은 각각 **수동 1회**씩, 앞 요청이 완전히 종료한 뒤 실행한다. 자동 반복/재시도가 아니다. 같은 모델·후보 수·출력 상한에서 stream만 바꿔 비교한다.
 
 ```bash
-run_rag_diagnostic stream 128 2
+run_rag_diagnostic stream 128 1
 # 위 요청 종료와 CPU 유휴를 확인한 다음 별도로 실행:
-run_rag_diagnostic non-stream 128 2
+run_rag_diagnostic non-stream 128 1
 ```
 
-추가 측정은 하나의 변수만 바꾼다. 우선 후보 1개와 256토큰으로 비교하고 192/128은 다음 승인된 실험으로 선택한다. 후보 1/2/5개는 가상 입력 부담 비교이며 5개는 실제 추천의 최대 2개 한도를 늘리는 설정이 아니다. 출력 32/64는 직접 진단 전용이며 추천 설정의 하한 128을 바꾸지 않는다. 512 측정이 항상 필요한 것은 아니다. 작은 상한에서도 느리면 먼저 그 결과를 분석한다. `done_reason=length`는 추천 성공이 아니라 잘린 생성이며 본문 검증을 완화하지 않는다.
+추가 측정은 하나의 변수만 바꾼다. 우선 후보 1개와 128토큰으로 비교하고 256은 다음 승인된 실험으로 선택한다. 후보 1/2/5개는 가상 입력 부담 비교이며 5개는 실제 추천의 최대 2개 한도를 늘리는 설정이 아니다. 출력 32/64는 직접 진단 전용이며 추천 설정의 하한 128을 바꾸지 않는다. 512 측정이 항상 필요한 것은 아니다. 작은 상한에서도 느리면 먼저 그 결과를 분석한다. `done_reason=length`는 추천 성공이 아니라 잘린 생성이며 본문 검증을 완화하지 않는다.
 
 `first_http_byte_s`는 HTTP 헤더/바이트까지이며 첫 토큰 시간이 아니다. 요약기의 첫 non-whitespace content 시간도 Python/파이프 시작 오차와 청크 batching을 포함한다. 비스트리밍의 첫 content는 완성 응답 시점이므로 스트리밍 TTFT와 같은 의미가 아니다. 스트리밍의 잦은 바이트는 소켓 read timeout을 피할 수 있어도 총 처리 시간을 줄이지 않는다. 두 방식 모두 같은 330초 wall deadline으로 비교한다. curl 비정상 종료/진단 incomplete는 성공으로 집계하지 않는다.
 
@@ -206,12 +208,12 @@ docker exec "$OLLAMA_CONTAINER" sh -c 'for f in /sys/fs/cgroup/cpu.max /sys/fs/c
 
 필요 시간의 참고식은 `로딩/준비 + 프롬프트 평가 + 목표 생성 토큰 / 생성 TPS + 여유`다. 예를 들어 2 tokens/s이면 512개 생성만 약 256초이고 모델 전환 17초와 평가 시간이 추가된다. 300초에 출력 512개를 끝내려면 생성 외 시간이 0이어도 약 1.71 tokens/s가 필요하다. 실제 응답은 상한보다 일찍 멈출 수 있으므로 상한 대신 실제 eval_count도 확인한다. 관측이 없는 TPS를 가정해 timeout만 늘리지 않는다.
 
-이번 최적화의 검증 순서는 **동일 모델·전체 digest 확인 → 별도 인스턴스의 1개/256 추천 → final metrics와 CPU 증가량 확인 → stream/non-stream 비교 또는 192/128 비교 → 2개 후보 비교**다. timeout/모델/서버 리소스는 변경하지 않는다. 작아진 입력·출력으로도 계속 실패하면 load/미확인 시간과 runner 상태를 따로 조사한다. 더 가벼운 LLM은 이번 범위에서 적용·다운로드하지 않으며 별도 승인·코드 검토가 필요하다. 임베딩 모델이나 저장된 벡터를 변경하지 않는다.
+이번 최적화의 검증 순서는 **동일 모델·전체 digest 확인 → 별도 인스턴스의 1개/128 추천 → final metrics와 CPU 증가량 확인 → stream/non-stream 비교 또는 128/256 비교 → 2개 후보 비교**다. timeout/모델/서버 리소스는 변경하지 않는다. 작아진 입력·출력으로도 계속 실패하면 load/미확인 시간과 runner 상태를 따로 조사한다. 더 가벼운 LLM은 이번 범위에서 적용·다운로드하지 않으며 별도 승인·코드 검토가 필요하다. 임베딩 모델이나 저장된 벡터를 변경하지 않는다.
 
 ## 로컬 검증 범위
 
 신규 Java Mock 테스트는 요청/응답 본문 비노출, duration/rate, 누락·잘못된 metadata, zero duration, 기존 옵션/반환값 유지, length 종료, HTTP 200 후 timeout을 확인한다. Python 테스트는 가짜 NDJSON/JSON을 BytesIO로 공급해 진행/최종 통계·불완전 응답·thinking·공백·입력 크기 제한과 비노출을 검사한다. 실제 Ollama·Docker·DB는 호출하지 않는다. 실제 지연의 최종 원인과 개선 효과는 위 측정 전까지 미검증이다.
 
-2026-10-16 CPU 최적화 포함 Java 17 / Maven 3.9.16 오프라인 `package` 성공: 총 1024개 중 1009개 통과, 기존 live/manual 15개 skipped, 실패·오류 0이다. 추천 200개에는 기존 진단 12개와 신규 최적화 22개가 포함된다. Python 요약기 12개, 배포 보호 56개, React 단위 테스트 8개도 통과했다. 배포 테스트는 가짜 Docker/SSH와 로컬 config 검사를 사용하며 실제 컨테이너를 변경하지 않는다. 관련 문서 Bash 블록 14개는 문법만 검사했고, 가상 payload 36종은 로컬 메모리에서 생성·검사하여 본문을 출력하지 않았다.
+2026-10-16 번호 선택 포함 Java 17 / Maven 3.9.16 오프라인 `package` 성공: 전체 1082개 중 1067개 통과, 기존 live/manual 15개 skipped, 실패·오류 0이다. 추천 258개에는 기존 진단 12개와 신규 선택/실패 분류 55개가 포함된다. Python 요약기 12개, 배포 보호 56개, React 8개도 통과했다. 배포 검사는 가짜 Docker/SSH와 로컬 config만 사용하고 실제 컨테이너를 변경하지 않는다.
 
-로그는 `target/phase1-validation/rag-cpu-focused.log`, `rag-cpu-package.log`, `rag-cpu-parser-tests.log`, `rag-cpu-deployment-tests.log`다. 기존 Windows wrapper 초기화 문제 때문에 준비된 Maven과 로컬 캐시로 검사했으며 wrapper/의존성 파일은 수정하지 않았다. 운영 통합·Docker 이미지 빌드는 수행하지 않았다.
+로그는 `target/phase1-validation/rag-selection-focused.log`, `rag-selection-package.log`, `rag-selection-parser-tests.log`, `rag-selection-deployment-tests.log`다. 기존 Windows wrapper 초기화 문제 때문에 준비된 Maven과 로컬 캐시로 검사했으며 wrapper/의존성은 수정하지 않았다. 운영 통합·Docker 이미지 빌드는 수행하지 않았다.

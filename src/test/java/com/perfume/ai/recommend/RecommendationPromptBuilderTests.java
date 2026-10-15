@@ -13,9 +13,9 @@ class RecommendationPromptBuilderTests {
     void separatesQuestionSystemAndEvidenceAndReturnsKoreanWithServerAttachedCitations(String query) {
         var builder = builder(); var prompt = builder.build(query, List.of(evidence(1)));
         assertThat(prompt.messages()).extracting(row -> row.get("role")).containsExactly("system", "user", "user");
-        assertThat(prompt.messages().get(0).get("content")).doesNotContain(query).contains("untrusted", "ONLY complete allowed sentences");
+        assertThat(prompt.messages().get(0).get("content")).doesNotContain(query).contains("untrusted", "ONLY supplied (source,factId) pairs");
         assertThat(prompt.messages().get(1).get("content")).contains(query);
-        assertThat(prompt.messages().get(2).get("content")).contains("\"source\":1", "\"sentences\"").doesNotContain("perfumeId", "snapshotAt");
+        assertThat(prompt.messages().get(2).get("content")).contains("\"source\":1", "\"facts\"", "\"factId\":1").doesNotContain("perfumeId", "snapshotAt", "는 검색된 후보입니다.");
         assertThat(builder.validateAndRender(generated(prompt), prompt)).contains("저장 정보", "[1]", "임베딩 생성 당시", "최신 정보와 다를");
     }
     @Test void mapsActualLayeredNotesAccordsPerformanceSeasonAndOtherMetricsWithoutInventingUnits() {
@@ -80,7 +80,7 @@ class RecommendationPromptBuilderTests {
         assertThat(catchThrowableOfType(RecommendationFailure.class, () -> builder().validateAndRender(generated, prompt())).code())
                 .isEqualTo(RecommendationFailure.Code.GENERATION_FAILED);
     }
-    @Test void referencesRequireIdentityBeforeFactsAndRejectRepeatingOrMixingSources() {
+    @Test void legacyFreeTextCannotOverrideServerIdentityOrMixSources() {
         var prompt = builder(2).build("향수", List.of(evidence(1), evidence(2)));
         var identity = prompt.allowed().stream().filter(row -> row.source() == 1 && row.identity()).findFirst().orElseThrow().text();
         var fact = prompt.allowed().stream().filter(row -> row.source() == 2 && !row.identity()).findFirst().orElseThrow().text();

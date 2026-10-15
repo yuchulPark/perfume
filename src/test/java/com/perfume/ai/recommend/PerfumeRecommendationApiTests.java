@@ -34,7 +34,8 @@ class PerfumeRecommendationApiTests {
                 .andExpect(jsonPath("$.sources[0].name").value("Stored 1")).andExpect(jsonPath("$.sources[0].brandName").value("Stored Brand"))
                 .andExpect(jsonPath("$.sources[0].similarity").value(1.0))
                 .andExpect(jsonPath("$.sources[0].source_text").doesNotExist()).andExpect(jsonPath("$.sources[0].embedding").doesNotExist())
-                .andExpect(jsonPath("$.query").doesNotExist());
+                .andExpect(jsonPath("$.query").doesNotExist()).andExpect(jsonPath("$.picks").doesNotExist())
+                .andExpect(jsonPath("$.validationReason").doesNotExist());
         verify(service).recommend(new PerfumeSemanticSearchRequest(query, 5));
     }
     @ParameterizedTest @ValueSource(strings = {"{}", "{\"query\":null}", "{\"query\":\"\"}", "{\"query\":\"   \"}", "{\"query\":\"　 \"}", "{\"query\":7}", "[]", "null", "private-bad-json",
