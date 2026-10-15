@@ -8,12 +8,14 @@ import com.perfume.ai.embedding.EmbeddingBatchOptions;
 import com.perfume.ai.embedding.PerfumeEmbeddingBatchRunner;
 import com.perfume.scentrev.preview.ScentRevBrandPreviewRunner;
 import com.perfume.ai.search.PerfumeSemanticSearchConfiguration;
+import com.perfume.ai.recommend.PerfumeRecommendationConfiguration;
 
 @SpringBootApplication
 public class PerfumeApplication {
 
 	public static void main(String[] args) {
 		var application = new SpringApplication(PerfumeApplication.class);
+		PerfumeRecommendationConfiguration.configureExecution(application);
 		PerfumeSemanticSearchConfiguration.configureReadOnlyExecution(application);
 		ScentRevBrandPreviewRunner.configureManualExecution(application);
 		ScentRevSingleBrandImportRunner.configureManualExecution(application);
