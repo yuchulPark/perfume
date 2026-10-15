@@ -9,7 +9,7 @@ import org.springframework.core.env.Environment;
 
 public record PerfumeRecommendationOptions(String model, String modelDigest, URI baseUrl, Duration connectTimeout,
         Duration readTimeout, Duration generationTimeout, Duration requestTimeout, int dbTimeoutSeconds,
-        int maxConcurrent, int maxOutputTokens, double temperature) {
+        int maxConcurrent, int maxOutputTokens, double temperature, int maxEvidenceCandidates, int inputBudgetBytes) {
     public static final String PREFIX = "perfume.ai.recommend.";
     public static final String ENABLED = PREFIX + "enabled";
     public static final int CONTEXT_TOKENS = 4096;
@@ -24,7 +24,9 @@ public record PerfumeRecommendationOptions(String model, String modelDigest, URI
         if (!bounded(connectTimeout, 10000) || !bounded(readTimeout, 300000) || !bounded(generationTimeout, 300000)
                 || !bounded(requestTimeout, 600000) || dbTimeoutSeconds < 1 || dbTimeoutSeconds > 10
                 || maxConcurrent < 1 || maxConcurrent > 2 || maxOutputTokens < 128 || maxOutputTokens > 768
-                || !Double.isFinite(temperature) || temperature < 0 || temperature > 0.5) {
+                || !Double.isFinite(temperature) || temperature < 0 || temperature > 0.5
+                || maxEvidenceCandidates < 1 || maxEvidenceCandidates > 2 || inputBudgetBytes < 1024
+                || inputBudgetBytes > CONTEXT_TOKENS - 768 - 512) {
             throw new IllegalArgumentException("Invalid recommendation timeouts, concurrency or generation limits.");
         }
     }
@@ -40,11 +42,12 @@ public record PerfumeRecommendationOptions(String model, String modelDigest, URI
                 env.getProperty(PREFIX + "model-digest"), url, duration(env, "connect-timeout-ms", 3000),
                 duration(env, "read-timeout-ms", 180000), duration(env, "generation-timeout-ms", 300000),
                 duration(env, "request-timeout-ms", 420000), env.getProperty(PREFIX + "db-timeout-seconds", Integer.class, 5),
-                env.getProperty(PREFIX + "max-concurrent", Integer.class, 1), env.getProperty(PREFIX + "max-output-tokens", Integer.class, 512),
-                env.getProperty(PREFIX + "temperature", Double.class, 0.2));
+                env.getProperty(PREFIX + "max-concurrent", Integer.class, 1), env.getProperty(PREFIX + "max-output-tokens", Integer.class, 256),
+                env.getProperty(PREFIX + "temperature", Double.class, 0.2), env.getProperty(PREFIX + "max-evidence-candidates", Integer.class, 1),
+                env.getProperty(PREFIX + "max-input-bytes", Integer.class, 2560));
     }
-    /** Byte-level upper bound on content tokens, with separate room for chat framing/template and output. */
-    public int inputBudgetBytes() { return CONTEXT_TOKENS - maxOutputTokens - 512; }
+    /** Fixed, safe labels for diagnostics, independent of user/provider text. */
+    public String optimizationMode() { return maxEvidenceCandidates == 1 ? "compact" : "two-candidate"; }
     private static Duration duration(Environment env, String key, long fallback) { return Duration.ofMillis(env.getProperty(PREFIX + key, Long.class, fallback)); }
     private static boolean bounded(Duration duration, long max) { return duration != null && duration.toMillis() > 0 && duration.toMillis() <= max; }
 }

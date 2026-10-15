@@ -30,7 +30,8 @@ class OllamaRecommendationDiagnosticsTests {
             OllamaRecommendationDiagnostics.started(prompt, options());
             var message = logs.messages().get(0);
             assertThat(message).contains("event=request", "messageCount=3", "messageContentBytes=" + prompt.inputBytes(),
-                    "queryMessageBytes=", "evidenceMessageBytes=", "contextSources=1", "numCtx=4096", "maxOutputTokens=512",
+                    "queryMessageBytes=", "evidenceMessageBytes=", "contextSources=1", "numCtx=4096", "maxOutputTokens=256",
+                    "optimizationMode=compact", "maxEvidenceCandidates=1", "inputBudgetBytes=2560", "allowedSentences=3", "omitted=true",
                     "numThreads=3", "stream=false", "format=json", "think=false", "truncate=false", "readTimeoutMs=180000", "generationTimeoutMs=300000")
                     .doesNotContain(privateQuery, "Bergamot", "Stored", "sha256:", "http://");
         }
@@ -74,9 +75,9 @@ class OllamaRecommendationDiagnosticsTests {
         }
     }
     @Test void successfulChatUsesServerMetricsWithoutChangingPayloadOrTheReturnedAnswer() throws Exception {
-        var fixture = new Fixture(); tags(fixture.server); var response = response();
+        var fixture = new Fixture(); tags(fixture.server); var response = response(); response.put("eval_count", 200); response.put("eval_duration", 100000000000L);
         fixture.server.expect(requestTo("http://ollama:11434/api/chat")).andExpect(content().json("""
-                {"stream":false,"format":"json","think":false,"truncate":false,"options":{"num_ctx":4096,"num_predict":512,"num_thread":3,"temperature":0.2}}
+                {"stream":false,"format":"json","think":false,"truncate":false,"options":{"num_ctx":4096,"num_predict":256,"num_thread":3,"temperature":0.2}}
                 """)).andRespond(withSuccess(response.toString(), MediaType.APPLICATION_JSON));
         tags(fixture.server);
         try (var logs = new Capture(OllamaRecommendationDiagnostics.class)) {
@@ -87,11 +88,11 @@ class OllamaRecommendationDiagnosticsTests {
         fixture.server.verify();
     }
     @Test void tokenLimitCompletionIsMeasuredBeforeItIsRejectedByExistingValidation() throws Exception {
-        var fixture = new Fixture(); tags(fixture.server); var response = response(); response.put("done_reason", "length"); response.put("eval_count", 512);
+        var fixture = new Fixture(); tags(fixture.server); var response = response(); response.put("done_reason", "length"); response.put("eval_count", 256);
         fixture.server.expect(requestTo("http://ollama:11434/api/chat")).andRespond(withSuccess(response.toString(), MediaType.APPLICATION_JSON));
         try (var logs = new Capture(OllamaRecommendationDiagnostics.class)) {
             assertThat(catchThrowableOfType(RecommendationFailure.class, () -> fixture.client.generate(prompt())).code()).isEqualTo(RecommendationFailure.Code.LLM_INVALID_RESPONSE);
-            assertThat(logs.messages().get(1)).contains("doneReason=length", "eval_count=512", "serverMetricsAvailable=true");
+            assertThat(logs.messages().get(1)).contains("doneReason=length", "eval_count=256", "serverMetricsAvailable=true");
         }
         fixture.server.verify();
     }

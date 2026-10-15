@@ -31,12 +31,13 @@ public class RecommendationEvidenceFormatter {
         var facts = new ArrayList<Fact>(); boolean omitted = false;
         int order = 0;
         var lowerQuery = query.toLowerCase(Locale.ROOT);
-        boolean wantsPerformance = lowerQuery.matches("(?s).*(지속|발향|확산|오래|longevity|sillage|projection|lasting).*");
+        boolean wantsProjection = lowerQuery.matches("(?s).*(발향|확산|sillage|projection).*");
+        boolean wantsLongevity = lowerQuery.matches("(?s).*(지속|오래|longevity|lasting).*");
         boolean wantsSeason = lowerQuery.matches("(?s).*(여름|겨울|가을|봄|계절|summer|winter|autumn|spring|season).*");
         boolean longevity = false, season = false;
         for (var line : lines) {
             if (line.startsWith("Name: ") || line.startsWith("Brand: ")) { continue; }
-            String label = null, value = null; int priority = 5;
+            String label = null, value = null; int priority = 5; boolean longevityFact = false, seasonFact = false;
             for (var layer : List.of("TOP", "MIDDLE", "BASE", "UNLAYERED")) {
                 if (line.startsWith(layer + " notes: ")) {
                     label = switch (layer) { case "TOP" -> "탑 노트"; case "MIDDLE" -> "미들 노트"; case "BASE" -> "베이스 노트"; default -> "층 구분 없는 노트"; };
@@ -51,9 +52,9 @@ public class RecommendationEvidenceFormatter {
                 if (split > 7) {
                     var key = line.substring(7, split); value = line.substring(split + 2);
                     if (!key.matches("[A-Za-z0-9_.-]{1,128}")) { omitted = true; continue; }
-                    if (key.contains("longevity")) { label = "지속력 평가 원자료(" + key + ")"; longevity = true; priority = wantsPerformance ? 0 : 3; }
-                    else if (key.contains("sillage") || key.contains("projection")) { label = "발향력 평가 원자료(" + key + ")"; priority = wantsPerformance ? 0 : 3; }
-                    else if (key.matches(".*(season|weather|summer|winter|spring|autumn).*")) { label = "계절 평가 원자료(" + key + ")"; season = true; priority = wantsSeason ? 0 : 3; }
+                    if (key.contains("longevity")) { label = "지속력 평가 원자료(" + key + ")"; longevityFact = true; priority = wantsLongevity ? 0 : 3; }
+                    else if (key.contains("sillage") || key.contains("projection")) { label = "발향력 평가 원자료(" + key + ")"; priority = wantsProjection ? 0 : 3; }
+                    else if (key.matches(".*(season|weather|summer|winter|spring|autumn).*")) { label = "계절 평가 원자료(" + key + ")"; seasonFact = true; priority = wantsSeason ? 1 : 3; }
                     else { label = "평가 원자료(" + key + ")"; priority = 5; }
                     int details = value.indexOf("; stored details:");
                     if (details >= 0) { value = value.substring(0, details); omitted = true; }
@@ -61,8 +62,14 @@ public class RecommendationEvidenceFormatter {
             }
             if (label == null) { if (!line.isBlank()) { omitted = true; } continue; }
             if (value == null || value.isBlank() || unsafe(value)) { omitted = true; continue; }
+            longevity |= longevityFact; season |= seasonFact;
             facts.add(new Fact(priority, order++, label, clean(value)));
         }
+        var longevityUncertainty = new Sentence(number, "이 근거에는 지속력 평가가 없어 지속력을 확정할 수 없습니다. [" + number + "]", false);
+        var seasonUncertainty = new Sentence(number, "이 근거에는 계절 평가가 없어 계절 적합성을 확정할 수 없습니다. [" + number + "]", false);
+        // Missing requested metrics must survive the small evidence budget, ahead of unrelated notes.
+        if (wantsLongevity && !longevity) { result.add(longevityUncertainty); }
+        if (wantsSeason && !season) { result.add(seasonUncertainty); }
         facts.sort(Comparator.comparingInt(Fact::priority).thenComparingInt(Fact::order));
         if (facts.size() > 24) { facts = new ArrayList<>(facts.subList(0, 24)); omitted = true; }
         for (var fact : facts) {
@@ -70,8 +77,8 @@ public class RecommendationEvidenceFormatter {
             boolean cut = !value.equals(fact.value()); omitted |= cut;
             result.add(new Sentence(number, "저장된 " + fact.label() + (cut ? " 일부는 «" : "는 «") + value + "»입니다. [" + number + "]", false));
         }
-        if (!longevity) { result.add(new Sentence(number, "이 근거에는 지속력 평가가 없어 지속력을 확정할 수 없습니다. [" + number + "]", false)); }
-        if (!season) { result.add(new Sentence(number, "이 근거에는 계절 평가가 없어 계절 적합성을 확정할 수 없습니다. [" + number + "]", false)); }
+        if (!wantsLongevity && !longevity) { result.add(longevityUncertainty); }
+        if (!wantsSeason && !season) { result.add(seasonUncertainty); }
         if (result.size() == 1) { result.add(new Sentence(number, "제공된 근거만으로 질문의 조건 충족을 확정할 수 없습니다. [" + number + "]", false)); }
         return new Formatted(evidence, List.copyOf(result), omitted);
     }

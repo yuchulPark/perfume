@@ -39,6 +39,8 @@ class PerfumeRecommendationConfigurationTests {
                         var options = context.getBean(PerfumeRecommendationOptions.class); assertThat(options.modelDigest()).isNotEqualTo(context.getBean(PerfumeSemanticSearchOptions.class).model().digest());
                         assertThat(options.readTimeout().toMillis()).isEqualTo(180000); assertThat(options.generationTimeout().toMillis()).isEqualTo(300000);
                         assertThat(options.requestTimeout().toMillis()).isEqualTo(420000); assertThat(options.maxConcurrent()).isEqualTo(1);
+                        assertThat(options.maxOutputTokens()).isEqualTo(256); assertThat(options.maxEvidenceCandidates()).isEqualTo(1);
+                        assertThat(options.inputBudgetBytes()).isEqualTo(2560); assertThat(options.optimizationMode()).isEqualTo("compact");
                     } else { assertThat(context).doesNotHaveBean(OllamaRecommendationClient.class).doesNotHaveBean(JdbcRecommendationEvidenceRepository.class); }
                     var search = context.getBean(PerfumeSemanticSearchOptions.class);
                     assertThat(search.readTimeout().toMillis()).isEqualTo(30000); assertThat(search.requestTimeout().toMillis()).isEqualTo(45000);
@@ -68,7 +70,8 @@ class PerfumeRecommendationConfigurationTests {
     }
     @ParameterizedTest @ValueSource(strings = {"model-digest=short", "model=qwen3-embedding:0.6b", "connect-timeout-ms=0", "connect-timeout-ms=10001", "read-timeout-ms=300001",
             "generation-timeout-ms=0", "generation-timeout-ms=300001", "request-timeout-ms=600001", "max-concurrent=0", "max-concurrent=3", "db-timeout-seconds=11",
-            "max-output-tokens=127", "max-output-tokens=769", "temperature=NaN", "temperature=0.6", "base-url=http://user:private@ollama:11434", "base-url=http://ollama:11434/api/chat"})
+            "max-output-tokens=127", "max-output-tokens=769", "max-input-bytes=1023", "max-input-bytes=2817", "max-evidence-candidates=0", "max-evidence-candidates=3",
+            "temperature=NaN", "temperature=0.6", "base-url=http://user:private@ollama:11434", "base-url=http://ollama:11434/api/chat"})
     void generationSettingsHaveFiniteLimitsAndAnIndependentFullDigest(String bad) {
         var pair = bad.split("=", 2);
         assertThatThrownBy(() -> PerfumeRecommendationOptions.from(environment().withProperty(PerfumeRecommendationOptions.PREFIX + pair[0], pair[1])))

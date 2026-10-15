@@ -15,7 +15,7 @@ final class RecommendationTestSupport {
     static PerfumeRecommendationOptions options() { return options(300000, 420000); }
     static PerfumeRecommendationOptions options(long generationMs, long totalMs) {
         return new PerfumeRecommendationOptions("qwen3:4b-instruct", "b".repeat(64), URI.create("http://ollama:11434"),
-                Duration.ofMillis(3000), Duration.ofMillis(180000), Duration.ofMillis(generationMs), Duration.ofMillis(totalMs), 5, 1, 512, 0.2);
+                Duration.ofMillis(3000), Duration.ofMillis(180000), Duration.ofMillis(generationMs), Duration.ofMillis(totalMs), 5, 1, 256, 0.2, 1, 2560);
     }
     static Hit hit(long id) { return new Hit(id, "Stored " + id, "Stored Brand", 1.0 / id); }
     static String text(long id) {
@@ -23,7 +23,8 @@ final class RecommendationTestSupport {
     }
     static RecommendationEvidence evidence(long id) { return evidence(id, text(id)); }
     static RecommendationEvidence evidence(long id, String text) { return new RecommendationEvidence((int) id, hit(id), text, Instant.parse("2026-10-16T00:00:00Z")); }
-    static RecommendationPromptBuilder builder() { return new RecommendationPromptBuilder(MAPPER, new RecommendationEvidenceFormatter(), options().inputBudgetBytes()); }
+    static RecommendationPromptBuilder builder() { return builder(1); }
+    static RecommendationPromptBuilder builder(int candidates) { return new RecommendationPromptBuilder(MAPPER, new RecommendationEvidenceFormatter(), options().inputBudgetBytes(), candidates); }
     static RecommendationPromptBuilder.Prompt prompt() { return builder().build("여름 향수", List.of(evidence(1))); }
     static String generated(RecommendationPromptBuilder.Prompt prompt) {
         var identity = prompt.allowed().stream().filter(RecommendationEvidenceFormatter.Sentence::identity).findFirst().orElseThrow();

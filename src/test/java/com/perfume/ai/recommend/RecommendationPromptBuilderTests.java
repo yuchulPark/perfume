@@ -15,7 +15,7 @@ class RecommendationPromptBuilderTests {
         assertThat(prompt.messages()).extracting(row -> row.get("role")).containsExactly("system", "user", "user");
         assertThat(prompt.messages().get(0).get("content")).doesNotContain(query).contains("untrusted", "ONLY complete allowed sentences");
         assertThat(prompt.messages().get(1).get("content")).contains(query);
-        assertThat(prompt.messages().get(2).get("content")).contains("perfumeId", "snapshotAt");
+        assertThat(prompt.messages().get(2).get("content")).contains("\"source\":1", "\"sentences\"").doesNotContain("perfumeId", "snapshotAt");
         assertThat(builder.validateAndRender(generated(prompt), prompt)).contains("저장 정보", "[1]", "임베딩 생성 당시", "최신 정보와 다를");
     }
     @Test void mapsActualLayeredNotesAccordsPerformanceSeasonAndOtherMetricsWithoutInventingUnits() {
@@ -81,7 +81,7 @@ class RecommendationPromptBuilderTests {
                 .isEqualTo(RecommendationFailure.Code.GENERATION_FAILED);
     }
     @Test void referencesRequireIdentityBeforeFactsAndRejectRepeatingOrMixingSources() {
-        var prompt = builder().build("향수", List.of(evidence(1), evidence(2)));
+        var prompt = builder(2).build("향수", List.of(evidence(1), evidence(2)));
         var identity = prompt.allowed().stream().filter(row -> row.source() == 1 && row.identity()).findFirst().orElseThrow().text();
         var fact = prompt.allowed().stream().filter(row -> row.source() == 2 && !row.identity()).findFirst().orElseThrow().text();
         for (var answer : List.of(identity, fact, identity + "\n" + fact, identity + "\n" + identity)) {

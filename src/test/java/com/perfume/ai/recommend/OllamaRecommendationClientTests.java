@@ -32,7 +32,7 @@ class OllamaRecommendationClientTests {
             assertThat(json.path("stream").booleanValue()).isFalse(); assertThat(json.path("think").booleanValue()).isFalse();
             assertThat(json.path("truncate").booleanValue()).isFalse(); assertThat(json.path("format").asText()).isEqualTo("json");
             assertThat(json.path("options").path("num_ctx").intValue()).isEqualTo(4096);
-            assertThat(json.path("options").path("num_predict").intValue()).isEqualTo(512);
+            assertThat(json.path("options").path("num_predict").intValue()).isEqualTo(256);
             assertThat(json.path("options").path("temperature").doubleValue()).isEqualTo(0.2);
             assertThat(json.path("options").path("num_thread").intValue()).isEqualTo(3);
             assertThat(json.path("messages")).hasSize(3); assertThat(json.has("tools")).isFalse(); assertThat(json.has("context")).isFalse();

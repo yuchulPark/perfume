@@ -29,7 +29,7 @@ public class PerfumeRecommendationConfiguration {
         return new JdbcRecommendationEvidenceRepository(source, search.model(), options.dbTimeoutSeconds());
     }
     @Bean RecommendationPromptBuilder recommendationPromptBuilder(ObjectMapper mapper, PerfumeRecommendationOptions options) {
-        return new RecommendationPromptBuilder(mapper, new RecommendationEvidenceFormatter(), options.inputBudgetBytes());
+        return new RecommendationPromptBuilder(mapper, new RecommendationEvidenceFormatter(), options.inputBudgetBytes(), options.maxEvidenceCandidates());
     }
     @Bean OllamaRecommendationClient recommendationLlmClient(RestClient.Builder builder, ObjectMapper mapper, PerfumeRecommendationOptions options) {
         var factory = new SimpleClientHttpRequestFactory(); factory.setConnectTimeout(options.connectTimeout()); factory.setReadTimeout(options.readTimeout());
