@@ -2,6 +2,7 @@ package com.perfume.ai.embedding;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import java.time.Duration;
 import java.util.List;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,20 @@ class PerfumeEmbeddingConfigurationTests {
                 "base-url=http://user:password@ollama:11434", "base-url=http://ollama:11434/api/embed")) {
             var pair = property.split("=", 2);
             assertThatThrownBy(() -> EmbeddingBatchOptions.from(environment().withProperty(EmbeddingBatchOptions.PREFIX + pair[0], pair[1])))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+    }
+
+    @Test
+    void readTimeoutDefaultsToFiveMinutesAndCanBeExplicitlyReducedWithinTheExistingLimit() {
+        assertThat(EmbeddingBatchOptions.from(environment()).readTimeout()).isEqualTo(Duration.ofMillis(300000));
+        for (long milliseconds : List.of(1L, 180000L, 300000L)) {
+            assertThat(EmbeddingBatchOptions.from(environment().withProperty(EmbeddingBatchOptions.PREFIX + "read-timeout-ms",
+                    Long.toString(milliseconds))).readTimeout()).isEqualTo(Duration.ofMillis(milliseconds));
+        }
+        for (var value : List.of("0", "300001")) {
+            assertThatThrownBy(() -> EmbeddingBatchOptions.from(environment()
+                    .withProperty(EmbeddingBatchOptions.PREFIX + "read-timeout-ms", value)))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }

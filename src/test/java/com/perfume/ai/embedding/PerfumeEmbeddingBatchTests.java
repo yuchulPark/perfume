@@ -54,6 +54,34 @@ class PerfumeEmbeddingBatchTests {
     }
 
     @Test
+    void rerunningFivePerfumesPreservesThreeSuccessesAndRetriesOnlyTheTwoFailures() {
+        for (long id = 1; id <= 5; id++) { store.documents.put(id, document(id, "Perfume " + id)); }
+        when(client.embed(any(), contains("Perfume 1"))).thenThrow(new EmbeddingFailure(EmbeddingFailure.Code.TIMEOUT));
+        when(client.embed(any(), contains("Perfume 5"))).thenThrow(new EmbeddingFailure(EmbeddingFailure.Code.HTTP_ERROR));
+        for (long id = 2; id <= 4; id++) { when(client.embed(any(), contains("Perfume " + id))).thenReturn(vector()); }
+        var first = batch.execute(options(5, 2, 0, model()));
+        assertThat(first.created()).isEqualTo(3);
+        assertThat(first.failed()).isEqualTo(2);
+        assertThat(store.saved).containsExactly(2L, 3L, 4L);
+        var successfulHashes = Map.copyOf(store.hashes);
+
+        reset(client);
+        when(client.embed(any(), anyString())).thenReturn(vector());
+        var rerun = batch.execute(options(5, 2, 0, model()));
+        assertThat(rerun.processed()).isEqualTo(5);
+        assertThat(rerun.created()).isEqualTo(2);
+        assertThat(rerun.changed()).isZero();
+        assertThat(rerun.skipped()).isEqualTo(3);
+        assertThat(rerun.failed()).isZero();
+        assertThat(store.saved).containsExactly(2L, 3L, 4L, 1L, 5L);
+        assertThat(store.hashes).hasSize(5).containsAllEntriesOf(successfulHashes);
+        verify(client, times(2)).embed(any(), anyString());
+        verify(client).embed(model(), texts.render(store.documents.get(1L)));
+        verify(client).embed(model(), texts.render(store.documents.get(5L)));
+        assertThat(store.locked).isFalse();
+    }
+
+    @Test
     void detectsRelationOnlyChangesWithoutTouchingThePublicPerfumeRow() {
         store.documents.put(1L, document(1, "Stored"));
         when(client.embed(any(), anyString())).thenReturn(vector());

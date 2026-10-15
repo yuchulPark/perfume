@@ -61,11 +61,32 @@ SQL은 `docs/sql`에 있고 JPA entity로 매핑하지 않는다. Spring SQL ini
 | `batch.max-items` | 1000 / 1–10000; 변경 없음·실패를 포함한 검사 건수 제한 |
 | `batch.after-id` | 0 / 0 이상; 시작 제외 ID |
 | `batch.delay-ms` | 250 / 0–60000; 임베딩 시도 후에만 대기 |
-| `connect-timeout-ms`, `read-timeout-ms` | 3000 / 1–30000, 180000 / 1–300000 |
+| `connect-timeout-ms`, `read-timeout-ms` | 3000 / 1–30000, 300000 / 1–300000 |
 
 결과의 `available`은 after-id 이후 시작 시 전체 건수, `target`은 max-items 제한을 반영한 목표, `processed`는 실제 검사 건수다. `new`, `changed`, `skipped`, `failed`, `lastId`, `upperId`, `hasMore`, `interrupted`도 출력한다. 조회 전 실패로 건수를 알 수 없으면 `unavailable`로 표시한다. 항목 실패/중단은 성공 종료로 보고하지 않는다. 검증 실패·일부 실패 시에도 이전 개별 커밋은 보존된다.
 
 `hasMore=true`이면 **실패가 없는 실행**의 lastId를 다음 `batch.after-id`로 넘긴다. 전체 주기가 끝나면 다음 증분 검사 주기는 다시 0에서 시작한다. 실패가 있었거나 중단됐다면 이전 범위부터 다시 검사하여 실패 항목을 놓치지 않는다. 높은 lastId 뒤로 건너뛰면 앞선 실패·변경 항목은 검사되지 않는다. 성공한 항목은 해시 비교로 건너뛰므로 안전하게 재실행할 수 있다.
+
+### CPU 임베딩 타임아웃과 HTTP 400 진단
+
+Ubuntu 5건 테스트에서 첫 요청은 약 246초/HTTP 200과 `broken pipe`, 중간 3건은 30–35초/HTTP 200, 마지막 요청은 약 217초/HTTP 400이었다. 첫 요청은 기존 read timeout 180초를 초과했으며, 클라이언트가 먼저 연결을 닫고 Ollama가 뒤늦게 응답을 쓰다가 실패했을 가능성이 높다. 서버 처리 시간과 `broken pipe`만으로 해당 요청의 클라이언트 예외를 확정할 수는 없다.
+
+[Spring Web 6.2.19 구현](https://github.com/spring-projects/spring-framework/blob/v6.2.19/spring-web/src/main/java/org/springframework/web/client/DefaultRestClient.java)의 `readWithMessageConverters`는 본문 읽기 중 I/O 예외를 일반 `RestClientException`으로 감싼다. 기존 코드는 `ResourceAccessException`에서만 타임아웃을 찾았으므로 이런 타임아웃/연결 종료도 `INVALID_RESPONSE`로 잘못 분류했다. 부분 JSON을 읽은 뒤 실제 네트워크 예외를 발생시키는 Mock 응답으로 이 경로를 재현하고 수정했다.
+
+| 확인한 클라이언트 증거 | 실패 코드 |
+| --- | --- |
+| 중첩 `SocketTimeoutException`, `HttpTimeoutException` | `TIMEOUT` |
+| 연결 오류, 본문 읽기의 실제 `IOException`/`SocketException`/`EOFException` | `CONNECTION_ERROR` |
+| 수신한 HTTP 400/429/5xx | `HTTP_ERROR`; 오류 본문은 파싱하지 않음 |
+| JSON 문법·JSON EOF·응답 구조 오류 | `INVALID_RESPONSE`; JSON 파싱 예외 자체를 연결 장애로 단정하지 않음 |
+
+요청 실패 로그에는 고정 endpoint, 실패 코드, 수신 HTTP 상태, `elapsedMs`, 예외 클래스와 최하위 원인 클래스만 기록한다. `httpStatus=0`은 상태를 수신하지 못했다는 의미다. 예외 메시지·stack trace·인증정보·원문·벡터·Ollama 응답 본문은 출력하지 않는다. 뒤이어 나오는 기존 배치 로그의 `perfumeId`로 실패 항목을 확인한다. HTTP 200도 본문을 끝까지 읽고 벡터를 검증하기 전에는 성공이 아니다.
+
+마지막 HTTP 400의 서버 원인은 **미확정**이다. 약 1700 입력 토큰과 context 4096이라는 정보만으로 컨텍스트 초과를 단정할 수 없다. [`truncate=false`](https://docs.ollama.com/api/embed)는 컨텍스트 초과 시 오류를 발생시키지만, 400이라는 상태만으로 그 경우인지 알 수 없다. 같은 요청 시각의 Ollama 서버/runner 오류 분류·모델/컨텍스트 메타데이터와 클라이언트의 상태·경과 시간·예외 종류를 대조해야 한다. 클라이언트가 먼저 시간 초과됐다면 뒤늦게 기록된 서버의 400을 실제 수신하지 못했을 수도 있다. 400을 타임아웃이나 정상 결과로 바꾸거나 원인 확인을 위해 원문/응답 본문을 로그에 남기지 않는다.
+
+CPU 첫 요청의 관측 시간 246초를 고려하여 read timeout 기본값을 **300000ms(5분)**로 늘렸다. 기존 상한 300000ms와 연결 제한 3000ms는 유지한다. 이는 소켓 읽기 제한이며 전체 배치 제한이나 400 해결 보장이 아니다. 명시적인 `--perfume.ai.embedding.read-timeout-ms=180000` 등 기존 설정은 그대로 우선 적용되므로, 향후 승인된 실행에서는 아래 예시처럼 300000을 지정한다. 자동 재시도·모델/컨텍스트·`truncate=false`·텍스트 형식·저장 로직은 바꾸지 않는다.
+
+현재 성공한 ID 2/3/4를 지우지 않으며 이미 적용한 SQL도 재실행하지 않는다. 코드 반영과 재실행을 별도로 승인한 뒤 **같은 모델명·digest, `perfume-v1`, 원본 해시**를 유지하고 `batch.after-id=0`, `batch.max-items=5`로 같은 범위를 재검사한다. 실패 실행의 `lastId=5`를 넘기면 ID 1/5를 놓친다. 원본이 그대로인 ID 2/3/4는 임베딩 요청·DB 갱신 없이 건너뛰고, ID 1/5만 다시 시도한다. 데이터가 바뀌었다면 해당 변경 항목도 정상적인 증분 갱신 대상이다. 이 동작은 5건 중 3건 성공/2건 실패 후 재실행하는 회귀 테스트로 확인한다.
 
 ## Ubuntu 적용·실행 — 각각 별도 승인 후
 
@@ -155,6 +176,7 @@ compose run --rm --no-deps --pull never -T --name perfume-dev-embedding-batch \
   --perfume.ai.embedding.base-url=http://ollama:11434 \
   --perfume.ai.embedding.model=qwen3-embedding:0.6b \
   --perfume.ai.embedding.model-digest="$MODEL_DIGEST" \
+  --perfume.ai.embedding.read-timeout-ms=300000 \
   --perfume.ai.embedding.batch.page-size=25 \
   --perfume.ai.embedding.batch.max-items=5 \
   --perfume.ai.embedding.batch.after-id=0 \
@@ -213,3 +235,5 @@ python3 -m unittest discover -s tests/deployment -v
 실제 Ubuntu에서의 SQL 적용 가능성·pgvector upsert·잠금 동시성·CPU 모델 응답 시간은 이 오프라인 검증과 구분하며, 승인 후 위 5건 실행으로 확인한다.
 
 코드 검토 보완 후 로컬 검증 결과: Java 17/Maven 3.9.16 오프라인 `package` 성공. 594개 중 579개 통과, 기존 live/manual 15개 skipped, 실패/오류 0이며 AI 테스트 58개(추가 회귀 11개 포함)는 모두 통과했다. 배포 보호 테스트 56개와 React 기존 단위 테스트 8개도 통과했다. 문서 명령은 Bash 문법만 검사하며 실행하지 않았고 수동 SQL이 runtime JAR에 포함되지 않는 것도 확인했다. 로그는 `target/phase1-validation/embedding-review-package.log`, `embedding-review-deployment-tests.log`다. Windows `mvnw.cmd`의 기존 wrapper 초기화 오류 때문에 로컬에 준비된 같은 Maven 3.9.16과 캐시 저장소로 검사했으며 wrapper 파일은 수정하지 않았다.
+
+타임아웃 진단 보완 후 검증(2026-10-15): 같은 Java 17/Maven 오프라인 `package` 성공. 현재 실행 608개 중 593개 통과, 기존 live/manual 15개 skipped, 실패/오류 0이다. AI 테스트 72개에는 새 회귀 14개(본문 읽기 타임아웃/통신 오류, JSON 오류 구분, 400/429/500, 로그 비노출, 3건 보존 및 재실행, timeout 한도)가 포함된다. 수정 전 본문 읽기 오류 5개가 모두 `INVALID_RESPONSE`로 오분류되는 것도 재현했다. 배포 보호 56개·React 8개 및 문서 Bash 블록 8개의 문법 검사도 통과했다. 로그는 `target/phase1-validation/ollama-diagnostics-package.log`, `ollama-diagnostics-deployment-tests.log`다. DB·Ollama는 Mock을 사용했으며 Ubuntu 접속·운영 SQL·실제 임베딩·배포는 수행하지 않았다.

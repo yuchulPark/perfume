@@ -33,7 +33,7 @@ public record EmbeddingBatchOptions(EmbeddingModelIdentity model, URI baseUrl, i
                 env.getProperty(PREFIX + "batch.after-id", Long.class, 0L),
                 env.getProperty(PREFIX + "batch.delay-ms", Long.class, 250L),
                 Duration.ofMillis(env.getProperty(PREFIX + "connect-timeout-ms", Long.class, 3000L)),
-                Duration.ofMillis(env.getProperty(PREFIX + "read-timeout-ms", Long.class, 180000L)));
+                Duration.ofMillis(env.getProperty(PREFIX + "read-timeout-ms", Long.class, 300000L)));
     }
 
     private static URI parseUrl(String value) {
