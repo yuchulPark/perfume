@@ -9,6 +9,7 @@ export default defineConfig({
   use: { baseURL: 'http://127.0.0.1:4173', channel: 'chrome', headless: true, trace: 'retain-on-failure' },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 1000 } } },
+    { name: 'tablet', use: { viewport: { width: 820, height: 1180 }, hasTouch: true } },
     { name: 'mobile', use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
   ],
   webServer: { command: process.platform === 'win32' ? 'npm.cmd run preview' : 'npm run preview',

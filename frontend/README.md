@@ -44,6 +44,7 @@
 | 메인/향수 목록 | `/` | `/api/brands`, `/api/perfumes?page=0&size=20` |
 | 검색/브랜드 필터 | `/?q=검색어&brandSlug=creed&page=1` | 키워드가 있으면 `/api/perfumes/search`, 없으면 `/api/perfumes`; `q`, `brandSlug`, `page`, `size=20` 전달 |
 | 향수 상세 | `/perfumes/{id}` | `/api/perfumes/{id}` |
+| AI 향수 추천 | `/recommend` | `POST /api/ai/perfumes/recommend` |
 
 - 검색은 입력 후 350ms 지연 처리하며 Enter/검색 버튼으로 즉시 실행할 수도 있습니다. 브랜드 변경은 즉시 반영됩니다. 검색이나 브랜드가 바뀌면 첫 페이지로 돌아갑니다.
 - 검색·브랜드·페이지는 URL에 보존됩니다. 카드에서 상세로 이동 후 `향수 목록으로`를 누르면 이전 조건으로 돌아옵니다.
@@ -69,6 +70,34 @@ API 계약은 기존 [REST 문서](../docs/rest-catalog-api.md) 및 Java DTO를 
 
 TanStack Query가 동일한 query key의 진행 중 요청을 공유합니다. 키워드를 trim/소문자로 정규화해 API의 대소문자 무시 검색과 맞춥니다. 목록/상세는 60초, 브랜드는 10분 동안 fresh cache를 사용합니다. 브라우저 포커스·재연결 시 자동 조회와 실패 시 자동 재시도를 끄고, 필요한 경우 화면의 수동 재시도를 사용합니다. 필터가 바뀌면 이전 요청을 취소하고 늦게 도착한 응답이 최신 검색 결과를 덮어쓰지 않도록 합니다. 페이지 변경 중에는 같은 필터의 이전 목록을 로딩 상태로 유지합니다. 검색·브랜드가 달라지면 이전 결과를 새 결과처럼 보여주지 않습니다.
 
+## RAG 4차 — AI 향수 추천
+
+API 계약은 [RAG 추천 문서](../docs/perfume-rag-recommendation.md), `PerfumeRecommendationController`, `PerfumeSemanticSearchRequest`, `PerfumeRecommendationResponse`, `RecommendationFailure`를 기준으로 합니다.
+
+- 상단 `AI 향수 추천` 메뉴와 `/recommend`에서 자연어 질문, 예시 질문, 검색 개수(topK)를 제공합니다. 예시를 누르면 입력만 채우며, 추천받기를 눌러야 요청합니다. 질문은 공백만 입력할 수 없고 최대 500 UTF-16 단위입니다. 검색 개수는 정수 1~20, 기본 5입니다.
+- `api/recommendations.js`가 기존 엔드포인트에 `{query, topK}`만 POST합니다. 일반 GET용 `client.js`와 `queries.js`의 제한·캐시 정책은 유지합니다. AI 요청은 React 페이지 메모리에서만 관리하여 Query 캐시, URL, localStorage, sessionStorage, 콘솔에 질문·답변을 남기지 않습니다. 화면을 떠나거나 새로고침하면 입력과 결과가 사라집니다.
+- 답변은 HTML 실행 없이 한국어 문단으로 표시합니다. `[1]`은 `sources[0]` 카드로 연결하고 서버 배열을 재정렬하지 않습니다. 근거 카드에는 향수명, 브랜드, 실제 검색 유사도와 `/perfumes/{perfumeId}` 링크를 표시합니다. 유사도는 확률이나 평점으로 변환하지 않습니다.
+- 전체 카탈로그가 아닌 임베딩된 일부 향수의 저장된 정보를 사용하며 최신 정보·조건 충족을 보장하지 않는다는 안내를 표시합니다. 임베딩 개수나 브랜드를 하드코딩하지 않습니다. 검색 개수와 실제 근거/답변에 소개되는 향수 개수가 다를 수 있습니다.
+- 대기 중 중복 제출을 막고 취소 버튼을 제공합니다. AbortController로 사용자 취소·화면 이탈·클라이언트 기한 초과를 전달하며, 이전 요청이 늦게 도착해도 새 결과를 덮어쓰지 않습니다. 가짜 진행률이나 처리 단계는 없습니다. 연결 취소만으로 백엔드/Ollama 작업이 즉시 중단되는 것은 보장되지 않습니다.
+- 결과 없음(`200`, 빈 sources), 추천 비활성화(`503/RECOMMEND_DISABLED`), 동시 요청 초과(`429/RECOMMEND_BUSY`), 잘못된 요청(`400`), 근거 이용 불가(`503/EVIDENCE_UNAVAILABLE`), 서비스 장애(`503`), 생성/서버 오류(`502`), 기한 초과(`504` 또는 클라이언트 기한 초과)를 구분합니다. 고정 코드와 HTTP 상태가 일치할 때만 코드를 사용하며 알 수 없는 코드·HTML 프록시 오류는 상태별 안전한 안내로 처리합니다. 원시 서버 detail/title, 내부 오류를 화면에 노출하지 않으며 자동 재시도는 없습니다.
+
+### AI 전용 제한 시간
+
+| 구간 | 설정 | 근거 |
+| --- | --- | --- |
+| 백엔드 전체 요청 | 기본 420초 | `PerfumeRecommendationOptions.requestTimeout`, 이번 작업에서 변경 없음 |
+| Nginx AI 프록시 읽기 | 450초 | 정확한 `/api/ai/perfumes/recommend` location에만 적용, 백엔드 오류 응답 여유 30초 |
+| AI 클라이언트 | 480초 | 프록시 오류 응답 여유 30초, 응답 body 읽기까지 적용 |
+| 일반 API | GET 클라이언트 15초, Nginx 읽기 30초 | 기존 값 유지 |
+
+### 실제 API 연동에 남은 설정
+
+프런트엔드 전용 API 키나 새 환경변수는 필요하지 않습니다. 로컬 Vite의 `/api`는 기존 `localhost:8081`로, Nginx는 기존 backend upstream으로 연결됩니다.
+
+백엔드는 기본 비활성화 상태를 유지합니다. 실제 추천 검증은 제한된 로컬 환경에서 운영자가 기존 RAG 문서에 따라 검색·추천 활성화 플래그와 각각의 고정 모델 전체 digest 등 기존 필수 설정을 준비한 후 별도로 진행해야 합니다. **공개 서비스는 인증과 사용자별 사용량 제한이 마련되기 전까지 AI 플래그를 활성화하지 않습니다.** 실제 DB/Ollama 호출과 설정 변경은 이번 프런트엔드 검증에 포함되지 않습니다.
+
+운영 연결 시 다른 프록시가 앞에 있다면 해당 경로의 제한도 확인해야 합니다. 백엔드 전체 제한을 기본 420초보다 길게 재설정하는 경우 Nginx와 클라이언트 제한도 함께 조정해야 합니다. 로컬에 Nginx 실행 파일이 없어 `nginx -t`는 실행하지 않았습니다. 기존 Dockerfile의 Nginx 구문 검증은 유지합니다.
+
 ## 파일 구조
 
 ```text
@@ -79,12 +108,16 @@ frontend/
   src/
     main.jsx / App.jsx             라우팅, 공통 헤더/푸터
     api/client.js / queries.js      REST 클라이언트, 캐시/취소
+    api/recommendations.js          AI 전용 POST, 검증, 기한, 안전한 오류 처리
     lib/display.js                 NULL, 점수, metric 경로 처리
-    pages/                         목록 및 상세 페이지
+    pages/                         목록, 상세, AI 추천 페이지
     components/                    검색, 카드, 이미지, 페이지, 상세 섹션, 상태 UI
     styles.css                     PC/모바일 반응형 스타일
   tests/display.test.js             순수 로직/클라이언트 테스트
+  tests/recommendations.test.js      AI 클라이언트/오류/기한/취소 Mock 테스트
+  tests/recommendation-components.test.js  실제 JSX의 React 렌더링 단위 테스트
   tests/browser/catalog.spec.js     모의 REST 응답 기반 화면 테스트
+  tests/browser/recommendation.spec.js  AI 입력/결과/취소/오류/개인정보 Mock 화면 테스트
   playwright.config.js             설치된 Chrome 사용
 ```
 
@@ -96,6 +129,8 @@ npm.cmd run build
 npm.cmd run test:browser
 ```
 
-브라우저 테스트는 빌드된 `dist`를 preview 서버로 열고 설치된 Google Chrome을 headless로 실행합니다. Chrome이 설치되어 있어야 합니다. 모든 `/api` 요청은 Playwright에서 모의 응답으로 가로채므로 실제 Spring Boot·PostgreSQL·ScentRev 호출이 발생하지 않습니다. 테스트 데이터는 `tests/`에만 있으며 production bundle이나 화면의 대체 데이터에 포함되지 않습니다. PC(1440px)·모바일(390px)에서 검색 지연/중복 요청, 필터/페이지, 상세/뒤로 이동, NULL/0, 이미지 실패, 오류 재시도, 오래된 응답의 경합 등을 검증합니다. 스크린샷과 실패 추적은 git에서 제외된 `test-results/`에 생성됩니다.
+브라우저 테스트는 빌드된 `dist`를 preview 서버로 열고 설치된 Google Chrome을 headless로 실행합니다. Chrome이 설치되어 있어야 합니다. 모든 `/api` 요청은 Playwright에서 모의 응답으로 가로채므로 실제 Spring Boot·PostgreSQL·ScentRev·Ollama 호출이 발생하지 않습니다. 테스트 데이터는 `tests/`에만 있으며 production bundle이나 화면의 대체 데이터에 포함되지 않습니다. PC(1440px)·태블릿(820px)·모바일(390px, 최소 320px)에서 기존 검색 지연/중복 요청, 필터/페이지, 상세/뒤로 이동, NULL/0, 이미지 실패, 오류 재시도, 오래된 응답의 경합 및 AI 추천의 주요 흐름을 검증합니다. 클라이언트 480초 기한은 가상 시계로 검증하여 실제 모델 호출이나 긴 대기를 하지 않습니다. 스크린샷과 실패 추적은 git에서 제외된 `test-results/`에 생성됩니다.
 
-검증 결과: 의존성 설치와 프로덕션 빌드 성공, 로직/REST 클라이언트 테스트 **8개 통과**, PC·모바일 브라우저 테스트 **14개 통과**, 실패 0개. 변경 전 파일 해시와 비교하여 기존 백엔드·설정·DB·Import 파일이 모두 유지됐음을 확인했습니다.
+React 단위 테스트는 기존 Vite로 실제 JSX 모듈을 변환하고 React 서버 렌더러로 상태·문단·출처·라우팅을 검증합니다. 사용자 상호작용과 DOM의 로딩·취소·오류·상세 이동은 별도 Playwright Mock 테스트로 검증합니다. 새 테스트 패키지는 추가하지 않습니다.
+
+RAG 4차 검증 결과: `npm test` **35개 통과**, `npm run build` **성공**, `npm run test:browser` **69개 통과**(PC·태블릿·모바일), 실패 0개입니다. 기존 검색·브랜드 필터·페이지네이션·상세 회귀 테스트도 포함합니다. 제한된 Windows 실행 환경에서 Playwright의 미리보기 서버 종료가 지연되어, 검증에서 띄운 preview 프로세스만 종료해 정리했고 테스트 명령의 종료 코드 0을 확인했습니다. 변경 범위는 `frontend/`뿐이며 백엔드·DB·모델·임베딩·Checkpoint·Jenkins·systemd는 변경하지 않았습니다.
