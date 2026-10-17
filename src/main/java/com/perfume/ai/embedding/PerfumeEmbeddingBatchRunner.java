@@ -29,6 +29,10 @@ public class PerfumeEmbeddingBatchRunner implements ApplicationRunner {
     }
 
     static void prepare(SpringApplication application, ConfigurableEnvironment environment, String[] args) {
+        if (environment.getProperty(AutoEmbeddingOptions.ENABLED, Boolean.class, false)
+                && !environment.getProperty(EmbeddingBatchOptions.ENABLED, Boolean.class, false)) {
+            throw new IllegalArgumentException("Automatic embedding requires the explicit batch execution mode.");
+        }
         if (!environment.getProperty(EmbeddingBatchOptions.ENABLED, Boolean.class, false)) { return; }
         if (!Arrays.asList(args).contains("--" + EmbeddingBatchOptions.ENABLED + "=true")) {
             throw new IllegalArgumentException("Embedding batches require the explicit --" + EmbeddingBatchOptions.ENABLED + "=true CLI flag.");
@@ -37,6 +41,16 @@ public class PerfumeEmbeddingBatchRunner implements ApplicationRunner {
             throw new IllegalArgumentException("Run the embedding batch separately from ScentRev Import.");
         }
         EmbeddingBatchOptions.from(environment); // Validate all limits and the pinned model before JDBC startup.
+        if (environment.getProperty(AutoEmbeddingOptions.ENABLED, Boolean.class, false)) {
+            if (!Arrays.asList(args).contains("--" + AutoEmbeddingOptions.ENABLED + "=true")) {
+                throw new IllegalArgumentException("Automatic batches require an explicit CLI flag.");
+            }
+            AutoEmbeddingOptions.from(environment);
+            if (environment.getProperty(EmbeddingBatchOptions.PREFIX + "batch.after-id", Long.class, 0L) != 0L) {
+                throw new IllegalArgumentException("Automatic batches use their persisted range cursors.");
+            }
+            application.setRegisterShutdownHook(false); // Automatic runner waits before closing the datasource.
+        }
         application.setWebApplicationType(WebApplicationType.NONE);
         environment.getPropertySources().addFirst(new MapPropertySource("perfumeEmbeddingManualExecution", Map.of(
                 "spring.main.web-application-type", "none", "spring.jpa.hibernate.ddl-auto", "validate",

@@ -46,6 +46,7 @@ application-secret.properties
 *.backup
 /.perfume-db-ready
 /.perfume-deploy.lock
+/.perfume-embedding-active
 
 ### Logs ###
 *.log

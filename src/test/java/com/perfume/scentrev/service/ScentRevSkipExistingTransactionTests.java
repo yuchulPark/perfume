@@ -30,6 +30,26 @@ import org.springframework.transaction.support.TransactionTemplate;
 /** Real Spring transaction propagation and persistence code, with mocked repositories; no JDBC. */
 class ScentRevSkipExistingTransactionTests {
     @Test
+    void writeGuardRunsInsideEachWriteTransactionAndBusyRefusalRollsBackThePage() {
+        var tx = new Transactions();
+        var brands = mock(BrandRepository.class); var perfumes = mock(PerfumeRepository.class);
+        var target = persistence(brands, perfumes);
+        var guard = mock(ScentRevCatalogWriteGuard.class);
+        doAnswer(call -> {
+            assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+            assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+            throw new IllegalStateException("ScentRev catalog write refused: EMBEDDING_BUSY");
+        }).when(guard).acquire();
+        target.setWriteGuard(guard);
+        var service = transactional(target, tx);
+        assertThatThrownBy(() -> service.importPageForSeededBrand(2L, "creed", List.of(), true)).hasMessageContaining("EMBEDDING_BUSY");
+        assertThatThrownBy(() -> service.importProfile(null)).hasMessageContaining("EMBEDDING_BUSY");
+        assertThat(tx.rolledBack).containsExactly(1, 2);
+        assertThat(tx.committed).isEmpty();
+        verifyNoInteractions(brands, perfumes);
+    }
+
+    @Test
     void readonlyPageLookupAndWritePageCommitAreSeparateAndAllApiCallsSuspendAmbientTransactions() {
         var tx = new Transactions(); var fixture = new Fixture(); fixture.catalog(2, 1);
         when(fixture.brands.findById(2L)).thenReturn(Optional.of(fixture.brand));

@@ -1,0 +1,10 @@
+# Copy to /etc/perfume/embedding-batch.conf. No shell expansion, quotes, credentials or inline comments.
+ENABLED=false
+MODEL=qwen3-embedding:0.6b
+# Full installed Ollama SHA-256 digest; never a short tag or Docker image digest.
+MODEL_DIGEST=
+MAX_ITEMS=100
+MAX_RUNTIME_SECONDS=3600
+PAGE_SIZE=25
+DELAY_MS=250
+READ_TIMEOUT_MS=300000

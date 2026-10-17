@@ -61,6 +61,7 @@ class ScentRevCuratedBrandDbImportSmokeTests {
     @EnableAutoConfiguration
     @EntityScan(basePackageClasses = Brand.class)
     @EnableJpaRepositories(basePackageClasses = BrandRepository.class)
-    @Import({ScentRevCuratedBrandConfiguration.class, ScentRevCuratedBrandDbImportService.class})
+    @Import({ScentRevCuratedBrandConfiguration.class, ScentRevCuratedBrandDbImportService.class,
+            com.perfume.scentrev.service.ScentRevCatalogWriteGuard.class})
     static class SeedConfiguration { }
 }

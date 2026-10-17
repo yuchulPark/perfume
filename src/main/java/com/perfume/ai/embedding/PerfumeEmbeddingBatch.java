@@ -17,21 +17,27 @@ public class PerfumeEmbeddingBatch {
             long skipped, long failed, long lastId, long upperId, boolean hasMore, boolean interrupted) { }
 
     public Result execute(EmbeddingBatchOptions options) {
+        return execute(options, null, () -> false);
+    }
+
+    /** Reuses the manual pipeline; automatic callers supply a fixed range and cooperative stop. */
+    public Result execute(EmbeddingBatchOptions options, Long rangeUpperId, java.util.function.BooleanSupplier stop) {
         long processed = 0, created = 0, changed = 0, skipped = 0, failed = 0, lastId = options.afterId();
         long available = -1, target = -1, upperId = -1;
         boolean interrupted = false;
+        boolean exhausted = false;
         try (var session = store.open()) {
-            var window = session.window(lastId);
+            var window = rangeUpperId == null ? session.window(lastId) : session.window(lastId, rangeUpperId);
             available = window.available();
             upperId = window.upperId();
             target = Math.min(available, options.maxItems());
-            if (target > 0 && !Thread.currentThread().isInterrupted()) { client.verifyModel(options.model()); }
+            if (target > 0 && !Thread.currentThread().isInterrupted() && !stop.getAsBoolean()) { client.verifyModel(options.model()); }
             while (processed < target) {
-                if (Thread.currentThread().isInterrupted()) { interrupted = true; break; }
+                if (Thread.currentThread().isInterrupted() || stop.getAsBoolean()) { interrupted = true; break; }
                 var ids = session.nextIds(lastId, window.upperId(), (int) Math.min(options.pageSize(), target - processed));
-                if (ids.isEmpty()) { break; }
+                if (ids.isEmpty()) { exhausted = true; break; }
                 for (long id : ids) {
-                    if (Thread.currentThread().isInterrupted()) { interrupted = true; break; }
+                    if (Thread.currentThread().isInterrupted() || stop.getAsBoolean()) { interrupted = true; break; }
                     boolean attemptedEmbedding = false;
                     try {
                         var text = texts.render(session.load(id));
@@ -63,13 +69,13 @@ public class PerfumeEmbeddingBatch {
                     lastId = id;
                     if (attemptedEmbedding && options.delayMs() > 0) {
                         try { Thread.sleep(options.delayMs()); }
-                        catch (InterruptedException stop) { Thread.currentThread().interrupt(); interrupted = true; break; }
+                        catch (InterruptedException interruptedSleep) { Thread.currentThread().interrupt(); interrupted = true; break; }
                     }
                 }
                 if (interrupted) { break; }
             }
             return new Result(window.available(), target, processed, created, changed, skipped, failed, lastId,
-                    window.upperId(), lastId < window.upperId(), interrupted);
+                    window.upperId(), lastId < window.upperId() && (rangeUpperId == null || (!exhausted && processed < available)), interrupted);
         } catch (RuntimeException failure) {
             var code = failure instanceof EmbeddingFailure known ? known.code() : EmbeddingFailure.Code.DATABASE;
             throw new EmbeddingFailure(code, new Result(available, target, processed, created, changed, skipped,

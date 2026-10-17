@@ -54,6 +54,10 @@ public class ScentRevPhase1ImportService {
     private final AccordRepository accordRepository;
     private final PerfumeAccordRepository perfumeAccordRepository;
     private final ScentRevProfileDataService profileData;
+    private ScentRevCatalogWriteGuard writeGuard;
+
+    @Autowired
+    void setWriteGuard(ScentRevCatalogWriteGuard writeGuard) { this.writeGuard = writeGuard; }
 
     public ScentRevPhase1ImportService(
             BrandRepository brandRepository,
@@ -98,6 +102,7 @@ public class ScentRevPhase1ImportService {
      */
     @Transactional
     public Perfume importProfile(ScentRevFragranceProfileResponse profile) {
+        if (writeGuard != null) { writeGuard.acquire(); }
         ScentRevIdentity identity = validateProfile(profile);
         if (profileData != null) { profileData.validate(profile); }
         Perfume perfume = findExistingPerfume(identity).orElseGet(() -> createPerfume(identity));
@@ -167,6 +172,7 @@ public class ScentRevPhase1ImportService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ScentRevPhase1PageImportResult importPageForSeededBrand(Long brandId, String brandSlug,
             List<ScentRevFragranceProfileResponse> profiles, boolean insertOnly) {
+        if (writeGuard != null) { writeGuard.acquire(); }
         validateProfilePageForBrand(brandSlug, profiles);
         Brand brand = brandRepository.findById(brandId)
                 .filter(existing -> brandSlug.equals(existing.getBrandSlug()))

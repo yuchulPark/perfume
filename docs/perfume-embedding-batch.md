@@ -1,5 +1,7 @@
 # 향수 임베딩 저장·증분 갱신 1차
 
+후속 RAG 5차의 기본 비활성 자동 실행, 진도 저장, Import 조정과 systemd 절차는 [자동 증분 배치 문서](perfume-auto-embedding-batch.md)를 따른다. 이 문서의 기존 수동 명령과 `after-id`/`max-items` 의미는 유지한다. 아래 1차 기록에 적힌 미구현 범위는 당시 기준이다.
+
 이번 변경은 코드·수동 SQL·오프라인 테스트 준비다. **운영 SQL 적용, 실제 임베딩 생성, SSH, Commit/Push, Jenkins 실행은 수행하지 않았다.** 아래 Ubuntu 명령은 코드 반영 및 DB 변경·배치 실행을 각각 승인한 뒤 운영자가 실행한다.
 
 일반 웹 실행에서는 `perfume.ai.embedding.batch.enabled=false`이며 AI bean, DB 검사, Ollama 호출, 스케줄러, 임베딩 실행 API가 없다. 기존 Import·검색·React·Compose·Jenkins 파일을 변경하지 않는다. Windows의 `localhost:11434`를 사용하지 않는다.

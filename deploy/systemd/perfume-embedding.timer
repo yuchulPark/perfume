@@ -1,0 +1,11 @@
+[Unit]
+Description=Perfume embedding schedule (operator must supply OnCalendar)
+
+[Timer]
+Unit=perfume-embedding.service
+Persistent=false
+AccuracySec=1min
+# Deliberately no OnCalendar/OnBootSec: install disabled, configure an approved schedule first.
+
+[Install]
+WantedBy=timers.target

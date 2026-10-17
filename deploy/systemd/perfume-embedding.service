@@ -1,0 +1,20 @@
+[Unit]
+Description=Perfume bounded incremental embedding batch
+After=docker.service
+Requires=docker.service
+ConditionPathExists=/etc/perfume/embedding-batch.conf
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/srv/perfume
+UMask=0077
+ExecStart=/usr/bin/bash /srv/perfume/scripts/perfume-auto-embedding.sh
+TimeoutStartSec=infinity
+TimeoutStopSec=450
+KillMode=mixed
+Restart=no
+SuccessExitStatus=75
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=perfume-embedding

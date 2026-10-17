@@ -126,7 +126,7 @@ print('Legacy default-image validation passed.')
 
 @unittest.skipUnless(BASH and Path(BASH).exists(), "Bash is required for mocked deploy-script execution.")
 class JenkinsDbPreservationTests(unittest.TestCase):
-    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False):
+    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False):
         with tempfile.TemporaryDirectory(prefix="perfume-deploy-mock-") as directory:
             root = Path(directory)
             (root / "scripts").mkdir()
@@ -145,6 +145,8 @@ class JenkinsDbPreservationTests(unittest.TestCase):
             (root / "fixture.json").write_text(json.dumps(fixture), encoding="utf-8")
             (root / ".env").write_text("DB_PASSWORD='offline-test-password'\n", encoding="utf-8")
             (root / ".perfume-db-ready").write_text("perfume-dev_pgdata\n", encoding="utf-8", newline="\n")
+            if embedding_marker:
+                (root / ".perfume-embedding-active").write_text("offline-owner\n", encoding="utf-8")
             if vector or approved:
                 from test_pgvector_production import verifier
                 verifier.write_approval(approval(), root / ".env.pgvector-approval.json")
@@ -180,6 +182,12 @@ class JenkinsDbPreservationTests(unittest.TestCase):
             if vector or approved:
                 self.assertEqual(approval(), json.loads((root / ".env.pgvector-approval.json").read_text()))
             return result, commands
+
+    def test_orphan_embedding_marker_refuses_deploy_before_git_or_docker(self):
+        result, commands = self.run_deploy(embedding_marker=True)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Embedding worker recovery is required", result.stderr)
+        self.assertFalse(any(cmd[0] in ('git', 'docker') for cmd in commands))
 
     def test_default_pgvector_and_first_upgrade_deploy_only_the_apps(self):
         for vector, legacy, extension in ((False, False, "none"), (False, True, "none"),

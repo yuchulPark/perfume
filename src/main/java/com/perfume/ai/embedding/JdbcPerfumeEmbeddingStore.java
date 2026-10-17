@@ -18,7 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 /** Only reads public catalog tables. AI writes are atomic upserts on a dedicated locked connection. */
 public class JdbcPerfumeEmbeddingStore implements PerfumeEmbeddingStore {
     // One database-wide AI batch, even for different models or different JVMs.
-    static final long LOCK_ID = 739206174812401L;
+    public static final long LOCK_ID = 739206174812401L;
     static final String UPSERT = """
             INSERT INTO ai.perfume_embeddings AS existing
                 (perfume_id, model_name, model_digest, text_version, source_text, source_sha256, embedding)
@@ -104,6 +104,14 @@ public class JdbcPerfumeEmbeddingStore implements PerfumeEmbeddingStore {
             try {
                 return jdbc.queryForObject("SELECT coalesce(max(id), 0) AS upper_id, count(*) AS available FROM public.perfumes WHERE id > ?",
                         (rs, row) -> new Window(rs.getLong("upper_id"), rs.getLong("available")), afterId);
+            } catch (DataAccessException failure) { throw databaseFailure(); }
+        }
+
+        @Override
+        public Window window(long afterId, long upperId) {
+            try {
+                return jdbc.queryForObject("SELECT count(*) AS available FROM public.perfumes WHERE id > ? AND id <= ?",
+                        (rs, row) -> new Window(upperId, rs.getLong("available")), afterId, upperId);
             } catch (DataAccessException failure) { throw databaseFailure(); }
         }
 

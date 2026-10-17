@@ -14,6 +14,10 @@ import com.perfume.repository.BrandRepository;
 public class ScentRevCuratedBrandDbImportService {
     private final ScentRevCuratedBrandConfiguration configuration;
     private final BrandRepository brands;
+    private com.perfume.scentrev.service.ScentRevCatalogWriteGuard writeGuard;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setWriteGuard(com.perfume.scentrev.service.ScentRevCatalogWriteGuard writeGuard) { this.writeGuard = writeGuard; }
 
     public ScentRevCuratedBrandDbImportService(ScentRevCuratedBrandConfiguration configuration,
             BrandRepository brands) {
@@ -29,6 +33,7 @@ public class ScentRevCuratedBrandDbImportService {
      */
     @Transactional
     public ScentRevCuratedBrandDbImportResult importVerifiedBrands() {
+        if (writeGuard != null) { writeGuard.acquire(); }
         var selected = loadValidatedDefinitions();
         int inserted = 0;
         int updated = 0;

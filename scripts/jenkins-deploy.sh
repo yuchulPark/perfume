@@ -19,6 +19,11 @@ test ! -L .perfume-deploy.lock
 for tool in docker git python3 flock sha256sum curl; do command -v "$tool" >/dev/null; done
 exec 9>.perfume-deploy.lock
 flock -n 9 || { echo "Another perfume deployment holds the lock." >&2; exit 1; }
+# A killed supervisor can leave a daemon-owned one-off worker. Its marker is cleared
+# only by the batch supervisor after proving absence; never bypass it during deploy.
+test ! -e .perfume-embedding-active && test ! -L .perfume-embedding-active || {
+    echo "Embedding worker recovery is required before deployment." >&2; exit 1;
+}
 
 # Do not inherit a different project's Compose or DB settings from the SSH session.
 unset COMPOSE_FILE COMPOSE_PROJECT_NAME COMPOSE_PROFILES DB_NAME DB_USERNAME DB_PASSWORD DB_URL SCENTREV_API_KEY PERFUME_DB_IMAGE
@@ -124,7 +129,7 @@ paths = sys.stdin.buffer.read().split(b"\0")
 for path in paths:
     name = path.rsplit(b"/", 1)[-1]
     if (path == b"backups" or path.startswith(b"backups/") or
-        path in (b".perfume-db-ready", b".perfume-deploy.lock") or
+        path in (b".perfume-db-ready", b".perfume-deploy.lock", b".perfume-embedding-active") or
         (name.startswith(b".env") and name != b".env.example") or
         name.endswith((b".dump", b".backup"))):
         print("Refusing deployment: incoming revision tracks protected operator files.", file=sys.stderr)

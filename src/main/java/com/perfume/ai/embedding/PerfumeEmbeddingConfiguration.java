@@ -37,7 +37,15 @@ public class PerfumeEmbeddingConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(name = AutoEmbeddingOptions.ENABLED, havingValue = "false", matchIfMissing = true)
     PerfumeEmbeddingBatchRunner perfumeEmbeddingBatchRunner(PerfumeEmbeddingBatch batch, EmbeddingBatchOptions options) {
         return new PerfumeEmbeddingBatchRunner(batch, options);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = AutoEmbeddingOptions.ENABLED, havingValue = "true")
+    AutoPerfumeEmbeddingRunner autoPerfumeEmbeddingRunner(PerfumeEmbeddingStore store, PerfumeEmbeddingBatch batch,
+            EmbeddingBatchOptions options, Environment environment) {
+        return new AutoPerfumeEmbeddingRunner(new AutoPerfumeEmbeddingJob(store, batch), options, AutoEmbeddingOptions.from(environment));
     }
 }
