@@ -52,7 +52,7 @@ class AutoEmbeddingSupervisorTests(unittest.TestCase):
             for key in ('COMPOSE_FILE', 'DOCKER_CONTEXT', 'DB_PASSWORD', 'DB_URL', 'SCENTREV_API_KEY', 'PERFUME_DB_IMAGE'):
                 self.assertNotIn(key, env)
 
-    def supervise(self, returncode=0, timeout=False, orphan=False, durable=True, checkpoint_status='SUCCESS', stale=False):
+    def supervise(self, returncode=0, timeout=False, orphan=False, durable=True, checkpoint_status='SUCCESS', stale=False, checkpoint_code=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory); state = root / 'state'; state.mkdir(); marker = root / '.perfume-embedding-active'
             process = MagicMock()
@@ -65,7 +65,7 @@ class AutoEmbeddingSupervisorTests(unittest.TestCase):
                 if durable:
                     (state / 'state.json').write_text(json.dumps({'latest': {
                         'startedAt': '2000-01-01T00:00:00Z' if stale else auto.datetime.now(auto.timezone.utc).isoformat(),
-                        'status': checkpoint_status, 'code': 'BATCH_BUSY' if checkpoint_status == 'SKIPPED' else 'OK'}}), encoding='utf-8')
+                        'status': checkpoint_status, 'code': checkpoint_code or ('BATCH_BUSY' if checkpoint_status == 'SKIPPED' else 'OK')}}), encoding='utf-8')
                 return process
             with patch.object(auto, 'ROOT', root), patch.object(auto, 'STATE', state), patch.object(auto, 'MARKER', marker), \
                  patch.object(auto, 'require_deploy_lock'), \
@@ -132,6 +132,21 @@ class AutoEmbeddingSupervisorTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'OWNER_MISMATCH'):
                 auto.stop_owned('owner')
             self.assertEqual(1, command.call_count)
+
+    def test_intermediate_checkpoint_cannot_be_mistaken_for_a_completed_invocation(self):
+        with self.assertRaisesRegex(ValueError, 'RESULT_INVALID'):
+            self.supervise(checkpoint_status='RUNNING', checkpoint_code='IN_PROGRESS')
+
+    def test_cumulative_multi_range_report_is_filtered_without_hiding_pending_or_failure(self):
+        prefix = 'Automatic embedding finished: startedAt=2026-10-18T00:00:00Z, finishedAt=2026-10-18T01:00:00Z, '
+        reports = [
+            prefix + 'status=SUCCESS, code=OK, total=2294, available=2169, target=1000, processed=1000, new=900, changed=0, skipped=100, failed=0, lastId=1129, upperId=2332, hasMore=true, interrupted=false, nextCursor=1129, pendingRanges=2, elapsedMs=3600000',
+            prefix + 'status=FAILED, code=PARTIAL_FAILURE, total=2294, available=2169, target=1000, processed=1000, new=900, changed=0, skipped=99, failed=1, lastId=129, upperId=2332, hasMore=true, interrupted=false, nextCursor=1129, pendingRanges=2, elapsedMs=3600000',
+            prefix + 'status=INTERRUPTED, code=TIME_LIMIT, total=2294, available=2169, target=1000, processed=300, new=250, changed=0, skipped=49, failed=1, lastId=429, upperId=2332, hasMore=true, interrupted=true, nextCursor=429, pendingRanges=3, elapsedMs=3600000']
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            auto.stream_safe(io.StringIO('\n'.join(reports + [reports[0] + ' private-password',
+                                 'Automatic embedding finished: status=SUCCESS vector=[1,2,3]']) + '\n'))
+        self.assertEqual(reports, output.getvalue().splitlines())
 
     def test_docker_or_spring_errors_and_malformed_safe_messages_do_not_leak(self):
         lines = ['DB_PASSWORD=private\n', 'Ollama response: [1,2,3] SECRET_SOURCE\n',

@@ -67,15 +67,20 @@ class AutoPerfumeEmbeddingJobTests {
         assertThat(failed.result().created()).isEqualTo(1);
         assertThat(state().pending()).containsExactly(new AutoEmbeddingState.Range(8, 90), new AutoEmbeddingState.Range(0, 8));
         store.add(1000, "New");
-        assertThat(run(2).result().lastId()).isEqualTo(90);
+        var continued = run(2);
+        assertThat(continued.result().created()).isEqualTo(1);
+        assertThat(continued.result().failed()).isEqualTo(1);
+        var next = run(2);
+        assertThat(next.result().created()).isEqualTo(1);
+        assertThat(next.result().skipped()).isEqualTo(1);
+        assertThat(next.result().hasMore()).isTrue();
         assertThat(run(2).status()).isEqualTo("FAILED");
-        assertThat(run(2).result().lastId()).isEqualTo(1000);
         assertThat(store.hashes).containsKeys(8L, 90L, 1000L).doesNotContainKey(1L);
-        // Repairing a failure resumes the retained range; already committed B is skipped.
+        // Only the failed prefix remains; unrelated successful work was acknowledged.
         store.add(1, "Repaired");
         var repaired = run(2);
         assertThat(repaired.result().created()).isEqualTo(1);
-        assertThat(repaired.result().skipped()).isEqualTo(1);
+        assertThat(repaired.result().skipped()).isZero();
         assertThat(state().pending()).isEmpty();
     }
 
@@ -99,8 +104,9 @@ class AutoPerfumeEmbeddingJobTests {
         assertThat(store.hashes).containsOnlyKeys(1L);
         assertThat(state().pending()).containsExactly(new AutoEmbeddingState.Range(1, 2), new AutoEmbeddingState.Range(0, 1));
         when(client.embed(any(), anyString())).thenReturn(PerfumeEmbeddingBatchTests.vector());
-        assertThat(run(2).result().created()).isEqualTo(1);
-        assertThat(run(2).result().skipped()).isEqualTo(1);
+        var resumed = run(2);
+        assertThat(resumed.result().created()).isEqualTo(1);
+        assertThat(resumed.result().skipped()).isEqualTo(1);
         verify(client, times(2)).embed(any(), anyString());
     }
 
@@ -124,10 +130,9 @@ class AutoPerfumeEmbeddingJobTests {
         assertThat(store.hashes).containsOnlyKeys(1L);
         assertThat(state().pending()).containsExactly(new AutoEmbeddingState.Range(5, 70), new AutoEmbeddingState.Range(0, 5));
         store.failSave = 0;
-        assertThat(run(3).result().created()).isEqualTo(1);
         var retry = run(3);
         assertThat(retry.result().skipped()).isEqualTo(1);
-        assertThat(retry.result().created()).isEqualTo(1);
+        assertThat(retry.result().created()).isEqualTo(2);
         assertThat(store.hashes).hasSize(3);
     }
 

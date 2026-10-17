@@ -30,7 +30,7 @@ systemd timer (운영자가 시각 지정, 설치만으로 활성화되지 않�
 | MODEL_DIGEST | 비어 있음 | 설치된 Ollama 모델의 전체 소문자 SHA-256 digest; 실행 전 필수 |
 | MAX_ITEMS | 100 | 1–10000, 실행당 **검사** 건수; 신규 생성 수가 아님 |
 | MAX_RUNTIME_SECONDS | 3600 | 1–86400, worker 기동/모델 로딩 포함 감독 시간 예산 |
-| PAGE_SIZE | 25 | 1–100 |
+| PAGE_SIZE | 25 | 1–100; DB 조회 페이지 크기 및 자동 작업의 checkpoint 처리 단위 |
 | DELAY_MS | 250 | 0–60000; 임베딩 시도 후 대기 |
 | READ_TIMEOUT_MS | 300000 | 1–300000; 개별 HTTP 읽기 제한 |
 
@@ -44,18 +44,25 @@ DB 스키마를 바꾸지 않고 `/var/lib/perfume-embedding/state.json`을 사�
 
 각 구간은 `(afterId, upperId]`다. DB에서 현재 건수와 최대 ID를 조회하므로 ID 간격과 향수 수를 하드코딩하지 않는다.
 
-1. 최초 실행은 현재 최대 ID까지 `(0, upperId]`를 등록한다.
-2. 실행당 맨 앞 구간 하나에서 최대 `MAX_ITEMS`개를 검사한다. 기존 해시가 같으면 embed 호출/갱신을 하지 않는다.
-3. 실패 없는 정상 실행은 완료된 접두 구간만 인정한다. 미검사 suffix는 목록 뒤로 보낸다.
-4. 부분 실패·중단 시 검사한 prefix 전체를 원래 `afterId`부터 재검사하도록 보존한다. 나머지 suffix도 별도 구간으로 남긴다. 성공한 개별 upsert를 되돌리거나 삭제하지 않는다.
-5. 실패한 prefix와 suffix를 목록 뒤로 순환시킨다. 특정 실패가 나머지 ID를 영구히 막지 않으며, 매 실행에서 관측 상한보다 높은 신규 ID 구간도 추가한다. 재시도는 다음 예약/관리자 실행에서만 한다.
-6. 모든 pending 구간이 끝나면 다음 실행은 다시 0부터 새 전체 검사 주기를 시작한다. 낮은 ID의 상세 변경, 늦게 커밋된 낮은 ID도 이 주기에서 반영한다.
+1. 시작할 때 한 번 현재 최대 ID·건수를 관측한다. pending이 비어 있으면 `(0, upperId]` 한 주기만 등록하고, pending이 있으면 관측 상한보다 높은 신규 ID 범위를 뒤에 추가한다. 이 목록을 처리 전에 먼저 atomic 저장한다.
+2. pending의 원래 FIFO 순서를 유지한 실행 가능 큐와, 이번 실행에서 재시도하지 않을 실패 prefix 목록을 메모리에서 구분한다. 영구 파일에는 두 목록을 합친 기존 pending Range 배열만 저장한다.
+3. 매 호출에서 `min(PAGE_SIZE, MAX_ITEMS-누적 processed)`개만 기존 PerfumeEmbeddingBatch로 검사한다. 해시 동일·신규·변경·실패 모두 검사 건수 예산을 소비한다. 첫 구간이 80건이면 MAX_ITEMS=1000에서 다음 구간들에는 총 920건이 남는다. 임베딩 호출 수가 1000이라는 뜻은 아니다.
+4. 성공한 처리 prefix는 완료로 인정하고, 미검사 suffix를 실행 가능 큐 뒤에 넣는다. 기존 구간이 먼저 순서를 얻으므로 한 큰 Range가 다른 Range를 계속 가리지 않는다. 페이지 단위로 체크포인트를 저장한 뒤 다음 구간을 처리한다.
+5. 실패가 있는 처리 prefix 전체는 다음 실행용 목록으로 미룬다. 정상 upsert는 되돌리거나 삭제하지 않는다. 미검사 suffix와 다른 구간은 남은 예산으로 계속 처리한다. 다음 실행에서 실패 prefix는 다시 적격이 되고 이미 정상 저장된 항목은 SHA-256으로 skip한다. 동일 실행에서 이 prefix를 재순환하지 않는다.
+6. `MAX_ITEMS`, 시작 시점부터 공유한 runtime, 정상 중단, 심각한 오류, 현재 실행 가능 큐 소진 중 하나로 끝난다. DB/모델 사전 검사 오류·잠금 충돌은 즉시 중단한다. 반환 cursor의 범위가 잘못되면 INVALID_PROGRESS, 아무 진전 없이 hasMore가 반복되는 계약 위반이면 NO_PROGRESS로 실패하고 원래 구간을 보존한다.
+7. 모든 실행 가능 구간이 끝나도 같은 실행에서 새 전체 검사 주기를 만들지 않는다. pending이 완전히 비었을 때 다음 실행만 0부터 새 주기를 시작한다. 실행 중 새로 유입된 상한 밖 ID는 다음 실행에 등록한다. 낮은 ID의 변경/늦은 커밋은 기존 전체 재검사 정책을 따른다.
 
-예: `(0,900]`에서 2개 검사 후 `lastId=80`, ID 2 실패, ID 80 성공이면 `(80,900]`, `(0,80]`를 남긴다. 실패한 ID 2를 완료로 처리하지 않으면서 이후 ID도 처리할 수 있다. 보고서의 `nextCursor`는 **다음 큐 구간의 시작점**이며 전체 진행의 최대 ID가 아니다. 순환 과정에서 감소할 수 있다. `pendingRanges`는 향수 건수가 아니다.
+예: `(0,900]`에서 2건 검사 후 lastId=80이고 ID 2 실패·ID 80 성공이면, `(80,900]`은 계속 실행 가능한 suffix, `(0,80]`은 다음 실행용 prefix다. 남은 현재 예산으로 suffix와 다른 적격 구간을 처리하고, 최종 pending에는 미처리 구간을 먼저, 실패 prefix를 뒤에 남긴다. 한 실패 항목만 남았다면 MAX_ITEMS=1000이어도 한 번만 검사한 뒤 종료한다.
 
-입력 상한과 pending 목록을 작업 전에 먼저 저장한다. 프로세스/VM이 upsert 후 checkpoint 전에 죽으면 이전 구간부터 다시 읽고 이미 저장한 행은 해시로 skip한다. 실제 VM 전원 종료를 Mock으로 재현했다고 주장하지 않으며, 테스트는 durable checkpoint와 개별 커밋이 남은 재시작 상태를 검증한다.
+**state.json은 version=1과 기존 필드를 그대로 사용하며 마이그레이션하지 않는다.** AutoEmbeddingState의 atomic write, 파일 잠금, 모델 identity, 중복·겹침 검증은 변경하지 않았다. 값 순서가 ID 오름차순이 아니어도 기존 FIFO를 보존한다. 처리 중 최신 결과는 RUNNING/IN_PROGRESS이고, 종료 시에만 최종 SUCCESS/FAILED/INTERRUPTED/SKIPPED로 기록한다. 기존 reader는 문자열 status를 읽을 수 있고, Python supervisor는 RUNNING을 완료로 인정하지 않는다. lastSuccessAt은 최종 성공일 때만 갱신한다.
 
-새 ID가 실행 도중 추가되면 다음 실행에서 상한 증가를 반영한다. 중간의 낮은 ID 추가/수정은 다음 전체 주기에서 반영한다. 유입이 처리 용량보다 많아 전체 주기가 끝나지 않으면 변경 검사의 지연도 커진다. 실패 prefix는 미완료이므로 성공 실행 하나가 있었다고 전체 backlog가 해소됐다고 판단하지 않는다. pending 구간은 10000개를 넘기면 실패하고 관리자가 원인/용량을 확인해야 한다.
+Checkpoint를 쓰기 전 프로세스가 끝나면 이전 파일에 현재 구간 전체가 남아 있다. DB upsert 후 파일 저장 전에 종료돼도 재실행의 SHA-256 skip으로 이미 커밋된 행을 보존한다. 현재 구간과 다음 구간 사이에도 먼저 저장하므로 한도 전체를 처음부터 다시 검사할 필요가 줄어든다. 정상 중단 중 현재 검사 prefix는 안전한 재검사를 위해 남긴다. 파일 저장이 실패하면 다음 작업을 시작하지 않고 기존 durable 파일을 보존한다. 실제 VM 전원 중단을 Mock으로 재현했다고 주장하지 않는다.
+
+Runtime은 구간마다 초기화하지 않는 monotonic clock으로 계산한다. Java 예산은 작업 시작 시점부터이며, 기존 Python 예산은 worker 기동도 포함한다. STOPPED와 TIME_LIMIT를 구분한다. 이미 진행 중인 HTTP/DB 요청의 완료·정리까지 기다릴 수 있어 hard deadline은 아니며 기존 supervisor/종료 유예·소유권 검사 정책을 유지한다. HTTP read 300000ms를 늘리거나 모델을 교체하지 않았다.
+
+각 처리 단위는 기존 DB advisory lock을 획득·해제한다. 다른 승인된 작업이 사이에 잠금을 점유하면 다음 단위에서 안전하게 중단한다. 아직 아무 것도 검사하지 못한 BATCH_BUSY는 SKIPPED, 이전 단위의 검사 실적이 있는 잠금 충돌은 FAILED다. 더 잦은 모델/잠금 검사와 파일 fsync 비용은 있지만 신규 HTTP 자동 재시도나 기존 항목의 재임베딩은 추가하지 않는다.
+
+새 ID 유입이 처리 용량보다 많거나 실패 prefix가 계속 남으면 전체 주기의 완료와 낮은 ID 변경 반영이 늦어질 수 있다. 실패를 누락시켜 완료로 표시하지 않는다. pending 10000개 상한과 파일 손상/identity 불일치 시 실패하는 기존 보호도 유지한다. 운영 state.json을 직접 편집·삭제·초기화하지 않는다.
 
 ## 4. Jenkins·수동 실행 잠금
 
@@ -222,7 +229,22 @@ systemctl list-timers --all perfume-embedding.timer
 
 `--status`는 timer 활성/실행 여부, service 상태/종료 결과, 다음 예정 시각, checkpoint 최근 결과/마지막 성공, worker/복구 표식 유무를 보여준다. `--status-db`는 추가로 현재 total, 해당 모델의 embedded, coverage_percent, missing_estimate를 읽기 전용 조회한다. 기존 원본의 변경 건수는 실제 해시 검사 전 알 수 없다. 새 실행이 JVM 시작 전에 실패하면 checkpoint의 이전 결과가 남으므로 service `Result/ExecMainStatus/시각`과 journal을 함께 확인한다. timer 외 직접 `--once`는 별도 unit journal이 기준이다.
 
-Java 보고서에는 시작/종료 UTC, SUCCESS/FAILED/INTERRUPTED/SKIPPED, 고정 오류 코드, 전체 대상 건수, available/target/processed/new/changed/skipped/failed/lastId/upperId/hasMore/interrupted, nextCursor/pendingRanges, elapsedMs가 있다. 표준 journal에도 같은 숫자를 기록한다. 모델/DB 오류는 기존 고정 코드, 부분 실패는 PARTIAL_FAILURE, 정상 중단은 STOPPED/TIME_LIMIT로 구분한다. 조회 불가 숫자는 -1이다. 모델/DB 사전 검사 실패는 processed=0, failed=0일 수 있지만 실행 상태는 FAILED다. `SUCCESS`는 그 실행만 완료한 의미이며 pending 전체 소진을 뜻하지 않는다.
+최종 Java 보고서는 **실행 전체 누적 결과**다. 기존 필드 순서·로그 형식을 유지해 Python 안전 필터가 그대로 통과시킨다.
+
+| 필드 | 한 실행에서의 의미 |
+| --- | --- |
+| total | 시작 시 관측한 전체 향수 건수; 현재 임베딩 건수가 아님 |
+| available | 시작 시 등록한 모든 pending 구간의 검사 대상 COUNT 합; suffix 재방문이나 실패 재검사로 중복 합산하지 않음 |
+| target | min(available, MAX_ITEMS); 동시 삭제 등으로 실제 processed는 더 작을 수 있음 |
+| processed / new / changed / skipped / failed | 모든 처리 단위 누적값; processed는 나머지 네 항목의 합 |
+| lastId | 이번 실행에서 마지막으로 검사한 ID, 없으면 0; FIFO 순환에 따라 감소할 수 있으며 전체 최대값/재개 cursor가 아님 |
+| upperId | 이번 실행에 등록한 관측 상한 observedUpperId |
+| hasMore | 최종 pending이 남아 있으면 true; 실패 prefix만 남아도 true |
+| interrupted | 정상 중단/시간 제한이 관측됐는지; 코드로 STOPPED와 TIME_LIMIT 구분 |
+| nextCursor / pendingRanges | 최종 pending의 첫 afterId / 구간 개수; 향수 건수가 아님 |
+| elapsedMs | Java 작업 시작부터의 누적 monotonic 시간; 구간마다 초기화하지 않음 |
+
+카운트 조회 전 중단·오류는 total/available/target에 -1이 있을 수 있다. COUNT들은 읽은 시점의 관측값이며 향수 수를 ID 차이로 추정하지 않는다.  표준 journal에도 같은 숫자를 기록한다. 모델/DB 오류는 기존 고정 코드, 부분 실패는 PARTIAL_FAILURE, 정상 중단은 STOPPED/TIME_LIMIT로 구분한다. 조회 불가 숫자는 -1이다. 모델/DB 사전 검사 실패는 processed=0, failed=0일 수 있지만 실행 상태는 FAILED다. `SUCCESS`는 그 실행만 완료한 의미이며 pending 전체 소진을 뜻하지 않는다.
 
 감독 프로세스는 Docker/Spring의 원시 예외 출력을 그대로 전달하지 않고 형식이 완전히 일치한 안전한 배치/Ollama 진단 메시지만 journal에 전달한다. 원문, 벡터, API 키, DB 비밀번호, Ollama 응답 본문과 예외 메시지는 로그에 넣지 않는다. zero exit만으로 성공을 판단하지 않고 이번 실행의 최신 durable 결과까지 확인한다. journal 보존 기간/용량은 운영자가 journald 정책으로 정하며 무한 로그 파일을 별도로 만들지 않는다.
 
@@ -247,7 +269,7 @@ sudo cp -a /var/lib/perfume-embedding/state.json \
 | `ai/embedding/AutoEmbeddingState.java` | 파일 잠금, 모델 identity, atomic checkpoint와 보고서 |
 | `ai/embedding/AutoPerfumeEmbeddingJob.java` | bounded 구간 큐, 신규 범위 등록, 재시작/실패 복구 |
 | `ai/embedding/AutoPerfumeEmbeddingRunner.java` | 일회성 Spring runner와 종료 신호 대기 |
-| 기존 `PerfumeEmbeddingBatch/Store/JdbcPerfumeEmbeddingStore` | 수동 파이프라인 재사용, 고정 upperId와 중단 조건 추가 |
+| 기존 `PerfumeEmbeddingBatch/Store/JdbcPerfumeEmbeddingStore` | 수동 파이프라인 재사용; 이번 연속 처리 개선에서 변경 없음 |
 | 기존 `PerfumeEmbeddingBatchRunner/Configuration`, `application.properties` | 명시적 CLI 보호, 수동/자동 runner 하나 선택, 기본 false |
 | `scentrev/service/ScentRevCatalogWriteGuard.java`와 기존 Import 두 서비스 | 저장 트랜잭션 공유 advisory lock |
 | `scripts/perfume-auto-embedding.sh`, `.py` | Jenkins flock, Docker worker 감독, 설정·상태 조회 |
@@ -270,7 +292,9 @@ bash -n scripts/perfume-auto-embedding.sh
 
 관리자가 활성화 전에 결정할 항목: 실제 전체 모델 digest, 예약 표현식/시간대, 최초 backlog와 일일 운영의 건수·시간 예산, Import/Jenkins 작업 창, 실패 알림과 journal 보존, DB/checkpoint 백업 및 복원 책임자, 실측 처리량에 따른 용량 조정 기준.
 
-## 14. 로컬 검증 결과 (2026-10-18)
+## 14. 최초 자동 실행 구현 당시 로컬 검증 기록 (2026-10-18)
+
+아래는 연속 처리 개선 전 기록이다. 이번 수정의 검증 결과는 15절을 따른다.
 
 - Java 17 / Maven 3.9.16 캐시를 사용한 오프라인 Maven 전체 `test`: **1104건, 실패 0, 오류 0, 기존 live/manual 15건 skipped, 1089건 통과**. 자동 실행/설정/파일 복구/Import 보호 관련 신규 Java 테스트 22건을 포함한다. 공개 카탈로그·의미 검색·LLM API와 기존 Import/Preview/skip-existing 회귀도 전체 suite에 포함된다.
 - 배포 보호 Python suite: **70건 통과**. 새 자동 실행 스크립트 테스트 13건과 Jenkins 고아 worker 표식 테스트 1건을 포함한다. 모든 Docker/Git/systemd 외부 동작은 Mock 또는 임시 디렉터리의 가짜 도구다.
@@ -280,3 +304,51 @@ bash -n scripts/perfume-auto-embedding.sh
 Windows 기본 Python 실행 별칭 대신 기존 pgAdmin 내 Python을 사용했다. JUnit 임시 경로는 workspace 내부로 지정했다. 기존 `target/classes`의 `ClassFormatError` 때문에, 원본 POM의 의존성/소스는 그대로 두고 빌드 출력·리소스 경로·테스트 작업 디렉터리·임시 경로만 분리한 `target/auto-embedding-validation-pom.xml`로 Maven 전체 suite를 검증했다. 원본 `pom.xml`은 변경하지 않았다.
 
 검증 로그는 `target/phase1-validation/auto-embedding-full-tests.log`, `auto-embedding-deployment.log`, `auto-embedding-python-focused.log`, `auto-embedding-diagnostics.log`, `auto-embedding-frontend-tests.log`, `auto-embedding-syntax.log`에 있다. Java 상세 XML 보고서는 `target/auto-embedding-validation/surefire-reports/`에 있다. 실제 DB·Ollama·Ubuntu·Docker daemon과 연결하지 않았고 Git Commit/Push, Jenkins 실행, systemd 설치·활성화도 수행하지 않았다.
+
+## 15. 연속 처리 개선 및 승인 후 검증 (2026-10-18)
+
+직접 원인은 기존 `AutoPerfumeEmbeddingJob.run()`이 `work.get(0)`에 대해 `batch.execute()`를 한 번만 호출하고 최종 결과를 기록한 것이다. MAX_ITEMS와 시간이 남아도 다음 pending Range로 이동하는 반복문이 없었다. 이제 3절의 큐 처리로 실행 전체 예산을 공유한다. 작은 구간이 끝났다는 이유만으로 종료하지 않는다.
+
+이번 수정 파일은 다음 5개다. 기존 수동 배치·JDBC 저장·state 파일 구현, Python supervisor 실행 코드, Import, Compose, Jenkins, SQL, 모델/타임아웃 설정은 변경하지 않았다.
+
+| 파일 | 이번 변경 |
+| --- | --- |
+| `src/main/java/com/perfume/ai/embedding/AutoPerfumeEmbeddingJob.java` | 연속 큐, 전역 건수/시간 예산, 처리 단위별 checkpoint, 실패 prefix 지연, 누적 보고 |
+| `src/test/java/com/perfume/ai/embedding/AutoPerfumeEmbeddingJobTests.java` | 기존 재개·실패 테스트를 한 실행에서 여러 구간을 처리하는 정책에 맞춤 |
+| `src/test/java/com/perfume/ai/embedding/AutoEmbeddingContinuationTests.java` | 연속 처리 신규 회귀 20건: 1000건 상한, 시간/중단, 커밋 후 모의 종료와 복구, 잠금, 기존 JSON, 누적 로그, 무진전 방어 |
+| `tests/deployment/test_auto_embedding.py` | 누적 로그의 안전 필터 호환, RUNNING checkpoint의 완료 오인 방지 회귀 |
+| `docs/perfume-auto-embedding-batch.md` | 알고리즘, 필드 의미, 운영 주의점과 검증 결과 |
+
+현재 소스의 전체 검증 결과:
+
+- Java 17 / Maven 전체 `test`: **1162건, 실패 0, 오류 0, 15건 skipped, 1147건 통과**. skipped는 기존 live/manual 테스트다. Import/Preview/skip-existing, RAG·기존 API 회귀를 포함한다.
+- `python -m unittest discover -s tests/deployment -v`: **81건 통과**. Docker/Git/systemd는 Mock 또는 임시 디렉터리의 가짜 도구로 검증했으며 실제 컨테이너를 실행·삭제하지 않았다.
+- `python -m unittest discover -s tests/diagnostics -v`: **12건 통과**.
+- frontend에서 `node --test tests/*.test.js`: **47건 통과**. 브라우저 통합 테스트는 실행하지 않았다.
+- 보호 Bash 스크립트 2개와 이 문서의 Bash 블록 10개는 실행 없이 `bash -n` 문법 검사를 통과했다. Python 구문 검사도 통과했다. 작업 시작 시 저장한 357개 파일의 해시와 비교해 이번 수정 대상 4개 이외의 353개가 동일함을 확인했고, 신규 파일은 위 Java 테스트 1개뿐이다. 기존 RAG 추천·React 변경사항은 그대로 보존했다.
+
+Maven은 14절과 같은 로컬 출력물 충돌을 피하도록 원본 의존성·Java 소스·테스트를 유지한 별도 검증 POM을 사용했다. Windows에서 실행한 명령은 아래와 같다. `JAVA_HOME`은 Java 17이며 실제 외부 호출을 활성화하는 환경변수를 제거한 상태다. Python은 기존 pgAdmin 설치의 실행 파일을 사용했다. 원본 `pom.xml`과 의존성을 수정하지 않았다.
+
+```powershell
+& .\target\phase1-validation\apache-maven-3.9.16\bin\mvn.cmd -B -o `
+  -f target/auto-embedding-continuation-validation-pom.xml `
+  '-Dmaven.repo.local=C:\dev\projects\perfume\target\phase1-validation\repository' test
+& 'C:\Users\pycup\AppData\Local\Programs\pgAdmin 4\python\python.exe' -m unittest discover -s tests/deployment -v
+& 'C:\Users\pycup\AppData\Local\Programs\pgAdmin 4\python\python.exe' -m unittest discover -s tests/diagnostics -v
+# frontend 디렉터리에서
+& 'C:\Program Files\nodejs\node.exe' --test tests/*.test.js
+```
+
+현재 Maven/Python 로그는 `target/phase1-validation/auto-embedding-continuation-full.log`, `auto-embedding-continuation-deployment.log`, `auto-embedding-continuation-diagnostics.log`에 있다. Java 상세 보고서는 `target/auto-embedding-continuation-validation/surefire-reports/`다. 로컬 검증용 POM·로그·임시 checkpoint는 Git 제외 대상인 target 안에만 생성했다.
+
+**Ubuntu에서의 다음 검증은 서버 반영과 실제 배치 실행을 별도 승인받은 뒤 관리자가 수행한다.** 지금 운영 checkpoint를 수정하거나 초기화할 필요는 없다.
+
+1. 기존 `--status`, `--status-db`와 journal 조회로 worker·잠금·현재 건수를 확인한다. 예전 2294/129 같은 수치를 현재 고정값으로 사용하지 않는다. Import 등 쓰기 작업과 Jenkins 배포 시간을 분리한다.
+2. timer와 실행 중인 자동/once 단위를 정상 중단하고 고정 worker 부재를 확인한다. 12절에 따라 현재 checkpoint를 별도 파일로 백업한다. 잠금 파일은 지우지 않는다. 기존 모델명/전체 digest/text_version과 state 디렉터리를 유지한다.
+3. 이 코드가 포함된 backend 이미지의 반영은 승인된 기존 배포 절차로 별도 진행한다. DB/Ollama 이미지·볼륨, SQL, Jenkins 방식은 바꾸지 않는다. 설정은 ENABLED=false로 두고 timer를 활성화하지 않는다.
+4. 별도 승인된 소규모 검사 예산으로 8절의 보호된 `--once`를 실행한다. 예를 들어 MAX_ITEMS=5, PAGE_SIZE=2면 기존 pending 범위가 충분할 때 같은 실행에서 여러 처리 단위로 진행해야 한다. MAX_RUNTIME_SECONDS는 관리자가 실제 처리 시간에 맞춰 정한다. 이 단계는 신규/변경 임베딩을 DB에 저장할 수 있다.
+5. 최종 로그·state 최신 결과에서 processed가 전체 MAX_ITEMS 이하이고 new+changed+skipped+failed와 같은지, 남은 pending이 있으면 hasMore=true인지 확인한다. pending이 있어도 SUCCESS/COMPLETED는 이번 한도 실행의 완료만 의미한다. 실패 prefix가 남으면 PARTIAL_FAILURE를 확인하고 운영 실패를 일부러 주입하지 않는다.
+6. 재실행은 직전 worker 부재와 잠금 해제를 확인한 뒤 같은 state/model로 한다. 정상 중단 검증이 승인됐다면 10절의 소유 단위 stop만 사용한다. 미완료 구간이 복구되고 이미 저장된 동일 해시가 skip되는지 확인한다. 한 실행에서 queue가 비어도 새 전체 주기는 다음 실행에만 시작해야 한다.
+7. 기존 웹/API와 DB 컨테이너·볼륨이 유지되는지 확인한다. 소규모 검증 후 일일 처리량·실패·전체 재검사 지연을 관찰하고, timer 활성화와 운영 예산 변경은 따로 승인한다.
+
+남은 위험과 미검증 범위: PAGE_SIZE마다 모델 검증·DB 잠금 재획득·파일 fsync가 발생하므로 실제 추가 비용은 Ubuntu에서 측정해야 한다. 잠금 재획득 사이에 Import가 잠금을 얻으면 기존 보호대로 배치가 중단된다. 계속 실패하는 prefix나 처리 용량 이상의 신규 유입은 전체 재검사 주기를 늦춘다. 이미 진행 중인 I/O는 기존 읽기 제한과 종료 유예 안에서 정리하므로 runtime은 즉시 강제 중단 시각이 아니다. 실제 Linux 전원 중단·파일시스템 내구성, systemd/Docker 신호 경합, PostgreSQL 두 세션 advisory lock은 이번 Mock 검증으로 보장하지 않는다. Commit/Push, Jenkins 실행, SSH, Docker 배포·서버 재시작, 실제 DB/임베딩 작업은 수행하지 않았으며 별도 승인이 필요하다.
