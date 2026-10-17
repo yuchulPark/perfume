@@ -8,6 +8,7 @@ public class RecommendationFailure extends RuntimeException {
         INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Provide a nonblank query of at most 500 characters and an integer topK from 1 to 20."),
         RECOMMEND_DISABLED(HttpStatus.SERVICE_UNAVAILABLE, "Recommendations are disabled."),
         RECOMMEND_BUSY(HttpStatus.TOO_MANY_REQUESTS, "Recommendations are busy. No request was queued."),
+        RECOMMEND_JOB_NOT_FOUND(HttpStatus.NOT_FOUND, "The job is unavailable, expired or inaccessible."),
         RECOMMEND_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "The recommendation processing deadline was exceeded."),
         RECOMMEND_INTERRUPTED(HttpStatus.SERVICE_UNAVAILABLE, "Recommendation processing was interrupted."),
         SEARCH_FAILED(HttpStatus.BAD_GATEWAY, "The evidence search could not be completed."),

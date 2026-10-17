@@ -22,7 +22,10 @@ test('React status rendering distinguishes loading, cancellation and safe error 
   assert.match(loading, /role="status"/); assert.match(loading, /추천 응답을 기다리고 있어요/);
   assert.doesNotMatch(loading, /%|progressbar/);
   const cancelled = render(RecommendationStatus, { status: 'cancelled' });
-  assert.match(cancelled, /추천 요청 대기를 취소했어요/); assert.match(cancelled, /서버 작업은 바로 멈추지 않을 수 있어요/);
+  assert.match(cancelled, /추천 작업 취소가 완료됐어요/); assert.match(cancelled, /백엔드 작업 종료와 정리를 확인했어요/);
+  assert.match(render(RecommendationStatus, { status: 'cancelling', confirmed: true }), /AI 추천을 취소하는 중입니다/);
+  assert.match(render(RecommendationStatus, { status: 'unknown' }), /작업 상태 확인 불가/);
+  assert.match(render(RecommendationStatus, { status: 'lost' }), /서버 재시작이나 보관 기간 만료/);
   for (const [status, kind] of [[400, 'invalid'], [429, 'busy'], [503, 'disabled'], [502, 'server'], [504, 'timeout']]) {
     const error = new RecommendationError(status, kind);
     const html = render(RecommendationStatus, { status: 'error', error });

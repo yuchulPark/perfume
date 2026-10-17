@@ -1,5 +1,7 @@
 # 향수 RAG 3차 — Ollama 근거 기반 추천
 
+React의 서버 취소·작업 상태 조회는 [추천 작업 관리 문서](perfume-recommendation-jobs.md)를 참고한다. 기존 동기 API는 유지되며 새 작업 API와 같은 실행 제한을 공유한다.
+
 이번 변경은 로컬 코드·문서·Mock 테스트 준비다. PostgreSQL/Ollama/ScentRev 실제 호출, 운영 SQL, SSH, 컨테이너 시작·재시작·삭제, Git Commit/Push, Jenkins 실행을 하지 않았다. 아래 Ubuntu 절차는 코드 반영과 실제 검증을 별도 승인한 뒤 운영자가 실행한다.
 
 ## 추가·수정 파일과 처리 흐름

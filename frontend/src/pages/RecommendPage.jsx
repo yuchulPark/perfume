@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Link } from 'react-router-dom';
-import { DEFAULT_TOP_K, MAX_QUERY_LENGTH, MAX_TOP_K, recommendPerfumes, validateRecommendationInput } from '../api/recommendations.js';
+import { DEFAULT_TOP_K, MAX_QUERY_LENGTH, MAX_TOP_K, validateRecommendationInput } from '../api/recommendations.js';
+import { RecommendationJobSession } from '../lib/recommendationJobs.js';
 import { Icon } from '../components/Icon.jsx';
 import { RecommendationResults, RecommendationStatus } from '../components/RecommendationResults.jsx';
 
@@ -10,42 +11,26 @@ export default function RecommendPage() {
   const [query, setQuery] = useState('');
   const [topK, setTopK] = useState(DEFAULT_TOP_K);
   const [validation, setValidation] = useState('');
-  const [result, setResult] = useState({ status: 'idle' });
-  const activeRequest = useRef(null);
+  const [jobs] = useState(() => new RecommendationJobSession());
+  const result = useSyncExternalStore(jobs.subscribe, jobs.getSnapshot, jobs.getSnapshot);
   const inputRef = useRef(null);
   const headingRef = useRef(null);
-  const pending = result.status === 'loading';
+  const pending = ['loading', 'cancelling', 'unknown'].includes(result.status);
 
   useEffect(() => {
     document.title = 'AI 향수 추천 · 향의 기록';
-    return () => { activeRequest.current?.abort(); activeRequest.current = null; };
-  }, []);
+    jobs.mount();
+    return () => jobs.unmount();
+  }, [jobs]);
   useEffect(() => { if (result.status === 'success') headingRef.current?.focus(); }, [result]);
 
-  async function submit(event) {
+  function submit(event) {
     event.preventDefault();
-    if (activeRequest.current) return;
+    if (pending) return;
     const invalid = validateRecommendationInput(query, topK);
     setValidation(invalid);
     if (invalid) { inputRef.current?.focus(); return; }
-    const controller = new AbortController();
-    activeRequest.current = controller;
-    setResult({ status: 'loading' });
-    try {
-      const data = await recommendPerfumes({ query, topK }, { signal: controller.signal });
-      if (activeRequest.current === controller && !controller.signal.aborted) setResult({ status: 'success', data });
-    } catch (error) {
-      if (activeRequest.current === controller && !controller.signal.aborted) setResult({ status: 'error', error });
-    } finally {
-      if (activeRequest.current === controller) activeRequest.current = null;
-    }
-  }
-
-  function cancel() {
-    const controller = activeRequest.current;
-    activeRequest.current = null;
-    controller?.abort();
-    setResult({ status: 'cancelled' });
+    jobs.start(query, topK);
   }
 
   return <div className="container recommend-page">
@@ -65,9 +50,12 @@ export default function RecommendPage() {
         <div className="recommend-form-footer"><div className="recommend-top-k"><label htmlFor="recommend-top-k">검색 개수</label>
           <select id="recommend-top-k" value={topK} disabled={pending} aria-describedby="recommend-top-k-help" onChange={(event) => setTopK(Number(event.target.value))}>
             {Array.from({ length: MAX_TOP_K }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}개</option>)}</select></div>
-          <div className="recommend-actions"><button type="submit" className="button button-dark" disabled={pending}><Icon name="spark" size={17} />{pending ? '추천 기다리는 중' : '추천받기'}</button>
-            {pending && <button type="button" className="button button-outline" onClick={cancel}>취소</button>}</div></div>
+          <div className="recommend-actions"><button type="submit" className="button button-dark" disabled={pending}><Icon name="spark" size={17} />{pending ? '추천 작업 진행 중' : '추천받기'}</button>
+            {pending && result.canCancel && result.status !== 'cancelling' && <button type="button" className="button button-outline" onClick={() => jobs.cancel()}>취소</button>}
+            {result.status === 'cancelling' && <button type="button" className="button button-outline" disabled>취소 처리 중</button>}
+            {result.status === 'unknown' && <button type="button" className="button button-outline" onClick={() => jobs.resume()}>상태 다시 확인</button>}</div></div>
         <p id="recommend-top-k-help" className="recommend-field-help">최대 몇 개의 향수를 검색할지 정해요. 실제 근거와 답변에 소개되는 향수는 더 적을 수 있어요.</p>
+        <p className="recommend-field-help">화면을 떠나도 서버 작업은 계속될 수 있어요. 같은 탭으로 돌아오면 작업 상태를 다시 확인해요.</p>
         {validation && <p id="recommend-validation" className="recommend-validation" role="alert">{validation}</p>}
       </form>
       <aside className="recommend-guide" aria-labelledby="recommend-guide-title"><Icon name="leaf" size={27} /><h2 id="recommend-guide-title">저장된 향에서 찾는 실마리</h2>
@@ -75,7 +63,7 @@ export default function RecommendPage() {
         <p>정보는 임베딩 생성 당시의 기록으로 최신 정보와 다를 수 있어요. 검색 유사도만으로 계절 적합성이나 지속력, 질문의 모든 조건을 충족한다고 확정할 수는 없어요.</p>
         <Link to="/">향수 컬렉션 둘러보기<Icon name="arrow" size={16} /></Link></aside>
     </div>
-    <RecommendationStatus status={result.status} error={result.error} />
+    <RecommendationStatus status={result.status} error={result.error} confirmed={result.confirmed} />
     {result.status === 'success' && <RecommendationResults data={result.data} headingRef={headingRef} />}
   </div>;
 }

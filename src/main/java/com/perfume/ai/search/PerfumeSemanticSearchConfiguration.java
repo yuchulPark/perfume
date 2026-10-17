@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import com.perfume.ai.transport.RecommendationHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration(proxyBeanMethods = false)
@@ -29,7 +29,7 @@ public class PerfumeSemanticSearchConfiguration {
     }
     @Bean PerfumeSemanticSearchOptions semanticSearchOptions(Environment environment) { return PerfumeSemanticSearchOptions.from(environment); }
     @Bean OllamaQueryEmbeddingAdapter queryEmbeddingAdapter(RestClient.Builder builder, PerfumeSemanticSearchOptions options) {
-        var factory = new SimpleClientHttpRequestFactory(); factory.setConnectTimeout(options.connectTimeout()); factory.setReadTimeout(options.readTimeout());
+        var factory = new RecommendationHttpRequestFactory(options.connectTimeout(), options.readTimeout());
         return new OllamaQueryEmbeddingAdapter(new OllamaPerfumeEmbeddingClient(builder.clone().baseUrl(options.baseUrl().toString())
                 .requestFactory(factory).build()), options.model());
     }

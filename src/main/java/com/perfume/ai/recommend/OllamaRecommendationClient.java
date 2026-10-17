@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import com.perfume.ai.transport.RecommendationCancellation;
 
 /** Non-streaming local chat only. No tools, generation retries, pull, persistence or chat history. */
 public class OllamaRecommendationClient {
@@ -108,7 +109,8 @@ public class OllamaRecommendationClient {
                 || response.path(field).intValue() < 0 || response.path(field).intValue() > limit)) { throw invalid(); }
     }
     static void checkInterrupted() {
-        if (Thread.currentThread().isInterrupted()) { throw new RecommendationFailure(RecommendationFailure.Code.RECOMMEND_INTERRUPTED); }
+        var scope = RecommendationCancellation.current();
+        if (Thread.currentThread().isInterrupted() || (scope != null && scope.isCancelled())) { throw new RecommendationFailure(RecommendationFailure.Code.RECOMMEND_INTERRUPTED); }
     }
     private static void failed(String stage, long started, RecommendationFailure.Code code, int httpStatus, boolean responseComplete) {
         log.warn("Ollama recommendation failed: stage={}, code={}, elapsedMs={}, httpStatus={}, responseComplete={}, serverMetricsAvailable=false",

@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import com.perfume.ai.transport.RecommendationHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration(proxyBeanMethods = false)
@@ -25,6 +25,7 @@ public class PerfumeRecommendationConfiguration {
         });
     }
     @Bean PerfumeRecommendationOptions recommendationOptions(Environment environment) { return PerfumeRecommendationOptions.from(environment); }
+    @Bean RecommendationJobOptions recommendationJobOptions(Environment environment) { return RecommendationJobOptions.from(environment); }
     @Bean JdbcRecommendationEvidenceRepository recommendationEvidenceRepository(DataSource source, PerfumeSemanticSearchOptions search, PerfumeRecommendationOptions options) {
         return new JdbcRecommendationEvidenceRepository(source, search.model(), options.dbTimeoutSeconds());
     }
@@ -32,11 +33,11 @@ public class PerfumeRecommendationConfiguration {
         return new RecommendationPromptBuilder(mapper, new RecommendationEvidenceFormatter(), options.inputBudgetBytes(), options.maxEvidenceCandidates());
     }
     @Bean OllamaRecommendationClient recommendationLlmClient(RestClient.Builder builder, ObjectMapper mapper, PerfumeRecommendationOptions options) {
-        var factory = new SimpleClientHttpRequestFactory(); factory.setConnectTimeout(options.connectTimeout()); factory.setReadTimeout(options.readTimeout());
+        var factory = new RecommendationHttpRequestFactory(options.connectTimeout(), options.readTimeout());
         return new OllamaRecommendationClient(builder.clone().baseUrl(options.baseUrl().toString()).requestFactory(factory).build(), mapper, options);
     }
     @Bean(destroyMethod = "close") PerfumeRecommendationService recommendationService(PerfumeSemanticSearchService search,
-            JdbcRecommendationEvidenceRepository evidence, RecommendationPromptBuilder prompts, OllamaRecommendationClient llm, PerfumeRecommendationOptions options) {
-        return new PerfumeRecommendationService(search, evidence, prompts, llm, options);
+            JdbcRecommendationEvidenceRepository evidence, RecommendationPromptBuilder prompts, OllamaRecommendationClient llm, PerfumeRecommendationOptions options, RecommendationJobOptions jobs) {
+        return new PerfumeRecommendationService(search, evidence, prompts, llm, options, jobs);
     }
 }

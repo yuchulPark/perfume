@@ -44,7 +44,7 @@
 | 메인/향수 목록 | `/` | `/api/brands`, `/api/perfumes?page=0&size=20` |
 | 검색/브랜드 필터 | `/?q=검색어&brandSlug=creed&page=1` | 키워드가 있으면 `/api/perfumes/search`, 없으면 `/api/perfumes`; `q`, `brandSlug`, `page`, `size=20` 전달 |
 | 향수 상세 | `/perfumes/{id}` | `/api/perfumes/{id}` |
-| AI 향수 추천 | `/recommend` | `POST /api/ai/perfumes/recommend` |
+| AI 향수 추천 | `/recommend` | `POST /api/ai/perfumes/recommend/jobs`, 작업 상태 GET, 작업 취소 POST |
 
 - 검색은 입력 후 350ms 지연 처리하며 Enter/검색 버튼으로 즉시 실행할 수도 있습니다. 브랜드 변경은 즉시 반영됩니다. 검색이나 브랜드가 바뀌면 첫 페이지로 돌아갑니다.
 - 검색·브랜드·페이지는 URL에 보존됩니다. 카드에서 상세로 이동 후 `향수 목록으로`를 누르면 이전 조건으로 돌아옵니다.
@@ -74,11 +74,13 @@ TanStack Query가 동일한 query key의 진행 중 요청을 공유합니다. �
 
 API 계약은 [RAG 추천 문서](../docs/perfume-rag-recommendation.md), `PerfumeRecommendationController`, `PerfumeSemanticSearchRequest`, `PerfumeRecommendationResponse`, `RecommendationFailure`를 기준으로 합니다.
 
+현재 화면의 서버 취소·상태 조회·복원 계약은 [추천 작업 관리 문서](../docs/perfume-recommendation-jobs.md)를 따릅니다. 기존 긴 동기 POST 클라이언트도 호환용으로 유지합니다.
+
 - 상단 `AI 향수 추천` 메뉴와 `/recommend`에서 자연어 질문, 예시 질문, 검색 개수(topK)를 제공합니다. 예시를 누르면 입력만 채우며, 추천받기를 눌러야 요청합니다. 질문은 공백만 입력할 수 없고 최대 500 UTF-16 단위입니다. 검색 개수는 정수 1~20, 기본 5입니다.
-- `api/recommendations.js`가 기존 엔드포인트에 `{query, topK}`만 POST합니다. 일반 GET용 `client.js`와 `queries.js`의 제한·캐시 정책은 유지합니다. AI 요청은 React 페이지 메모리에서만 관리하여 Query 캐시, URL, localStorage, sessionStorage, 콘솔에 질문·답변을 남기지 않습니다. 화면을 떠나거나 새로고침하면 입력과 결과가 사라집니다.
+- `api/recommendations.js`가 작업 생성 엔드포인트에 `{query, topK}`를 POST하고, 약 2초 간격으로 상태를 조회합니다. 일반 GET용 `client.js`와 `queries.js`의 제한·캐시 정책은 유지합니다. 질문·답변은 Query 캐시, URL, localStorage, sessionStorage, 콘솔에 남기지 않습니다. 같은 탭의 복원을 위해 작업 ID와 접근 토큰만 sessionStorage에 두고 완료 확인 시 삭제합니다. 새로고침하면 질문 입력은 사라지고 진행 중 작업 상태를 복구합니다.
 - 답변은 HTML 실행 없이 한국어 문단으로 표시합니다. `[1]`은 `sources[0]` 카드로 연결하고 서버 배열을 재정렬하지 않습니다. 근거 카드에는 향수명, 브랜드, 실제 검색 유사도와 `/perfumes/{perfumeId}` 링크를 표시합니다. 유사도는 확률이나 평점으로 변환하지 않습니다.
 - 전체 카탈로그가 아닌 임베딩된 일부 향수의 저장된 정보를 사용하며 최신 정보·조건 충족을 보장하지 않는다는 안내를 표시합니다. 임베딩 개수나 브랜드를 하드코딩하지 않습니다. 검색 개수와 실제 근거/답변에 소개되는 향수 개수가 다를 수 있습니다.
-- 대기 중 중복 제출을 막고 취소 버튼을 제공합니다. AbortController로 사용자 취소·화면 이탈·클라이언트 기한 초과를 전달하며, 이전 요청이 늦게 도착해도 새 결과를 덮어쓰지 않습니다. 가짜 진행률이나 처리 단계는 없습니다. 연결 취소만으로 백엔드/Ollama 작업이 즉시 중단되는 것은 보장되지 않습니다.
+- 대기 중 중복 제출을 막고 취소 API로 서버에 취소를 요청합니다. `CANCELLING`에서는 ‘AI 추천을 취소하는 중입니다’를 표시하고 서버 실행·정리 확인 전 새 제출을 막습니다. 조회 오류나 모호한 생성/취소 응답은 ‘작업 상태 확인 불가’로 멈추며 사용자의 명시적 재확인을 기다립니다. 자동 조회는 최대 450회이며 무한 재시도나 자동 재생성은 없습니다. 이전 조회 응답은 새 작업 결과를 덮어쓰지 않습니다. 이탈 시 브라우저 HTTP만 중단하고 서버 취소를 가장하지 않으며, 돌아오면 저장된 핸들로 상태를 확인합니다. Ollama 원격 계산의 즉시 종료는 보장하지 않습니다.
 - 결과 없음(`200`, 빈 sources), 추천 비활성화(`503/RECOMMEND_DISABLED`), 동시 요청 초과(`429/RECOMMEND_BUSY`), 잘못된 요청(`400`), 근거 이용 불가(`503/EVIDENCE_UNAVAILABLE`), 서비스 장애(`503`), 생성/서버 오류(`502`), 기한 초과(`504` 또는 클라이언트 기한 초과)를 구분합니다. 고정 코드와 HTTP 상태가 일치할 때만 코드를 사용하며 알 수 없는 코드·HTML 프록시 오류는 상태별 안전한 안내로 처리합니다. 원시 서버 detail/title, 내부 오류를 화면에 노출하지 않으며 자동 재시도는 없습니다.
 
 ### AI 전용 제한 시간
@@ -87,7 +89,9 @@ API 계약은 [RAG 추천 문서](../docs/perfume-rag-recommendation.md), `Perfu
 | --- | --- | --- |
 | 백엔드 전체 요청 | 기본 420초 | `PerfumeRecommendationOptions.requestTimeout`, 이번 작업에서 변경 없음 |
 | Nginx AI 프록시 읽기 | 450초 | 정확한 `/api/ai/perfumes/recommend` location에만 적용, 백엔드 오류 응답 여유 30초 |
-| AI 클라이언트 | 480초 | 프록시 오류 응답 여유 30초, 응답 body 읽기까지 적용 |
+| 기존 동기 AI 클라이언트 | 480초 | 호환 유지, 프록시 오류 응답 여유 30초 |
+| 작업 생성·상태 조회·취소 HTTP | 각각 15초 | 실제 추천 계산 기한과 별개, 실패 시 상태 확인 불가 처리 |
+| 작업 자동 조회 간격 | 2초 | 최대 450회, 이후 명시적 상태 재확인 |
 | 일반 API | GET 클라이언트 15초, Nginx 읽기 30초 | 기존 값 유지 |
 
 ### 실제 API 연동에 남은 설정
@@ -110,11 +114,13 @@ frontend/
     api/client.js / queries.js      REST 클라이언트, 캐시/취소
     api/recommendations.js          AI 전용 POST, 검증, 기한, 안전한 오류 처리
     lib/display.js                 NULL, 점수, metric 경로 처리
+    lib/recommendationJobs.js      작업 핸들·취소·복원·유한 폴링 상태 관리
     pages/                         목록, 상세, AI 추천 페이지
     components/                    검색, 카드, 이미지, 페이지, 상세 섹션, 상태 UI
     styles.css                     PC/모바일 반응형 스타일
   tests/display.test.js             순수 로직/클라이언트 테스트
   tests/recommendations.test.js      AI 클라이언트/오류/기한/취소 Mock 테스트
+  tests/recommendation-jobs.test.js   작업 API·취소·복원·네트워크·폴링 한도 단위 테스트
   tests/recommendation-components.test.js  실제 JSX의 React 렌더링 단위 테스트
   tests/browser/catalog.spec.js     모의 REST 응답 기반 화면 테스트
   tests/browser/recommendation.spec.js  AI 입력/결과/취소/오류/개인정보 Mock 화면 테스트
@@ -133,4 +139,4 @@ npm.cmd run test:browser
 
 React 단위 테스트는 기존 Vite로 실제 JSX 모듈을 변환하고 React 서버 렌더러로 상태·문단·출처·라우팅을 검증합니다. 사용자 상호작용과 DOM의 로딩·취소·오류·상세 이동은 별도 Playwright Mock 테스트로 검증합니다. 새 테스트 패키지는 추가하지 않습니다.
 
-RAG 4차 검증 결과: `npm test` **35개 통과**, `npm run build` **성공**, `npm run test:browser` **69개 통과**(PC·태블릿·모바일), 실패 0개입니다. 기존 검색·브랜드 필터·페이지네이션·상세 회귀 테스트도 포함합니다. 제한된 Windows 실행 환경에서 Playwright의 미리보기 서버 종료가 지연되어, 검증에서 띄운 preview 프로세스만 종료해 정리했고 테스트 명령의 종료 코드 0을 확인했습니다. 변경 범위는 `frontend/`뿐이며 백엔드·DB·모델·임베딩·Checkpoint·Jenkins·systemd는 변경하지 않았습니다.
+서버 취소 추가 전 초기 RAG 4차 검증 기록: 단위 테스트 35개와 브라우저 테스트 69개 통과, 빌드 성공. 현재 작업 관리 기능의 최신 검증과 변경 범위는 [추천 작업 관리 문서](../docs/perfume-recommendation-jobs.md)에 기록합니다. 기존 검색·브랜드 필터·페이지네이션·상세 회귀 테스트도 유지합니다.
