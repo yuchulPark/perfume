@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -16,8 +17,23 @@ spec.loader.exec_module(guard)
 PASSWORD = "offline-test-password"
 
 
-def deployment_config():
-    return {
+def ai_environment(inputs=None):
+    """Offline projection of only backend's AI scalar values; not a full Compose/YAML parser."""
+    source = (SCRIPT.parents[1] / "compose.yaml").read_text(encoding="utf-8")
+    block = source.split("  backend:\n", 1)[1].split("  frontend:\n", 1)[0]
+    values = {}
+    for key, value in re.findall(r"^      (PERFUME_AI_[A-Z_]+): (.+)$", block, re.MULTILINE):
+        interpolation = re.fullmatch(r"\$\{([A-Z_]+):-([^}]*)\}", value)
+        if interpolation:
+            name, default = interpolation.groups()
+            values[key] = (inputs or {}).get(name) or default
+        else:
+            values[key] = json.loads(value)
+    return values
+
+
+def deployment_config(ai=None):
+    config = {
         "name": "perfume-dev",
         "volumes": {"pgdata": {"name": "perfume-dev_pgdata"},
                     "ollama-data": {"name": "perfume-dev_ollama-data"}},
@@ -57,6 +73,9 @@ def deployment_config():
             },
         },
     }
+    if ai is not None:
+        config["services"]["backend"]["environment"].update(ai)
+    return config
 
 
 class DeploymentGuardTests(unittest.TestCase):
@@ -224,7 +243,8 @@ class DeploymentGuardTests(unittest.TestCase):
     def test_repository_compose_matches_guard_without_starting_containers(self):
         project_directory = SCRIPT.parents[1]
         environment = dict(os.environ)
-        for key in ("COMPOSE_FILE", "COMPOSE_PROJECT_NAME", "COMPOSE_PROFILES", "DB_NAME", "DB_USERNAME", "DB_PASSWORD", "PERFUME_DB_IMAGE"):
+        for key in ("COMPOSE_FILE", "COMPOSE_PROJECT_NAME", "COMPOSE_PROFILES", "DB_NAME", "DB_USERNAME", "DB_PASSWORD", "PERFUME_DB_IMAGE",
+                    "PERFUME_AI_SEARCH_ENABLED", "PERFUME_AI_SEARCH_MODEL_DIGEST", "PERFUME_AI_RECOMMEND_ENABLED", "PERFUME_AI_RECOMMEND_MODEL_DIGEST"):
             environment.pop(key, None)
         environment["DB_PASSWORD"] = PASSWORD
         result = subprocess.run([

@@ -27,6 +27,8 @@ test ! -e .perfume-embedding-active && test ! -L .perfume-embedding-active || {
 
 # Do not inherit a different project's Compose or DB settings from the SSH session.
 unset COMPOSE_FILE COMPOSE_PROJECT_NAME COMPOSE_PROFILES DB_NAME DB_USERNAME DB_PASSWORD DB_URL SCENTREV_API_KEY PERFUME_DB_IMAGE
+# AI activation and model identities must come only from the operator-owned server .env.
+unset PERFUME_AI_SEARCH_ENABLED PERFUME_AI_SEARCH_MODEL_DIGEST PERFUME_AI_RECOMMEND_ENABLED PERFUME_AI_RECOMMEND_MODEL_DIGEST
 export GIT_TERMINAL_PROMPT=0
 compose() {
     docker compose --project-name perfume-dev --project-directory "$deploy_directory" \

@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from test_compose_guard import deployment_config, PASSWORD
+from test_compose_guard import deployment_config, PASSWORD, ai_environment
 from test_pgvector_production import ROOT, DB_ID, IMAGE_ID, approval, container, image, probe
 
 BASH = str(Path("C:/Program Files/Git/bin/bash.exe")) if os.name == "nt" else shutil.which("bash")
@@ -41,6 +41,9 @@ assert tool == 'docker', tool
 changed = (root / 'changed-db').exists()
 db_id = '9' * 64 if changed else data['container']['Id']
 if args[0] == 'compose':
+    assert not any(key in os.environ for key in (
+        'PERFUME_AI_SEARCH_ENABLED', 'PERFUME_AI_SEARCH_MODEL_DIGEST',
+        'PERFUME_AI_RECOMMEND_ENABLED', 'PERFUME_AI_RECOMMEND_MODEL_DIGEST'))
     command = next(x for x in args[1:] if x in ('config', 'build', 'up', 'ps'))
     if command == 'config' and '--quiet' not in args:
         print(json.dumps(data['compose']))
@@ -126,7 +129,7 @@ print('Legacy default-image validation passed.')
 
 @unittest.skipUnless(BASH and Path(BASH).exists(), "Bash is required for mocked deploy-script execution.")
 class JenkinsDbPreservationTests(unittest.TestCase):
-    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False):
+    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False, ai_inputs=None):
         with tempfile.TemporaryDirectory(prefix="perfume-deploy-mock-") as directory:
             root = Path(directory)
             (root / "scripts").mkdir()
@@ -136,7 +139,7 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                        PYTHONDONTWRITEBYTECODE="1")
             posix_directory = subprocess.run([BASH, "--noprofile", "--norc", "-c", 'cd "$1" && pwd -P', "test", directory],
                                              env=env, text=True, capture_output=True, check=True).stdout.strip()
-            config = deployment_config()
+            config = deployment_config(ai_environment(ai_inputs) if ai_inputs is not None else None)
             config["services"]["backend"]["build"]["context"] = posix_directory
             config["services"]["frontend"]["build"]["context"] = posix_directory + "/frontend"
             config["services"]["db"]["image"] = reference or (IMAGE_ID if vector else "postgres:17-bookworm")
@@ -165,6 +168,9 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                        PERFUME_TEST_PYTHON=sys.executable, PERFUME_TEST_FAKE_TOOLS=str(root / "fake-tools.py"),
                        PERFUME_TEST_PYTHON_DRIVER=str(root / "python-driver.py"), PERFUME_TEST_GUARD_SOURCE=str(guard_source),
                        PERFUME_EXPECTED_DB_PASSWORD=PASSWORD)
+            # SSH session values must never override the operator-managed Compose .env inputs.
+            env.update(PERFUME_AI_SEARCH_ENABLED="true", PERFUME_AI_SEARCH_MODEL_DIGEST="invalid-inherited",
+                       PERFUME_AI_RECOMMEND_ENABLED="true", PERFUME_AI_RECOMMEND_MODEL_DIGEST="invalid-inherited")
             env["PATH"] = str(root / "fake-bin") + os.pathsep + env["PATH"]
             for name in ("docker", "git", "curl", "flock", "python3"):
                 body = ('exec "$PERFUME_TEST_PYTHON" "$PERFUME_TEST_PYTHON_DRIVER" "$@"' if name == "python3" else
@@ -224,3 +230,23 @@ class JenkinsDbPreservationTests(unittest.TestCase):
         up = [cmd for cmd in commands if cmd[:2] == ["docker", "compose"] and "up" in cmd]
         self.assertEqual(2, len(up))
         self.assertTrue(all(cmd[-1] in ("backend", "frontend") for cmd in up))
+
+    def test_ai_disabled_and_enabled_deploys_preserve_db_and_only_replace_apps(self):
+        for enabled in ("false", "true"):
+            with self.subTest(enabled=enabled):
+                inputs = {"PERFUME_AI_SEARCH_ENABLED": enabled, "PERFUME_AI_SEARCH_MODEL_DIGEST": "a" * 64 if enabled == "true" else "",
+                          "PERFUME_AI_RECOMMEND_ENABLED": enabled, "PERFUME_AI_RECOMMEND_MODEL_DIGEST": "b" * 64 if enabled == "true" else ""}
+                result, commands = self.run_deploy(vector=True, extension="0.8.7", ai_inputs=inputs)
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                up = [cmd for cmd in commands if cmd[:2] == ["docker", "compose"] and "up" in cmd]
+                self.assertEqual(["backend", "frontend"], [cmd[-1] for cmd in up])
+                self.assertTrue(all("--no-deps" in cmd and "--no-build" in cmd for cmd in up))
+                self.assertIn("DB container, volume and .env preserved", result.stdout)
+
+    def test_invalid_enabled_ai_config_stops_before_fetch_build_or_app_replacement(self):
+        for digest in ("", "invalid-digest"):
+            with self.subTest(digest=digest):
+                result, commands = self.run_deploy(ai_inputs={"PERFUME_AI_SEARCH_ENABLED": "true", "PERFUME_AI_SEARCH_MODEL_DIGEST": digest})
+                self.assertNotEqual(0, result.returncode)
+                self.assertFalse(any(cmd[:2] == ["git", "fetch"] for cmd in commands))
+                self.assertFalse(any(cmd[:2] == ["docker", "compose"] and any(action in cmd for action in ("build", "up")) for cmd in commands))

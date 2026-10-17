@@ -112,6 +112,8 @@ Pipeline은 이 표식을 생성하거나 수정하지 않습니다. DB/볼륨/�
 
 ## 이후 코드 재배포와 실패 대응
 
+기존 상시 backend의 AI 검색·추천 활성화는 [개발 LAN AI 활성화 절차](perfume-ai-lan-activation.md)를 따른다. 기본값은 비활성이며 전체 모델 Digest는 서버 `.env`에서만 주입한다. 해당 문서에 단계별 활성화·검증·비활성화 롤백을 정리했다.
+
 main에 Push하면 같은 Pipeline이 코드/이미지만 갱신합니다. 서버 .env, backups, .perfume-db-ready 및 PostgreSQL 볼륨을 보존하며 dump를 재복원하지 않습니다. incoming 커밋에 .env/덤프/백업/운영 표식이 들어 있으면 Git reset 이전에 거부합니다.
 
 서버 Git 작업사본은 자동 배포용으로 유지하고 소스 수정을 서버에서 직접 하지 않습니다. Git reset은 테스트한 커밋의 추적 소스만 갱신합니다. 보호된 운영 파일이 아닌 추적 소스의 현지 수정은 유지되지 않습니다.

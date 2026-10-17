@@ -16,6 +16,41 @@ VECTOR_VERSION = "0.8.7"
 APPROVAL_NAME = ".env.pgvector-approval.json"
 APPROVAL_PATH = Path(__file__).resolve().parents[1] / APPROVAL_NAME
 SHA256 = r"[0-9a-f]{64}"
+AI_FIXED_ENV = {
+    "PERFUME_AI_SEARCH_MODEL": "qwen3-embedding:0.6b",
+    "PERFUME_AI_SEARCH_READ_TIMEOUT_MS": "60000",
+    "PERFUME_AI_SEARCH_REQUEST_TIMEOUT_MS": "120000",
+    "PERFUME_AI_SEARCH_MAX_CONCURRENT": "1",
+    "PERFUME_AI_RECOMMEND_MODEL": "qwen3:4b-instruct",
+    "PERFUME_AI_RECOMMEND_READ_TIMEOUT_MS": "300000",
+    "PERFUME_AI_RECOMMEND_GENERATION_TIMEOUT_MS": "300000",
+    "PERFUME_AI_RECOMMEND_REQUEST_TIMEOUT_MS": "420000",
+    "PERFUME_AI_RECOMMEND_MAX_CONCURRENT": "1",
+}
+AI_INPUT_ENV = {
+    "PERFUME_AI_SEARCH_ENABLED", "PERFUME_AI_SEARCH_MODEL_DIGEST",
+    "PERFUME_AI_RECOMMEND_ENABLED", "PERFUME_AI_RECOMMEND_MODEL_DIGEST",
+}
+
+
+def validate_ai_environment(environment):
+    keys = {key for key in environment if key.startswith("PERFUME_AI_")}
+    # The first deployment validates the old checkout before fetching the new Compose.
+    # No AI overrides means the existing application.properties keeps both APIs disabled.
+    if not keys:
+        return
+    require(keys == AI_INPUT_ENV | AI_FIXED_ENV.keys(), "Unexpected or incomplete AI environment settings.")
+    require(all(environment[key] == value for key, value in AI_FIXED_ENV.items()),
+            "AI model, deadline and CPU concurrency settings must retain the validated limits.")
+    for feature in ("SEARCH", "RECOMMEND"):
+        enabled = environment[f"PERFUME_AI_{feature}_ENABLED"]
+        digest = environment[f"PERFUME_AI_{feature}_MODEL_DIGEST"]
+        require(enabled in ("false", "true"), "AI enabled flags must be true or false.")
+        require(isinstance(digest, str) and (digest == "" or re.fullmatch(r"(?:sha256:)?" + SHA256, digest) is not None),
+                "AI model identities require a full lowercase SHA-256 digest.")
+        require(enabled != "true" or digest != "", "Enabled AI APIs require their own full model digest.")
+    require(environment["PERFUME_AI_RECOMMEND_ENABLED"] != "true" or environment["PERFUME_AI_SEARCH_ENABLED"] == "true",
+            "Recommendations require semantic search to be enabled.")
 
 
 def require(condition, message):
@@ -220,6 +255,9 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume", 
     require(db_env["POSTGRES_PASSWORD"] == expected_password
             and app_env["DB_PASSWORD"] == expected_password, "Jenkins credential and server .env password differ.")
     require(app_env.get("SCENTREV_API_KEY") == "", "Web deployment must not receive a ScentRev API key.")
+    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
+            "Unexpected backend environment overrides.")
+    validate_ai_environment(app_env)
     for name in services:
         require(not services[name].get("command") and not services[name].get("entrypoint"), "Image startup defaults must be retained.")
     for name, directory in (("backend", deploy_directory), ("frontend", os.path.join(deploy_directory, "frontend"))):
