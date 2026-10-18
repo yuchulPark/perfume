@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "run_id": "synthetic-run-v1",
+  "data_kind": "synthetic",
+  "dataset_sha256": "be8bf5887fc167ce3b9d1c00caa5aef16daef896492b670edcf0790ca1eb1600",
+  "config": {
+    "corpus_snapshot": "synthetic-corpus-v1",
+    "embedding_snapshot": "synthetic-embedding-v1",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "embedding_model_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "llm_model": "qwen3:4b-instruct",
+    "llm_model_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "text_version": "perfume-v1",
+    "prompt_revision": "synthetic-prompt-v1",
+    "formatter_revision": "synthetic-formatter-v1",
+    "backend_revision": "synthetic-backend-v1",
+    "captured_at": "2026-10-18T00:00:00Z",
+    "search_top_k": 5,
+    "max_evidence_candidates": 2,
+    "embedding_coverage": {
+      "total_perfumes": 4,
+      "embedded_perfumes": 4
+    },
+    "ollama_version": "synthetic-ollama",
+    "generation_options": {
+      "num_ctx": 4096,
+      "num_predict": 128,
+      "temperature": 0.2,
+      "num_thread": 3,
+      "max_input_bytes": 2560
+    }
+  },
+  "records": [
+    {
+      "query_id": "syn-ranked",
+      "query_sha256": "e4d37ca36152108f668fadc6b5b42e083c7d5d3979097f511e6d8c9402be2b1f",
+      "search": {
+        "status": "succeeded",
+        "response": {
+          "results": [
+            {
+              "perfumeId": 900001,
+              "name": "가상 향수 900001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 900003,
+              "name": "가상 향수 900003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.75
+            },
+            {
+              "perfumeId": 900002,
+              "name": "가상 향수 900002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            }
+          ],
+          "returnedCount": 3
+        },
+        "error_code": null
+      },
+      "recommendation": {
+        "status": "succeeded",
+        "response": {
+          "answer": "가상 테스트용 조립 문장입니다.\n가상 향수 900003 (가상 브랜드)는 가상 후보입니다. [2]\n저장된 가상 노트는 «가상 우디»입니다. [2]\n이 파일은 실제 향수·DB 평가 결과가 아닙니다.",
+          "sources": [
+            {
+              "perfumeId": 900001,
+              "name": "가상 향수 900001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 900003,
+              "name": "가상 향수 900003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.75
+            },
+            {
+              "perfumeId": 900002,
+              "name": "가상 향수 900002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            }
+          ],
+          "returnedCount": 3
+        },
+        "error_code": null,
+        "picks": [
+          {
+            "source": 2,
+            "factId": 1
+          }
+        ],
+        "evidence_reference": {
+          "review": {
+            "status": "approved",
+            "reviewer": "SYNTHETIC-FIXTURE-NOT-A-HUMAN-REVIEW",
+            "reviewed_at": "2026-10-18T00:00:00Z"
+          },
+          "query_sha256": "e4d37ca36152108f668fadc6b5b42e083c7d5d3979097f511e6d8c9402be2b1f",
+          "corpus_snapshot": "synthetic-corpus-v1",
+          "prefix_lines": [
+            "가상 테스트용 조립 문장입니다."
+          ],
+          "suffix_lines": [
+            "이 파일은 실제 향수·DB 평가 결과가 아닙니다."
+          ],
+          "sources": [
+            {
+              "source": 1,
+              "perfume_id": 900001,
+              "source_sha256": "494c1aeb75cd526b52ef8c204be3270eb6f0a6fe1ab6801f93e6dfc3afde2fa6",
+              "identity_line": "가상 향수 900001 (가상 브랜드)는 가상 후보입니다. [1]",
+              "facts": [
+                {
+                  "fact_id": 1,
+                  "text": "저장된 가상 노트는 «가상 시트러스»입니다. [1]",
+                  "kind": "stored_fact"
+                },
+                {
+                  "fact_id": 2,
+                  "text": "가상 근거에는 지속력 자료가 없습니다. [1]",
+                  "kind": "uncertainty"
+                }
+              ],
+              "source_text": "Name: 가상 향수 900001\nBrand: 가상 브랜드\nTOP notes: 가상 시트러스"
+            },
+            {
+              "source": 2,
+              "perfume_id": 900003,
+              "source_sha256": "424ec982e0268362fed66a0f965edcc3a33c0d16b8cd49fa9062646e30d5fde6",
+              "identity_line": "가상 향수 900003 (가상 브랜드)는 가상 후보입니다. [2]",
+              "facts": [
+                {
+                  "fact_id": 1,
+                  "text": "저장된 가상 노트는 «가상 우디»입니다. [2]",
+                  "kind": "stored_fact"
+                },
+                {
+                  "fact_id": 2,
+                  "text": "가상 근거에는 지속력 자료가 없습니다. [2]",
+                  "kind": "uncertainty"
+                }
+              ],
+              "source_text": "Name: 가상 향수 900003\nBrand: 가상 브랜드\nTOP notes: 가상 우디"
+            }
+          ],
+          "config_sha256": "3c141db4cedf8afe2b587c73d00ac857974b483263e04f0b59279f8186461c3f"
+        },
+        "human_review": {
+          "review": {
+            "status": "approved",
+            "reviewer": "SYNTHETIC-FIXTURE-NOT-A-HUMAN-REVIEW",
+            "reviewed_at": "2026-10-18T00:00:00Z"
+          },
+          "answer_sha256": "47e86ff2a61a6c3fefb6aac25127472c3d21900ecc7cfee848853abbc36fbf5e",
+          "question_relevant": false,
+          "evidence_relevant": false,
+          "uncertainty_appropriate": null,
+          "query_sha256": "e4d37ca36152108f668fadc6b5b42e083c7d5d3979097f511e6d8c9402be2b1f",
+          "config_sha256": "3c141db4cedf8afe2b587c73d00ac857974b483263e04f0b59279f8186461c3f"
+        }
+      }
+    },
+    {
+      "query_id": "syn-unlabeled",
+      "query_sha256": "d55fb268ad2802f9200ea1564dfc1c565678dbf754d6db22242dbdb9275a938f",
+      "search": {
+        "status": "succeeded",
+        "response": {
+          "results": [
+            {
+              "perfumeId": 900001,
+              "name": "가상 향수 900001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            }
+          ],
+          "returnedCount": 1
+        },
+        "error_code": null
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "syn-no-match",
+      "query_sha256": "eeeaa7dbb0fbc5b39e01af49f9e84bce794013220dc2d018e9434fc643fa22d7",
+      "search": {
+        "status": "succeeded",
+        "response": {
+          "results": [],
+          "returnedCount": 0
+        },
+        "error_code": null
+      },
+      "recommendation": {
+        "status": "succeeded",
+        "response": {
+          "answer": "가상 조건에 맞는 후보가 없습니다.",
+          "sources": [],
+          "returnedCount": 0
+        },
+        "error_code": null,
+        "picks": null,
+        "evidence_reference": null,
+        "human_review": {
+          "review": {
+            "status": "approved",
+            "reviewer": "SYNTHETIC-FIXTURE-NOT-A-HUMAN-REVIEW",
+            "reviewed_at": "2026-10-18T00:00:00Z"
+          },
+          "answer_sha256": "cf7f3f9b91f24cd653b24b518f79b8ebef9c4fbdf7af1576be97bdeca6a32236",
+          "question_relevant": true,
+          "evidence_relevant": null,
+          "uncertainty_appropriate": true,
+          "query_sha256": "eeeaa7dbb0fbc5b39e01af49f9e84bce794013220dc2d018e9434fc643fa22d7",
+          "config_sha256": "3c141db4cedf8afe2b587c73d00ac857974b483263e04f0b59279f8186461c3f"
+        }
+      }
+    },
+    {
+      "query_id": "syn-pool",
+      "query_sha256": "fd307c3cba1dd8009e9be2b73ad503b14b17dbe947c84452f2e2dfb073cdefad",
+      "search": {
+        "status": "succeeded",
+        "response": {
+          "results": [
+            {
+              "perfumeId": 900004,
+              "name": "가상 향수 900004",
+              "brandName": "가상 브랜드",
+              "similarity": 0.6499999999999999
+            },
+            {
+              "perfumeId": 900001,
+              "name": "가상 향수 900001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            }
+          ],
+          "returnedCount": 2
+        },
+        "error_code": null
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "syn-failed",
+      "query_sha256": "f6d670bf8c566924cce4d18a909f52c1f0a11a36abbb67bddd7c88a1bfeaec4e",
+      "search": {
+        "status": "failed",
+        "response": null,
+        "error_code": "SEARCH_TIMEOUT"
+      },
+      "recommendation": {
+        "status": "timed_out",
+        "response": null,
+        "error_code": "LLM_TIMEOUT",
+        "picks": null,
+        "evidence_reference": null,
+        "human_review": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "dataset_id": "synthetic-rag-fixture",
+  "version": "v1",
+  "data_kind": "synthetic",
+  "corpus_snapshot": "synthetic-corpus-v1",
+  "queries": [
+    {
+      "id": "syn-ranked",
+      "category": "accord",
+      "query": "가상 시트러스 향수를 골라 줘.",
+      "constraints": [
+        "가상 시트러스 조건"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "answerable",
+      "qrels": [
+        {
+          "perfume_id": 900001,
+          "grade": 3,
+          "condition_satisfied": true
+        },
+        {
+          "perfume_id": 900002,
+          "grade": 1,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 900003,
+          "grade": 0,
+          "condition_satisfied": false
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-A-HUMAN-REVIEW",
+        "reviewed_at": "2026-10-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "syn-unlabeled",
+      "category": "mood",
+      "query": "가상 차분한 향을 찾아 줘.",
+      "constraints": [
+        "정답 미확정 사례"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "qrels": [],
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      }
+    },
+    {
+      "id": "syn-no-match",
+      "category": "no_match",
+      "query": "가상 데이터에 없는 조건을 만족하는 향수를 찾아 줘.",
+      "constraints": [
+        "가상 데이터에서 일치 향수 없음"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "no_match",
+      "qrels": [],
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-A-HUMAN-REVIEW",
+        "reviewed_at": "2026-10-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "syn-pool",
+      "category": "note",
+      "query": "가상 노트가 있는 향수를 찾아 줘.",
+      "constraints": [
+        "미평가 검색 결과 사례"
+      ],
+      "judgment_scope": "pool",
+      "answerability": "answerable",
+      "qrels": [
+        {
+          "perfume_id": 900001,
+          "grade": 3,
+          "condition_satisfied": true
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-A-HUMAN-REVIEW",
+        "reviewed_at": "2026-10-18T00:00:00Z"
+      }
+    },
+    {
+      "id": "syn-failed",
+      "category": "longevity",
+      "query": "가상 지속력 조건을 확인해 줘.",
+      "constraints": [
+        "수집 실패 사례"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "answerable",
+      "qrels": [
+        {
+          "perfume_id": 900001,
+          "grade": 3,
+          "condition_satisfied": true
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-A-HUMAN-REVIEW",
+        "reviewed_at": "2026-10-18T00:00:00Z"
+      }
+    }
+  ]
+}

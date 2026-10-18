@@ -1,0 +1,426 @@
+{
+  "schema_version": 1,
+  "dataset_id": "scent-archive-ko",
+  "version": "v1-draft",
+  "data_kind": "real",
+  "corpus_snapshot": null,
+  "queries": [
+    {
+      "id": "ko-001",
+      "category": "accord",
+      "query": "상쾌한 시트러스 향수를 추천해 줘.",
+      "constraints": [
+        "시트러스 어코드의 저장 근거",
+        "상쾌함의 판단 기준을 검토자가 명시"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-002",
+      "category": "accord",
+      "query": "꽃향기가 중심인 플로럴 향수를 찾고 있어.",
+      "constraints": [
+        "플로럴 어코드의 저장 근거"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-003",
+      "category": "accord",
+      "query": "우디한 느낌이 중심인 향수를 알려 줘.",
+      "constraints": [
+        "우디 어코드 또는 노트의 저장 근거"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-004",
+      "category": "note",
+      "query": "베르가모트 노트가 있는 향수를 추천해 줘.",
+      "constraints": [
+        "베르가모트 노트 포함 여부"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-005",
+      "category": "note",
+      "query": "장미 노트가 분명한 향수를 찾고 있어.",
+      "constraints": [
+        "장미 노트 포함 여부"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-006",
+      "category": "note",
+      "query": "아이리스 노트를 포함한 향수를 알려 줘.",
+      "constraints": [
+        "아이리스 노트 포함 여부"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-007",
+      "category": "mood",
+      "query": "출근할 때 쓰기 좋은 상쾌한 분위기의 향수를 찾고 있어.",
+      "constraints": [
+        "상쾌함과 출근 적합성의 수동 평가 기준",
+        "저장 정보로 판단 불가능한 부분 구분"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-008",
+      "category": "mood",
+      "query": "차분하고 편안한 느낌의 향수를 추천해 줘.",
+      "constraints": [
+        "분위기 관련 저장 근거 또는 판단 불가능 여부"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-009",
+      "category": "longevity",
+      "query": "지속력 평가가 좋은 향수를 추천해 줘.",
+      "constraints": [
+        "지속력 지표의 실제 척도와 표본 확인"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-010",
+      "category": "longevity",
+      "query": "오래 남지 않는 향수를 찾고 있어.",
+      "constraints": [
+        "낮은 지속력의 저장 근거",
+        "평가 누락을 낮은 지속력으로 간주하지 않음"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-011",
+      "category": "projection",
+      "query": "발향력이 약한 향수를 추천해 줘.",
+      "constraints": [
+        "낮은 발향력의 저장 근거",
+        "평가 누락을 약한 발향으로 간주하지 않음"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-012",
+      "category": "projection",
+      "query": "존재감 있게 퍼지는 향수를 찾고 있어.",
+      "constraints": [
+        "발향력 또는 확산력 평가의 실제 척도 확인"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-013",
+      "category": "season",
+      "query": "여름에 어울리는 향수를 추천해 줘.",
+      "constraints": [
+        "계절 평가의 저장 근거 또는 불확실성 표시"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-014",
+      "category": "season",
+      "query": "겨울용 향수를 찾고 있어.",
+      "constraints": [
+        "겨울 적합성의 저장 근거 또는 불확실성 표시"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-015",
+      "category": "exclusion",
+      "query": "장미 노트가 없는 플로럴 향수를 추천해 줘.",
+      "constraints": [
+        "플로럴 관련성",
+        "장미 배제는 완전한 노트 정보로 확인; 누락은 부재의 증거가 아님"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-016",
+      "category": "exclusion",
+      "query": "시트러스 노트를 제외한 우디 향수를 알려 줘.",
+      "constraints": [
+        "우디 관련성",
+        "시트러스 배제 여부를 확인할 충분한 정보"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-017",
+      "category": "compound",
+      "query": "여름에 쓰기 좋은 시트러스 향수 중 발향이 약한 것을 찾고 있어.",
+      "constraints": [
+        "시트러스",
+        "여름 평가",
+        "낮은 발향력; 각각 근거 확인"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-018",
+      "category": "compound",
+      "query": "겨울에 어울리는 우디 향수 중 지속력이 좋은 것을 추천해 줘.",
+      "constraints": [
+        "우디",
+        "겨울 평가",
+        "높은 지속력; 각각 근거 확인"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-019",
+      "category": "compound",
+      "query": "바닐라가 없고 발향이 약한 플로럴 향수를 찾아 줘.",
+      "constraints": [
+        "플로럴",
+        "바닐라 제외",
+        "낮은 발향력; 누락 정보와 구분"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-020",
+      "category": "missing_information",
+      "query": "성별·연령대별 선호 통계가 확인되는 향수를 추천해 줘.",
+      "constraints": [
+        "요청한 선호 통계가 실제 저장되어 있는지 확인",
+        "없으면 추측 금지"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-021",
+      "category": "missing_information",
+      "query": "최신 생산 배치에서 지속력이 개선된 향수를 알려 줘.",
+      "constraints": [
+        "생산 배치별 비교 자료 존재 여부",
+        "기존 단일 평가를 개선 추세로 해석하지 않음"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-022",
+      "category": "missing_information",
+      "query": "지금 구매 가격까지 비교해서 가성비 향수를 추천해 줘.",
+      "constraints": [
+        "현재 가격과 판매 시점의 저장 여부",
+        "자료가 없으면 가성비 확정 금지"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-023",
+      "category": "no_match",
+      "query": "장미와 바닐라가 모두 없으면서 두 노트가 중심인 향수를 찾아 줘.",
+      "constraints": [
+        "상충하는 조건 확인",
+        "조건을 임의로 완화하지 않음"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-024",
+      "category": "no_match",
+      "query": "현재 등록된 향수 중 모든 노트 정보가 완전하고 향료가 전혀 없는 향수를 찾아 줘.",
+      "constraints": [
+        "존재하지 않는 조건인지 사람이 현재 DB 기준으로 확정"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "ko-025",
+      "category": "no_match",
+      "query": "여름과 겨울 평가가 모두 최고이면서 지속력과 발향력은 모두 최저인 향수를 찾아 줘.",
+      "constraints": [
+        "실제 척도와 전체 조건의 교집합 확인",
+        "일치하는 향수가 있으면 no_match 라벨을 부여하지 않음"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    }
+  ]
+}
