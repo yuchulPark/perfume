@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "dataset_id": "synthetic-reranking-fixture",
+  "version": "v1",
+  "data_kind": "synthetic",
+  "corpus_snapshot": "synthetic-reranking-corpus-v1",
+  "queries": [
+    {
+      "id": "rr-include",
+      "category": "note",
+      "query": "바닐라 향수 추천해 줘",
+      "constraints": [
+        "가상 로직 검증 전용; 실제 정답 아님"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "answerable",
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "qrels": [
+        {
+          "perfume_id": 910001,
+          "grade": 3,
+          "condition_satisfied": true
+        },
+        {
+          "perfume_id": 910002,
+          "grade": 0,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 910003,
+          "grade": 3,
+          "condition_satisfied": true
+        },
+        {
+          "perfume_id": 910004,
+          "grade": 0,
+          "condition_satisfied": null
+        }
+      ]
+    },
+    {
+      "id": "rr-exclude",
+      "category": "exclusion",
+      "query": "바닐라는 싫어",
+      "constraints": [
+        "가상 로직 검증 전용; 실제 정답 아님"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "answerable",
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "qrels": [
+        {
+          "perfume_id": 910001,
+          "grade": 0,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 910002,
+          "grade": 3,
+          "condition_satisfied": true
+        },
+        {
+          "perfume_id": 910003,
+          "grade": 0,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 910004,
+          "grade": 0,
+          "condition_satisfied": null
+        }
+      ]
+    },
+    {
+      "id": "rr-compound",
+      "category": "compound",
+      "query": "여름에 사용하기 좋은 시트러스 향수인데 바닐라는 싫어",
+      "constraints": [
+        "가상 로직 검증 전용; 실제 정답 아님"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "answerable",
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "qrels": [
+        {
+          "perfume_id": 910001,
+          "grade": 0,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 910002,
+          "grade": 3,
+          "condition_satisfied": true
+        },
+        {
+          "perfume_id": 910003,
+          "grade": 0,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 910004,
+          "grade": 0,
+          "condition_satisfied": null
+        }
+      ]
+    },
+    {
+      "id": "rr-longevity",
+      "category": "longevity",
+      "query": "지속력이 좋은 향수 추천해 줘",
+      "constraints": [
+        "가상 로직 검증 전용; 실제 정답 아님"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "answerable",
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "qrels": [
+        {
+          "perfume_id": 910001,
+          "grade": 0,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 910002,
+          "grade": 1,
+          "condition_satisfied": null
+        },
+        {
+          "perfume_id": 910003,
+          "grade": 3,
+          "condition_satisfied": true
+        },
+        {
+          "perfume_id": 910004,
+          "grade": 0,
+          "condition_satisfied": null
+        }
+      ]
+    },
+    {
+      "id": "rr-projection",
+      "category": "projection",
+      "query": "발향력이 약한 향수 추천해 줘",
+      "constraints": [
+        "가상 로직 검증 전용; 실제 정답 아님"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "answerable",
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "qrels": [
+        {
+          "perfume_id": 910001,
+          "grade": 0,
+          "condition_satisfied": false
+        },
+        {
+          "perfume_id": 910002,
+          "grade": 3,
+          "condition_satisfied": true
+        },
+        {
+          "perfume_id": 910003,
+          "grade": 0,
+          "condition_satisfied": null
+        },
+        {
+          "perfume_id": 910004,
+          "grade": 0,
+          "condition_satisfied": null
+        }
+      ]
+    },
+    {
+      "id": "rr-unknown",
+      "category": "mood",
+      "query": "차분하고 은은한 향수 추천해 줘",
+      "constraints": [
+        "가상 로직 검증 전용; 실제 정답 아님"
+      ],
+      "judgment_scope": "unreviewed",
+      "answerability": "unreviewed",
+      "review": {
+        "status": "draft",
+        "reviewer": null,
+        "reviewed_at": null
+      },
+      "qrels": []
+    },
+    {
+      "id": "rr-empty",
+      "category": "no_match",
+      "query": "장미 향수 추천해 줘",
+      "constraints": [
+        "가상 로직 검증 전용; 실제 정답 아님"
+      ],
+      "judgment_scope": "exhaustive",
+      "answerability": "no_match",
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "qrels": []
+    }
+  ]
+}

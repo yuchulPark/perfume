@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "run_id": "synthetic-reranking-run-v1",
+  "data_kind": "synthetic",
+  "dataset_sha256": "a70d033d7d20646e23f37ed2d860c8f5da39c0bea72d879742ecbe1c388e400d",
+  "config": {
+    "corpus_snapshot": "synthetic-reranking-corpus-v1",
+    "embedding_snapshot": "synthetic-reranking-embedding-v1",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "embedding_model_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "llm_model": "qwen3:4b-instruct",
+    "llm_model_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "text_version": "perfume-v1",
+    "prompt_revision": "synthetic-prompt-v1",
+    "formatter_revision": "synthetic-formatter-v1",
+    "backend_revision": "synthetic-backend-v1",
+    "captured_at": "2026-10-19T00:00:00Z",
+    "search_top_k": 20,
+    "max_evidence_candidates": 2,
+    "embedding_coverage": {
+      "total_perfumes": 4,
+      "embedded_perfumes": 4
+    },
+    "ollama_version": "synthetic-ollama",
+    "generation_options": {
+      "num_ctx": 4096,
+      "num_predict": 128,
+      "temperature": 0.2,
+      "num_thread": 3,
+      "max_input_bytes": 2560
+    }
+  },
+  "records": [
+    {
+      "query_id": "rr-include",
+      "query_sha256": "86545d7c5cafc29fc7eb788c88f0622904727fd4b3e70cb23106ed784206c355",
+      "search": {
+        "status": "succeeded",
+        "error_code": null,
+        "response": {
+          "results": [
+            {
+              "perfumeId": 910002,
+              "name": "가상 향수 910002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 910001,
+              "name": "가상 향수 910001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.8999999999999999
+            },
+            {
+              "perfumeId": 910003,
+              "name": "가상 향수 910003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            },
+            {
+              "perfumeId": 910004,
+              "name": "가상 향수 910004",
+              "brandName": "가상 브랜드",
+              "similarity": 0.7999999999999999
+            }
+          ],
+          "returnedCount": 4
+        }
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "rr-exclude",
+      "query_sha256": "9689cde53776cceda0d97ab02fc5cecd3c2cc02991bf274b624e9cd7ad4d4fbc",
+      "search": {
+        "status": "succeeded",
+        "error_code": null,
+        "response": {
+          "results": [
+            {
+              "perfumeId": 910001,
+              "name": "가상 향수 910001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 910002,
+              "name": "가상 향수 910002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.8999999999999999
+            },
+            {
+              "perfumeId": 910003,
+              "name": "가상 향수 910003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            },
+            {
+              "perfumeId": 910004,
+              "name": "가상 향수 910004",
+              "brandName": "가상 브랜드",
+              "similarity": 0.7999999999999999
+            }
+          ],
+          "returnedCount": 4
+        }
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "rr-compound",
+      "query_sha256": "4dd63ba7bfac64763f69a3c7802b8982636a9cd5dd3d62e470aeb1a1873799d4",
+      "search": {
+        "status": "succeeded",
+        "error_code": null,
+        "response": {
+          "results": [
+            {
+              "perfumeId": 910003,
+              "name": "가상 향수 910003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 910001,
+              "name": "가상 향수 910001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.8999999999999999
+            },
+            {
+              "perfumeId": 910002,
+              "name": "가상 향수 910002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            },
+            {
+              "perfumeId": 910004,
+              "name": "가상 향수 910004",
+              "brandName": "가상 브랜드",
+              "similarity": 0.7999999999999999
+            }
+          ],
+          "returnedCount": 4
+        }
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "rr-longevity",
+      "query_sha256": "95f0e4a8b2bf7d46139add784a0f0e00b8a070a1a1ae2a05aa62937b786a423c",
+      "search": {
+        "status": "succeeded",
+        "error_code": null,
+        "response": {
+          "results": [
+            {
+              "perfumeId": 910001,
+              "name": "가상 향수 910001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 910002,
+              "name": "가상 향수 910002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.8999999999999999
+            },
+            {
+              "perfumeId": 910003,
+              "name": "가상 향수 910003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            },
+            {
+              "perfumeId": 910004,
+              "name": "가상 향수 910004",
+              "brandName": "가상 브랜드",
+              "similarity": 0.7999999999999999
+            }
+          ],
+          "returnedCount": 4
+        }
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "rr-projection",
+      "query_sha256": "3fbe68b6994e4b5955999ef7066b776c5e7aa6627ec9e89d8288d2d6be4398ca",
+      "search": {
+        "status": "succeeded",
+        "error_code": null,
+        "response": {
+          "results": [
+            {
+              "perfumeId": 910001,
+              "name": "가상 향수 910001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 910002,
+              "name": "가상 향수 910002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.8999999999999999
+            },
+            {
+              "perfumeId": 910003,
+              "name": "가상 향수 910003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            },
+            {
+              "perfumeId": 910004,
+              "name": "가상 향수 910004",
+              "brandName": "가상 브랜드",
+              "similarity": 0.7999999999999999
+            }
+          ],
+          "returnedCount": 4
+        }
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "rr-unknown",
+      "query_sha256": "b13ce9e74a5fd5f1ca071dd4a6eea6d1a7341328195a200601f331f9b72db622",
+      "search": {
+        "status": "succeeded",
+        "error_code": null,
+        "response": {
+          "results": [
+            {
+              "perfumeId": 910004,
+              "name": "가상 향수 910004",
+              "brandName": "가상 브랜드",
+              "similarity": 0.95
+            },
+            {
+              "perfumeId": 910001,
+              "name": "가상 향수 910001",
+              "brandName": "가상 브랜드",
+              "similarity": 0.8999999999999999
+            },
+            {
+              "perfumeId": 910002,
+              "name": "가상 향수 910002",
+              "brandName": "가상 브랜드",
+              "similarity": 0.85
+            },
+            {
+              "perfumeId": 910003,
+              "name": "가상 향수 910003",
+              "brandName": "가상 브랜드",
+              "similarity": 0.7999999999999999
+            }
+          ],
+          "returnedCount": 4
+        }
+      },
+      "recommendation": null
+    },
+    {
+      "query_id": "rr-empty",
+      "query_sha256": "879ae7d10da8be3beba8f4f48bd6b6daaee496ff6c4828f5b38b977d3ac60339",
+      "search": {
+        "status": "succeeded",
+        "error_code": null,
+        "response": {
+          "results": [],
+          "returnedCount": 0
+        }
+      },
+      "recommendation": null
+    }
+  ]
+}

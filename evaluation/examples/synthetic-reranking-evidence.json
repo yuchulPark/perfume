@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "data_kind": "synthetic",
+  "run_sha256": "abd3b9c084bdbff2ecd22b8bbcf4b05fab59972af0b0ffdba576bcb22778baf7",
+  "config_sha256": "5603ce4d4a018c5da6a641258f96f7dd67eecbde3fce82e300b485c29d85e548",
+  "corpus_snapshot": "synthetic-reranking-corpus-v1",
+  "embedding_snapshot": "synthetic-reranking-embedding-v1",
+  "evidence_basis": "catalog_snapshot",
+  "review": {
+    "status": "approved",
+    "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+    "reviewed_at": "2026-10-19T00:00:00Z"
+  },
+  "metric_contracts": [
+    {
+      "id": "synthetic-longevity",
+      "kind": "longevity",
+      "value": null,
+      "metric_key": "performance.longevity",
+      "scale": "synthetic-longevity-v1",
+      "categories": {
+        "high": [
+          "long_lasting"
+        ],
+        "low": [
+          "short_lasting"
+        ]
+      },
+      "accepted_reliability": [
+        "high"
+      ],
+      "allowed_derived_from": [
+        null
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "semantic_reference": "SYNTHETIC-SEMANTICS-NOT-PROVIDER-CONTRACT"
+    },
+    {
+      "id": "synthetic-projection",
+      "kind": "projection",
+      "value": null,
+      "metric_key": "performance.projection",
+      "scale": "synthetic-projection-v1",
+      "categories": {
+        "high": [
+          "strong"
+        ],
+        "low": [
+          "weak"
+        ]
+      },
+      "accepted_reliability": [
+        "high"
+      ],
+      "allowed_derived_from": [
+        null
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "semantic_reference": "SYNTHETIC-SEMANTICS-NOT-PROVIDER-CONTRACT"
+    },
+    {
+      "id": "synthetic-season",
+      "kind": "season",
+      "value": "summer",
+      "metric_key": "performance.season.summer",
+      "scale": "synthetic-season-v1",
+      "categories": {
+        "suitable": [
+          "suitable"
+        ],
+        "unsuitable": [
+          "unsuitable"
+        ]
+      },
+      "accepted_reliability": [
+        "high"
+      ],
+      "allowed_derived_from": [
+        null
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "SYNTHETIC-FIXTURE-NOT-REAL-REVIEW",
+        "reviewed_at": "2026-10-19T00:00:00Z"
+      },
+      "semantic_reference": "SYNTHETIC-SEMANTICS-NOT-PROVIDER-CONTRACT"
+    }
+  ],
+  "candidates": [
+    {
+      "perfume_id": 910001,
+      "notes": [
+        "Vanilla"
+      ],
+      "accords": [
+        "Woody"
+      ],
+      "metrics": [
+        {
+          "key": "performance.longevity",
+          "score": 0.5,
+          "category": "short_lasting",
+          "records": 100,
+          "reliability": "high",
+          "scale": "synthetic-longevity-v1",
+          "derived_from": null
+        },
+        {
+          "key": "performance.projection",
+          "score": 0.5,
+          "category": "strong",
+          "records": 100,
+          "reliability": "high",
+          "scale": "synthetic-projection-v1",
+          "derived_from": null
+        },
+        {
+          "key": "performance.season.summer",
+          "score": 0.5,
+          "category": "unsuitable",
+          "records": 100,
+          "reliability": "high",
+          "scale": "synthetic-season-v1",
+          "derived_from": null
+        }
+      ],
+      "snapshot_sha256": "4fc5a622be7e1704bab095af2c18e044e2ea8a38e8dc5da5e16eb54cf6cab83a"
+    },
+    {
+      "perfume_id": 910002,
+      "notes": [
+        "Bergamot"
+      ],
+      "accords": [
+        "Citrus"
+      ],
+      "metrics": [
+        {
+          "key": "performance.longevity",
+          "score": 0.99,
+          "category": "long_lasting",
+          "records": 100,
+          "reliability": "high",
+          "scale": null,
+          "derived_from": null
+        },
+        {
+          "key": "performance.projection",
+          "score": 0.5,
+          "category": "weak",
+          "records": 100,
+          "reliability": "high",
+          "scale": "synthetic-projection-v1",
+          "derived_from": null
+        },
+        {
+          "key": "performance.season.summer",
+          "score": 0.5,
+          "category": "suitable",
+          "records": 100,
+          "reliability": "high",
+          "scale": "synthetic-season-v1",
+          "derived_from": null
+        }
+      ],
+      "snapshot_sha256": "47f6af22e7bfd953516a025cf6d05423c6cd89b433c718e33e1e787d6483feda"
+    },
+    {
+      "perfume_id": 910003,
+      "notes": [
+        "Vanilla",
+        "Bergamot"
+      ],
+      "accords": [
+        "Citrus"
+      ],
+      "metrics": [
+        {
+          "key": "performance.longevity",
+          "score": 0.5,
+          "category": "long_lasting",
+          "records": 100,
+          "reliability": "high",
+          "scale": "synthetic-longevity-v1",
+          "derived_from": null
+        },
+        {
+          "key": "performance.season.summer",
+          "score": 0.5,
+          "category": "suitable",
+          "records": 100,
+          "reliability": "high",
+          "scale": "synthetic-season-v1",
+          "derived_from": null
+        }
+      ],
+      "snapshot_sha256": "0a3f33d931ddb9c58dd3e97082fe4e34e9ec79efba2acf47039a2a65f1387d1a"
+    },
+    {
+      "perfume_id": 910004,
+      "notes": null,
+      "accords": null,
+      "metrics": [],
+      "snapshot_sha256": "154c3477742c89f3dd899e8dbe3c8e4f841a23c55aea0ba68a11422938492673"
+    }
+  ]
+}
