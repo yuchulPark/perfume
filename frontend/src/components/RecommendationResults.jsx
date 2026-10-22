@@ -22,7 +22,9 @@ export function RecommendationStatus({ status, error, confirmed }) {
     {status === 'cancelling' && <div className="recommend-notice"><span className="recommend-spinner" aria-hidden="true" />
       <div><h2>AI 추천을 취소하는 중입니다</h2><p>{confirmed ? '서버가 취소 요청을 접수했어요. 작업 종료와 정리를 확인할 때까지 새 추천을 기다려 주세요.' : '서버에 취소 요청을 전달하고 있어요. 아직 작업 종료가 확인되지 않았어요.'}</p></div></div>}
     {status === 'unknown' && <div className="recommend-notice recommend-error"><Icon name="alert" size={23} />
-      <div><h2>작업 상태 확인 불가</h2><p>서버 작업이 종료됐는지 확인할 수 없어요. 연결을 확인한 뒤 ‘상태 다시 확인’을 눌러 주세요. 새 추천은 종료 확인까지 기다려 주세요.</p></div></div>}
+      <div><h2>{error?.kind === 'forbidden' ? error.title : '작업 상태 확인 불가'}</h2>
+        {error?.kind === 'forbidden' && <p>{error.message}</p>}
+        <p>서버 작업이 종료됐는지 확인할 수 없어요. 연결을 확인한 뒤 ‘상태 다시 확인’을 눌러 주세요. 새 추천은 종료 확인까지 기다려 주세요.</p></div></div>}
     {status === 'lost' && <div className="recommend-notice"><Icon name="alert" size={23} />
       <div><h2>작업 정보를 찾을 수 없어요</h2><p>서버 재시작이나 보관 기간 만료로 이전 상태를 복구할 수 없어요. 새 요청의 실행 가능 여부는 서버가 다시 확인해요.</p></div></div>}
     {status === 'cancelled' && <div className="recommend-notice"><Icon name="close" size={23} />

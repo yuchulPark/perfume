@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@org.springframework.context.annotation.Import(com.perfume.auth.AuthSecurityConfiguration.class)
 @WebMvcTest(controllers = PerfumeSemanticSearchController.class, properties = "scentrev.brand-import=false")
 class PerfumeSemanticSearchApiTests {
     @Autowired MockMvc mvc;

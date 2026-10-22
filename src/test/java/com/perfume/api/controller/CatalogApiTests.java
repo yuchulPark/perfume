@@ -20,6 +20,7 @@ import com.perfume.api.dto.PerfumeDetailResponse.*;
 import com.perfume.api.service.*;
 
 /** Real MVC routing, validation and JSON serialization; no repository/JDBC/MCP beans are loaded. */
+@org.springframework.context.annotation.Import(com.perfume.auth.AuthSecurityConfiguration.class)
 @WebMvcTest(controllers = {BrandController.class, PerfumeController.class}, properties = "scentrev.brand-import=false")
 class CatalogApiTests {
     @Autowired private MockMvc mvc;

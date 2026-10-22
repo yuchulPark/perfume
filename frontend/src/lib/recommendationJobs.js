@@ -41,7 +41,11 @@ export class RecommendationJobSession {
       this.apply(view);
     } catch (error) {
       if (!this.mounted || sequence !== this.sequence || http.signal.aborted) return;
-      if (error.kind === 'lost' || (kind === 'create' && ['INVALID_REQUEST', 'RECOMMEND_BUSY', 'RECOMMEND_DISABLED'].includes(error.code))) {
+      if (error.kind === 'auth') {
+        this.cancelRequested = false;
+        if (kind === 'create') { this.handle = null; this.save(); }
+        this.update({ status: 'unauthenticated', error });
+      } else if (error.kind === 'lost' || (kind === 'create' && (error.kind === 'forbidden' || ['INVALID_REQUEST', 'RECOMMEND_BUSY', 'RECOMMEND_DISABLED'].includes(error.code)))) {
         this.cancelRequested = false;
         this.handle = null; this.save(); this.update({ status: error.kind === 'lost' ? 'lost' : 'error', error });
       } else {

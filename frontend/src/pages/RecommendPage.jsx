@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext.jsx';
+import LoginNotice from '../components/LoginNotice.jsx';
 import { DEFAULT_TOP_K, MAX_QUERY_LENGTH, MAX_TOP_K, validateRecommendationInput } from '../api/recommendations.js';
 import { RecommendationJobSession } from '../lib/recommendationJobs.js';
 import { Icon } from '../components/Icon.jsx';
@@ -8,25 +10,36 @@ import { RecommendationResults, RecommendationStatus } from '../components/Recom
 const examples = ['산뜻한 시트러스 노트가 있는 향수를 찾고 있어요.', '차분한 우디 향을 좋아해요. 어떤 향수가 있을까요?', '달콤한 향보다 가벼운 꽃향기가 좋아요.'];
 
 export default function RecommendPage() {
-  const [query, setQuery] = useState('');
-  const [topK, setTopK] = useState(DEFAULT_TOP_K);
+  const auth = useAuth(), navigate = useNavigate();
+  const [query, setQuery] = useState(auth.draft.current.query);
+  const [topK, setTopK] = useState(auth.draft.current.topK ?? DEFAULT_TOP_K);
+  const [loginNotice, setLoginNotice] = useState(false);
   const [validation, setValidation] = useState('');
   const [jobs] = useState(() => new RecommendationJobSession());
   const result = useSyncExternalStore(jobs.subscribe, jobs.getSnapshot, jobs.getSnapshot);
   const inputRef = useRef(null);
   const headingRef = useRef(null);
-  const pending = ['loading', 'cancelling', 'unknown'].includes(result.status);
+  const canRun = auth.phase === 'ready' && (!auth.enabled || !!auth.user);
+  const pending = canRun && ['loading', 'cancelling', 'unknown'].includes(result.status);
 
   useEffect(() => {
     document.title = 'AI 향수 추천 · 향의 기록';
-    jobs.mount();
+  }, []);
+  useEffect(() => {
+    if (canRun) jobs.mount();
     return () => jobs.unmount();
-  }, [jobs]);
+  }, [jobs, canRun]);
+  useEffect(() => { auth.draft.current = { query, topK }; }, [auth.draft, query, topK]);
+  useEffect(() => {
+    if (result.error?.kind === 'auth') { auth.expire(); setLoginNotice(true); }
+  }, [result.error]);
   useEffect(() => { if (result.status === 'success') headingRef.current?.focus(); }, [result]);
 
   function submit(event) {
     event.preventDefault();
     if (pending) return;
+    if (auth.phase !== 'ready') { setValidation('로그인 상태를 확인한 후 다시 눌러 주세요.'); return; }
+    if (auth.enabled && !auth.user) { setValidation(''); setLoginNotice(true); return; }
     const invalid = validateRecommendationInput(query, topK);
     setValidation(invalid);
     if (invalid) { inputRef.current?.focus(); return; }
@@ -34,6 +47,7 @@ export default function RecommendPage() {
   }
 
   return <div className="container recommend-page">
+    {loginNotice && <LoginNotice onCancel={() => setLoginNotice(false)} onConfirm={() => navigate('/login', { state: { from: '/recommend' } })} />}
     <header className="recommend-intro"><span className="eyebrow"><Icon name="spark" size={16} />A SCENT FOR YOUR WORDS</span>
       <h1>AI 향수 추천</h1><p>좋아하는 향과 원하는 분위기를 들려주세요.<br />저장된 향수 정보를 바탕으로 취향의 실마리를 찾아드려요.</p></header>
     <div className="recommend-compose">

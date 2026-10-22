@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@org.springframework.context.annotation.Import(com.perfume.auth.AuthSecurityConfiguration.class)
 @WebMvcTest(controllers = PerfumeRecommendationController.class, properties = "scentrev.brand-import=false")
 class PerfumeRecommendationJobApiTests {
     static final String BASE = "/api/ai/perfumes/recommend/jobs", ID = "11111111-1111-4111-8111-111111111111", TOKEN = "d".repeat(64);

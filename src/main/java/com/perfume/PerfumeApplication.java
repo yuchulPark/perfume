@@ -14,6 +14,7 @@ import com.perfume.ai.recommend.PerfumeRecommendationConfiguration;
 public class PerfumeApplication {
 
 	public static void main(String[] args) {
+		if (com.perfume.auth.AuthAdminCli.runIfRequested(args)) return;
 		var application = new SpringApplication(PerfumeApplication.class);
 		PerfumeRecommendationConfiguration.configureExecution(application);
 		PerfumeSemanticSearchConfiguration.configureReadOnlyExecution(application);

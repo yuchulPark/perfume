@@ -31,6 +31,7 @@ const detailDto = {
 async function mockApi(page, handler) {
   const calls = [];
   await page.route('**/api/**', async (route) => {
+    if (new URL(route.request().url()).pathname === '/api/auth/me') return route.fulfill({ json: { enabled: false, user: null } });
     const url = new URL(route.request().url()); calls.push(url.pathname + url.search);
     if (handler && await handler(route, url)) return;
     const body = url.pathname === '/api/brands' ? brands : /^\/api\/perfumes\/\d+$/.test(url.pathname) ? detailDto

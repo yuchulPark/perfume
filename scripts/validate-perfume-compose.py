@@ -255,8 +255,14 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume", 
     require(db_env["POSTGRES_PASSWORD"] == expected_password
             and app_env["DB_PASSWORD"] == expected_password, "Jenkins credential and server .env password differ.")
     require(app_env.get("SCENTREV_API_KEY") == "", "Web deployment must not receive a ScentRev API key.")
-    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
+    auth_keys = {"PERFUME_AUTH_ENABLED", "PERFUME_AUTH_COOKIE_SECURE"}
+    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | auth_keys | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
             "Unexpected backend environment overrides.")
+    if auth_keys & app_env.keys():
+        require(auth_keys <= app_env.keys()
+                and app_env["PERFUME_AUTH_ENABLED"] in {"false", "true"}
+                and app_env["PERFUME_AUTH_COOKIE_SECURE"] == "true",
+                "Authentication deployment requires an explicit flag and Secure session cookies.")
     validate_ai_environment(app_env)
     for name in services:
         require(not services[name].get("command") and not services[name].get("entrypoint"), "Image startup defaults must be retained.")

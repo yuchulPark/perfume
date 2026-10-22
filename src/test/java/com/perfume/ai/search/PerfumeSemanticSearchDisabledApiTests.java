@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+@org.springframework.context.annotation.Import(com.perfume.auth.AuthSecurityConfiguration.class)
 @WebMvcTest(controllers = PerfumeSemanticSearchController.class, properties = "scentrev.brand-import=false")
 class PerfumeSemanticSearchDisabledApiTests {
     @Autowired MockMvc mvc;

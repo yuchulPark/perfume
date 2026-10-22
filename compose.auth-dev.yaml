@@ -1,0 +1,22 @@
+# Standalone, disposable local auth database. Never combine with compose.yaml.
+# No named volumes and no existing perfume/embedding services are referenced.
+name: perfume-auth-isolated
+services:
+  auth-db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: perfume_auth_dev
+      POSTGRES_USER: perfume_auth_dev
+      POSTGRES_PASSWORD: ${AUTH_DEV_DB_PASSWORD:?Set a disposable AUTH_DEV_DB_PASSWORD}
+    ports:
+      - "127.0.0.1:25432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ./docs/sql/auth-schema.sql:/docker-entrypoint-initdb.d/01-auth.sql:ro
+      - ./docs/sql/auth-dev-marker.sql:/docker-entrypoint-initdb.d/02-isolated.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U perfume_auth_dev -d perfume_auth_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

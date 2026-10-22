@@ -79,6 +79,23 @@ def deployment_config(ai=None):
 
 
 class DeploymentGuardTests(unittest.TestCase):
+    def test_staged_authentication_flags_are_accepted_but_insecure_or_bootstrap_overrides_are_rejected(self):
+        for enabled in ("false", "true"):
+            config = deployment_config()
+            config["services"]["backend"]["environment"].update(
+                PERFUME_AUTH_ENABLED=enabled, PERFUME_AUTH_COOKIE_SECURE="true")
+            guard.validate_config(config, PASSWORD)
+        for override in ({"PERFUME_AUTH_COOKIE_SECURE": "false"},
+                         {"PERFUME_AUTH_ENABLED": "invalid"},
+                         {"PERFUME_AUTH_BOOTSTRAP_TOKEN_HASH": "forbidden-in-web-container"},
+                         {"SPRING_PROFILES_ACTIVE": "auth-dev"}):
+            config = deployment_config()
+            config["services"]["backend"]["environment"].update(
+                PERFUME_AUTH_ENABLED="false", PERFUME_AUTH_COOKIE_SECURE="true")
+            config["services"]["backend"]["environment"].update(override)
+            with self.assertRaises(ValueError):
+                guard.validate_config(config, PASSWORD)
+
     def test_existing_fixed_deployment_is_accepted(self):
         for memory_limit in (6 * 1024 ** 3, str(6 * 1024 ** 3)):
             with self.subTest(memory_limit=memory_limit):

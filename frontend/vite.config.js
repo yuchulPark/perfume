@@ -1,7 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import http from 'node:http';
 
-const proxy = { '/api': { target: 'http://localhost:8081', changeOrigin: true } };
+// Connection describes one transport hop. Let Vite manage its client connection
+// independently when the backend closes its own socket (including keep-alive limits).
+const proxy = { '/api': { target: 'http://127.0.0.1:8081', changeOrigin: true,
+  agent: new http.Agent({ keepAlive: true }), headers: { Connection: 'keep-alive' },
+  configure(proxyServer) {
+    proxyServer.on('proxyRes', (response) => { delete response.headers.connection; });
+  } } };
 
 export default defineConfig({
   plugins: [react()],

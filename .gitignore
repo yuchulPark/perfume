@@ -51,6 +51,10 @@ application-secret.properties
 ### Logs ###
 *.log
 
+### Python test artifacts ###
+__pycache__/
+*.py[cod]
+
 ### Frontend ###
 node_modules/
 dist/

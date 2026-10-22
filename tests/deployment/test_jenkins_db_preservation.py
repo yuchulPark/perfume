@@ -44,6 +44,7 @@ if args[0] == 'compose':
     assert not any(key in os.environ for key in (
         'PERFUME_AI_SEARCH_ENABLED', 'PERFUME_AI_SEARCH_MODEL_DIGEST',
         'PERFUME_AI_RECOMMEND_ENABLED', 'PERFUME_AI_RECOMMEND_MODEL_DIGEST'))
+    assert not any(key in os.environ for key in ('PERFUME_AUTH_ENABLED', 'PERFUME_AUTH_COOKIE_SECURE'))
     command = next(x for x in args[1:] if x in ('config', 'build', 'up', 'ps'))
     if command == 'config' and '--quiet' not in args:
         print(json.dumps(data['compose']))
@@ -129,7 +130,7 @@ print('Legacy default-image validation passed.')
 
 @unittest.skipUnless(BASH and Path(BASH).exists(), "Bash is required for mocked deploy-script execution.")
 class JenkinsDbPreservationTests(unittest.TestCase):
-    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False, ai_inputs=None):
+    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False, ai_inputs=None, auth_enabled=None):
         with tempfile.TemporaryDirectory(prefix="perfume-deploy-mock-") as directory:
             root = Path(directory)
             (root / "scripts").mkdir()
@@ -140,6 +141,9 @@ class JenkinsDbPreservationTests(unittest.TestCase):
             posix_directory = subprocess.run([BASH, "--noprofile", "--norc", "-c", 'cd "$1" && pwd -P', "test", directory],
                                              env=env, text=True, capture_output=True, check=True).stdout.strip()
             config = deployment_config(ai_environment(ai_inputs) if ai_inputs is not None else None)
+            if auth_enabled is not None:
+                config["services"]["backend"]["environment"].update(
+                    PERFUME_AUTH_ENABLED=auth_enabled, PERFUME_AUTH_COOKIE_SECURE="true")
             config["services"]["backend"]["build"]["context"] = posix_directory
             config["services"]["frontend"]["build"]["context"] = posix_directory + "/frontend"
             config["services"]["db"]["image"] = reference or (IMAGE_ID if vector else "postgres:17-bookworm")
@@ -170,7 +174,8 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                        PERFUME_EXPECTED_DB_PASSWORD=PASSWORD)
             # SSH session values must never override the operator-managed Compose .env inputs.
             env.update(PERFUME_AI_SEARCH_ENABLED="true", PERFUME_AI_SEARCH_MODEL_DIGEST="invalid-inherited",
-                       PERFUME_AI_RECOMMEND_ENABLED="true", PERFUME_AI_RECOMMEND_MODEL_DIGEST="invalid-inherited")
+                       PERFUME_AI_RECOMMEND_ENABLED="true", PERFUME_AI_RECOMMEND_MODEL_DIGEST="invalid-inherited",
+                       PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_COOKIE_SECURE="false")
             env["PATH"] = str(root / "fake-bin") + os.pathsep + env["PATH"]
             for name in ("docker", "git", "curl", "flock", "python3"):
                 body = ('exec "$PERFUME_TEST_PYTHON" "$PERFUME_TEST_PYTHON_DRIVER" "$@"' if name == "python3" else
@@ -230,6 +235,16 @@ class JenkinsDbPreservationTests(unittest.TestCase):
         up = [cmd for cmd in commands if cmd[:2] == ["docker", "compose"] and "up" in cmd]
         self.assertEqual(2, len(up))
         self.assertTrue(all(cmd[-1] in ("backend", "frontend") for cmd in up))
+
+    def test_authentication_modes_ignore_inherited_flags_and_preserve_database_and_healthchecks(self):
+        for enabled in ("false", "true"):
+            with self.subTest(enabled=enabled):
+                result, commands = self.run_deploy(auth_enabled=enabled)
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                up = [cmd for cmd in commands if cmd[:2] == ["docker", "compose"] and "up" in cmd]
+                self.assertEqual(["backend", "frontend"], [cmd[-1] for cmd in up])
+                self.assertTrue(all("--no-deps" in cmd and "--no-build" in cmd for cmd in up))
+                self.assertIn("DB container, volume and .env preserved", result.stdout)
 
     def test_ai_disabled_and_enabled_deploys_preserve_db_and_only_replace_apps(self):
         for enabled in ("false", "true"):

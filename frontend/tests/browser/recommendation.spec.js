@@ -14,6 +14,7 @@ async function mockApi(page, handlers = {}) {
   const calls = { creates: [], gets: [], cancels: [] };
   await page.route('**/api/**', async (route) => {
     const request = route.request(), path = new URL(request.url()).pathname;
+    if (path === '/api/auth/me') return route.fulfill({ json: { enabled: false, user: null } });
     if (path.startsWith(endpoint)) {
       const token = request.headers()['x-recommendation-token'];
       expect(token).toMatch(/^[0-9a-f]{64}$/);
@@ -39,6 +40,8 @@ test('job recommendation keeps menu, inputs, paragraphs, citation order, source 
   await expect(page.getByRole('heading', { level: 1, name: 'AI 향수 추천' })).toBeVisible();
   await expect(page.getByText('전체 카탈로그가 아닌, 임베딩된 일부 향수의 저장된 정보를 기반으로 추천해요.')).toBeVisible();
   await page.getByLabel('검색 개수', { exact: true }).selectOption('8'); await submit(page);
+  await expect(page).toHaveURL('/recommend');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '취향을 위한 추천 기록' })).toBeFocused();
   expect(calls.creates).toHaveLength(1); expect(calls.creates[0].body).toEqual({ query: '시트러스 향수를 찾아요.', topK: 8 });
   expect(calls.gets[0].token).toBe(calls.creates[0].token);

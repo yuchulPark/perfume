@@ -1,4 +1,5 @@
 import { ApiError } from './client.js';
+import { csrfHeaders } from './auth.js';
 
 export const MAX_QUERY_LENGTH = 500;
 export const DEFAULT_TOP_K = 5;
@@ -7,6 +8,8 @@ export const MAX_TOP_K = 20;
 export const RECOMMENDATION_TIMEOUT_MS = 480_000;
 
 const messages = {
+  auth: ['로그인이 필요해요', 'AI 향수 추천 기능을 이용하려면 로그인이 필요합니다.'],
+  forbidden: ['요청 권한을 확인해 주세요', '요청이 허용되지 않았어요. 로그인 상태와 보안 토큰을 확인하려면 새로고침해 주세요.'],
   invalid: ['질문과 검색 개수를 확인해 주세요', '질문은 공백을 제외한 내용이 있어야 하고 500자 이내여야 해요. 검색 개수는 1~20 사이의 정수로 선택해 주세요.'],
   disabled: ['AI 추천이 비활성화되어 있어요', '현재 이 서비스에서는 AI 추천을 제공하지 않아요. 향수 컬렉션을 둘러보실 수 있어요.'],
   busy: ['다른 추천 요청을 처리하고 있어요', '동시 요청 한도를 초과해 요청이 접수되지 않았어요. 잠시 후 추천받기 버튼으로 다시 요청해 주세요.'],
@@ -42,6 +45,8 @@ export class RecommendationError extends ApiError {
 }
 
 export function recommendationFailure(status, code) {
+  if (status === 401) return new RecommendationError(status, 'auth');
+  if (status === 403) return new RecommendationError(status, 'forbidden');
   const known = knownCodes.get(code);
   const trusted = known?.[0] === status;
   const fallback = { 400: 'invalid', 429: 'busy', 502: 'server', 503: 'unavailable', 504: 'timeout' };
@@ -74,8 +79,8 @@ async function jobRequest(path, method, token, body, { signal, fetcher = globalT
   };
   try {
     check();
-    const response = await fetcher(path, { method, signal: controller.signal, cache: 'no-store',
-      headers: { Accept: 'application/json, application/problem+json', 'X-Recommendation-Token': token, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    const response = await fetcher(path, { method, signal: controller.signal, cache: 'no-store', credentials: 'same-origin',
+      headers: { Accept: 'application/json, application/problem+json', 'X-Recommendation-Token': token, ...(method === 'POST' ? csrfHeaders() : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
       ...(body ? { body: JSON.stringify(body) } : {}) });
     let data;
     try { data = await response.json(); } catch { /* Safe status fallback for proxy errors. */ }
@@ -141,8 +146,8 @@ export async function recommendPerfumes({ query, topK = DEFAULT_TOP_K }, { signa
   try {
     checkAbort();
     const response = await fetcher('/api/ai/perfumes/recommend', {
-      method: 'POST', signal: controller.signal,
-      headers: { Accept: 'application/json, application/problem+json', 'Content-Type': 'application/json' },
+      method: 'POST', signal: controller.signal, credentials: 'same-origin',
+      headers: { Accept: 'application/json, application/problem+json', 'Content-Type': 'application/json', ...csrfHeaders() },
       body: JSON.stringify({ query, topK }),
     });
     checkAbort();
@@ -150,10 +155,7 @@ export async function recommendPerfumes({ query, topK = DEFAULT_TOP_K }, { signa
       let body;
       try { body = await response.json(); } catch { /* Proxies may return HTML or an empty body. */ }
       checkAbort();
-      const known = knownCodes.get(body?.code);
-      const trusted = known?.[0] === response.status;
-      const fallback = { 400: 'invalid', 429: 'busy', 502: 'server', 503: 'unavailable', 504: 'timeout' };
-      throw new RecommendationError(response.status, trusted ? known[1] : fallback[response.status] || 'server', trusted ? body.code : null);
+      throw recommendationFailure(response.status, body?.code);
     }
     let data;
     try { data = await response.json(); } catch { throw new RecommendationError(response.status, 'response'); }
