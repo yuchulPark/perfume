@@ -79,6 +79,27 @@ def deployment_config(ai=None):
 
 
 class DeploymentGuardTests(unittest.TestCase):
+    def test_http_authentication_requires_complete_private_development_opt_in(self):
+        environment = dict(PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_COOKIE_SECURE="false",
+                           SPRING_PROFILES_ACTIVE="auth-dev-http", PERFUME_AUTH_DEV_HTTP_ENABLED="true",
+                           PERFUME_AUTH_DEV_HTTP_ORIGIN="http://192.168.0.19:8088")
+        config = deployment_config()
+        config["services"]["backend"]["environment"].update(environment)
+        guard.validate_config(config, PASSWORD)
+        for overrides in ({"PERFUME_AUTH_ENABLED": "false"}, {"PERFUME_AUTH_DEV_HTTP_ENABLED": "false"},
+                          {"PERFUME_AUTH_COOKIE_SECURE": "true"}, {"SPRING_PROFILES_ACTIVE": "prod"},
+                          {"SPRING_PROFILES_ACTIVE": "auth-dev-http,prod"}, {"SPRING_PROFILES_ACTIVE": "auth-dev"},
+                          {"PERFUME_AUTH_DEV_HTTP_ORIGIN": "http://example.com:8088"}):
+            invalid = copy.deepcopy(config)
+            invalid["services"]["backend"]["environment"].update(overrides)
+            with self.assertRaises(ValueError):
+                guard.validate_config(invalid, PASSWORD)
+        for key in environment:
+            invalid = copy.deepcopy(config)
+            del invalid["services"]["backend"]["environment"][key]
+            with self.assertRaises(ValueError):
+                guard.validate_config(invalid, PASSWORD)
+
     def test_staged_authentication_flags_are_accepted_but_insecure_or_bootstrap_overrides_are_rejected(self):
         for enabled in ("false", "true"):
             config = deployment_config()

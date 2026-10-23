@@ -64,7 +64,7 @@ test('20 cards, placeholders, paging and detail navigation retain cached list fi
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test('debounced search makes one request and brand changes reset pagination', async ({ page }) => {
+test('debounced search makes one request and brand changes reset pagination', async ({ page, baseURL }) => {
   const calls = await mockApi(page); await page.goto('/?page=2');
   await expect(page.locator('.perfume-card')).toHaveCount(20);
   const input = page.getByRole('searchbox');
@@ -77,7 +77,7 @@ test('debounced search makes one request and brand changes reset pagination', as
   await expect.poll(() => calls.filter((url) => url.includes('brandSlug=kierin')).length).toBe(1);
   await expect(page).toHaveURL(/brandSlug=kierin/);
   await page.getByRole('button', { name: '검색 초기화' }).click();
-  await expect(input).toHaveValue(''); await expect(page).toHaveURL('http://127.0.0.1:4173/');
+  await expect(input).toHaveValue(''); await expect(page).toHaveURL(new URL('/', baseURL).href);
 });
 
 test('direct detail shows every supported section, wear fallbacks, zero values and missing data', async ({ page }, testInfo) => {

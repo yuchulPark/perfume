@@ -17,10 +17,11 @@ public class AuthDataConfiguration {
     @Bean SmartInitializingSingleton authActivationGuard(AuthUserStore store, DataSource source, Environment environment) {
         return () -> {
             boolean dev = environment.matchesProfiles("auth-dev");
+            boolean devHttp = AuthDevelopmentHttp.enabled(environment);
             String ddl = environment.getProperty("spring.jpa.hibernate.ddl-auto", "");
             if (!ddl.equals("validate") && !ddl.equals("none")) throw new IllegalStateException("Authentication requires ddl-auto=validate or none");
             if (dev) verifyIsolatedDatabase(source, environment.getProperty("spring.datasource.url", ""));
-            else if (!environment.getProperty("server.servlet.session.cookie.secure", Boolean.class, false))
+            else if (!devHttp && !environment.getProperty("server.servlet.session.cookie.secure", Boolean.class, false))
                 throw new IllegalStateException("Authentication requires Secure session cookies outside isolated development");
             try { verifySchema(source); store.verifyReady(dev); }
             catch (org.springframework.dao.DataAccessException ex) {

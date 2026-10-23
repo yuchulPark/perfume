@@ -256,9 +256,17 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume", 
             and app_env["DB_PASSWORD"] == expected_password, "Jenkins credential and server .env password differ.")
     require(app_env.get("SCENTREV_API_KEY") == "", "Web deployment must not receive a ScentRev API key.")
     auth_keys = {"PERFUME_AUTH_ENABLED", "PERFUME_AUTH_COOKIE_SECURE"}
-    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | auth_keys | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
+    http_keys = {"SPRING_PROFILES_ACTIVE", "PERFUME_AUTH_DEV_HTTP_ENABLED", "PERFUME_AUTH_DEV_HTTP_ORIGIN"}
+    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | auth_keys | http_keys | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
             "Unexpected backend environment overrides.")
-    if auth_keys & app_env.keys():
+    if http_keys & app_env.keys():
+        require(app_env.get("SPRING_PROFILES_ACTIVE") == "auth-dev-http"
+                and app_env.get("PERFUME_AUTH_DEV_HTTP_ENABLED") == "true"
+                and app_env.get("PERFUME_AUTH_DEV_HTTP_ORIGIN") == "http://192.168.0.19:8088"
+                and app_env.get("PERFUME_AUTH_ENABLED") == "true"
+                and app_env.get("PERFUME_AUTH_COOKIE_SECURE") == "false",
+                "HTTP authentication is restricted to the explicitly opted-in private development VM.")
+    elif auth_keys & app_env.keys():
         require(auth_keys <= app_env.keys()
                 and app_env["PERFUME_AUTH_ENABLED"] in {"false", "true"}
                 and app_env["PERFUME_AUTH_COOKIE_SECURE"] == "true",

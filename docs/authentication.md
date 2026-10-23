@@ -1,7 +1,11 @@
 # SCENT ARCHIVE 세션 인증
 
+현재 Ubuntu HTTP 배포와 GitHub main의 차이, Jenkins 재배포 조건 및 2026-10-24 재검증은 [Git 동기화 검토](auth-git-sync-review.md)에 정리했다. 아래 과거 배포 안전성 기록의 HTTPS 준비 조건과 당시 미검증 항목은 개인 VM의 명시적인 HTTP 예외 적용 전 기록이다.
+
 추가 실제 로컬 검증 결과와 현재 브라우저 URL/실행 명령은 [로컬 검증 기록](auth-local-verification.md)에 정리했다.
 Commit/Push 전 최종 코드·배포 검토와 최신 테스트 결과는 [배포 안전성 검토](auth-deployment-review.md)를 기준으로 한다. 아래 최초 구현 당시의 테스트 수와 프록시 검증 범위는 이 최신 기록과 구분한다.
+
+개인 Ubuntu 개발 VM `192.168.0.19:8088`의 HTTP 로그인 예외와 HTTPS 구축 취소 상태는 [Ubuntu 개발서버 HTTP 인증](auth-ubuntu-development.md)을 참조한다. 기본 Secure 쿠키와 로컬 `auth-dev` 격리 제한은 유지하며, 별도 `auth-dev-http` 프로필·명시적 opt-in·LAN 프록시 보호 조건을 모두 요구한다.
 
 인증은 기본 비활성(`PERFUME_AUTH_ENABLED=false`)이다. 이번 변경은 운영 DB에 적용하지 않았다. 일반 회원가입과 `/signup` API/화면은 제공하지 않으며 최초 관리자 한 명만 별도 Bootstrap 인증을 거친 CLI에서 생성한다.
 

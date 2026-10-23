@@ -1,0 +1,9 @@
+# Explicit private-VM exception; always merge with compose.yaml, never use auth-dev here.
+# Without PERFUME_AUTH_DEV_HTTP_ENABLED=true the application refuses startup.
+services:
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: auth-dev-http
+      PERFUME_AUTH_DEV_HTTP_ENABLED: ${PERFUME_AUTH_DEV_HTTP_ENABLED:-false}
+      PERFUME_AUTH_DEV_HTTP_ORIGIN: http://192.168.0.19:8088
+      PERFUME_AUTH_COOKIE_SECURE: "false"

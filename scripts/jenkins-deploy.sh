@@ -30,11 +30,33 @@ unset COMPOSE_FILE COMPOSE_PROJECT_NAME COMPOSE_PROFILES DB_NAME DB_USERNAME DB_
 # AI activation and model identities must come only from the operator-owned server .env.
 unset PERFUME_AI_SEARCH_ENABLED PERFUME_AI_SEARCH_MODEL_DIGEST PERFUME_AI_RECOMMEND_ENABLED PERFUME_AI_RECOMMEND_MODEL_DIGEST
 # Authentication activation also comes only from the operator-owned server .env.
-unset PERFUME_AUTH_ENABLED PERFUME_AUTH_COOKIE_SECURE
+unset PERFUME_AUTH_ENABLED PERFUME_AUTH_COOKIE_SECURE PERFUME_AUTH_DEV_HTTP_ENABLED PERFUME_AUTH_DEV_HTTP_ORIGIN SPRING_PROFILES_ACTIVE
+auth_dev_http="$(python3 - <<'PY'
+from pathlib import Path
+import re
+values = []
+for line in Path('.env').read_text().splitlines():
+    match = re.match(r'^\s*(?:export\s+)?PERFUME_AUTH_DEV_HTTP_ENABLED\s*=(.*)$', line)
+    if match:
+        value = re.fullmatch(r'''\s*(true|false|'true'|'false'|"true"|"false")\s*(?:#.*)?''', match[1])
+        if value is None:
+            raise SystemExit('Invalid development HTTP flag in server .env')
+        values.append(value[1].strip('\'"'))
+if len(values) > 1:
+    raise SystemExit('Duplicate development HTTP flag in server .env')
+print(values[0] if values else 'false')
+PY
+)"
 export GIT_TERMINAL_PROMPT=0
 compose() {
+    local http_override=()
+    if [[ "$auth_dev_http" == true ]]; then
+        test -f "$deploy_directory/compose.auth-dev-http.yaml"
+        test ! -L "$deploy_directory/compose.auth-dev-http.yaml"
+        http_override=(--file "$deploy_directory/compose.auth-dev-http.yaml")
+    fi
     docker compose --project-name perfume-dev --project-directory "$deploy_directory" \
-        --env-file "$deploy_directory/.env" --file "$deploy_directory/compose.yaml" "$@"
+        --env-file "$deploy_directory/.env" --file "$deploy_directory/compose.yaml" "${http_override[@]}" "$@"
 }
 env_hash="$(sha256sum .env)"
 ready_hash="$(sha256sum .perfume-db-ready)"

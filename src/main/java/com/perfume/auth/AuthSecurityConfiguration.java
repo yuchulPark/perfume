@@ -42,6 +42,7 @@ public class AuthSecurityConfiguration {
 
     @Bean SecurityFilterChain authSecurity(HttpSecurity http, Environment env, ObjectMapper json) throws Exception {
         boolean enabled = env.getProperty("perfume.auth.enabled", Boolean.class, false);
+        if (AuthDevelopmentHttp.enabled(env)) http.addFilterBefore(new AuthDevelopmentHttp(json), CsrfFilter.class);
         http.requestCache(cache -> cache.disable())
             .httpBasic(basic -> basic.disable())
             .csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> enabled
@@ -72,7 +73,7 @@ public class AuthSecurityConfiguration {
                     .successHandler((req, res, auth) -> write(json, res, 200, AuthController.identity(auth, true)))
                     .failureHandler((req, res, ex) -> error(json, res, 401, "INVALID_CREDENTIALS")))
                 .logout(logout -> logout.logoutUrl("/api/auth/logout").invalidateHttpSession(true)
-                    .clearAuthentication(true).deleteCookies("JSESSIONID")
+                    .clearAuthentication(true).deleteCookies(env.getProperty("server.servlet.session.cookie.name", "JSESSIONID"))
                     .logoutSuccessHandler((req, res, auth) -> write(json, res, 200, Map.of("success", true))));
         }
         return http.build();

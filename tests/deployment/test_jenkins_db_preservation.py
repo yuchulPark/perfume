@@ -44,7 +44,10 @@ if args[0] == 'compose':
     assert not any(key in os.environ for key in (
         'PERFUME_AI_SEARCH_ENABLED', 'PERFUME_AI_SEARCH_MODEL_DIGEST',
         'PERFUME_AI_RECOMMEND_ENABLED', 'PERFUME_AI_RECOMMEND_MODEL_DIGEST'))
-    assert not any(key in os.environ for key in ('PERFUME_AUTH_ENABLED', 'PERFUME_AUTH_COOKIE_SECURE'))
+    assert not any(key in os.environ for key in ('PERFUME_AUTH_ENABLED', 'PERFUME_AUTH_COOKIE_SECURE',
+        'PERFUME_AUTH_DEV_HTTP_ENABLED', 'PERFUME_AUTH_DEV_HTTP_ORIGIN', 'SPRING_PROFILES_ACTIVE'))
+    http_override = any(arg.endswith('/compose.auth-dev-http.yaml') for arg in args)
+    assert http_override == (data['compose']['services']['backend']['environment'].get('PERFUME_AUTH_DEV_HTTP_ENABLED') == 'true')
     command = next(x for x in args[1:] if x in ('config', 'build', 'up', 'ps'))
     if command == 'config' and '--quiet' not in args:
         print(json.dumps(data['compose']))
@@ -130,7 +133,7 @@ print('Legacy default-image validation passed.')
 
 @unittest.skipUnless(BASH and Path(BASH).exists(), "Bash is required for mocked deploy-script execution.")
 class JenkinsDbPreservationTests(unittest.TestCase):
-    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False, ai_inputs=None, auth_enabled=None):
+    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False, ai_inputs=None, auth_enabled=None, auth_http=False, http_value=None):
         with tempfile.TemporaryDirectory(prefix="perfume-deploy-mock-") as directory:
             root = Path(directory)
             (root / "scripts").mkdir()
@@ -144,13 +147,21 @@ class JenkinsDbPreservationTests(unittest.TestCase):
             if auth_enabled is not None:
                 config["services"]["backend"]["environment"].update(
                     PERFUME_AUTH_ENABLED=auth_enabled, PERFUME_AUTH_COOKIE_SECURE="true")
+            if auth_http:
+                config["services"]["backend"]["environment"].update(
+                    PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_COOKIE_SECURE="false", SPRING_PROFILES_ACTIVE="auth-dev-http",
+                    PERFUME_AUTH_DEV_HTTP_ENABLED="true", PERFUME_AUTH_DEV_HTTP_ORIGIN="http://192.168.0.19:8088")
+                (root / "compose.auth-dev-http.yaml").write_text((ROOT / "compose.auth-dev-http.yaml").read_text(encoding="utf-8"))
             config["services"]["backend"]["build"]["context"] = posix_directory
             config["services"]["frontend"]["build"]["context"] = posix_directory + "/frontend"
             config["services"]["db"]["image"] = reference or (IMAGE_ID if vector else "postgres:17-bookworm")
             fixture = {"compose": config, "container": container(vector), "image": image(vector), "probe": probe(vector),
                        "change_id": change_id, "protected_incoming": protected_incoming, "extension": extension}
             (root / "fixture.json").write_text(json.dumps(fixture), encoding="utf-8")
-            (root / ".env").write_text("DB_PASSWORD='offline-test-password'\n", encoding="utf-8")
+            env_content = "DB_PASSWORD='offline-test-password'\n"
+            if auth_http or http_value is not None:
+                env_content += "PERFUME_AUTH_DEV_HTTP_ENABLED=" + (http_value if http_value is not None else "true") + "\n"
+            (root / ".env").write_text(env_content, encoding="utf-8")
             (root / ".perfume-db-ready").write_text("perfume-dev_pgdata\n", encoding="utf-8", newline="\n")
             if embedding_marker:
                 (root / ".perfume-embedding-active").write_text("offline-owner\n", encoding="utf-8")
@@ -175,7 +186,8 @@ class JenkinsDbPreservationTests(unittest.TestCase):
             # SSH session values must never override the operator-managed Compose .env inputs.
             env.update(PERFUME_AI_SEARCH_ENABLED="true", PERFUME_AI_SEARCH_MODEL_DIGEST="invalid-inherited",
                        PERFUME_AI_RECOMMEND_ENABLED="true", PERFUME_AI_RECOMMEND_MODEL_DIGEST="invalid-inherited",
-                       PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_COOKIE_SECURE="false")
+                       PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_COOKIE_SECURE="false", PERFUME_AUTH_DEV_HTTP_ENABLED="true",
+                       PERFUME_AUTH_DEV_HTTP_ORIGIN="http://public.example.com", SPRING_PROFILES_ACTIVE="production")
             env["PATH"] = str(root / "fake-bin") + os.pathsep + env["PATH"]
             for name in ("docker", "git", "curl", "flock", "python3"):
                 body = ('exec "$PERFUME_TEST_PYTHON" "$PERFUME_TEST_PYTHON_DRIVER" "$@"' if name == "python3" else
@@ -189,7 +201,7 @@ class JenkinsDbPreservationTests(unittest.TestCase):
             commands = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()] if log.exists() else []
             self.assertNotIn(PASSWORD, result.stdout + result.stderr)
             self.assertEqual("perfume-dev_pgdata\n", (root / ".perfume-db-ready").read_text())
-            self.assertEqual("DB_PASSWORD='offline-test-password'\n", (root / ".env").read_text())
+            self.assertEqual(env_content, (root / ".env").read_text())
             if vector or approved:
                 self.assertEqual(approval(), json.loads((root / ".env.pgvector-approval.json").read_text()))
             return result, commands
@@ -199,6 +211,19 @@ class JenkinsDbPreservationTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("Embedding worker recovery is required", result.stderr)
         self.assertFalse(any(cmd[0] in ('git', 'docker') for cmd in commands))
+
+    def test_private_http_override_comes_only_from_server_env_and_preserves_database(self):
+        result, commands = self.run_deploy(auth_http=True)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        up = [cmd for cmd in commands if cmd[:2] == ['docker', 'compose'] and 'up' in cmd]
+        self.assertEqual(['backend', 'frontend'], [cmd[-1] for cmd in up])
+        self.assertTrue(all('--no-deps' in cmd for cmd in up))
+
+    def test_invalid_or_duplicate_http_flag_stops_before_git_or_docker(self):
+        for value in ('maybe', 'true\nPERFUME_AUTH_DEV_HTTP_ENABLED=false', '$(touch should-never-run)'):
+            result, commands = self.run_deploy(http_value=value)
+            self.assertNotEqual(0, result.returncode)
+            self.assertFalse(any(cmd[0] in ('git', 'docker') for cmd in commands))
 
     def test_default_pgvector_and_first_upgrade_deploy_only_the_apps(self):
         for vector, legacy, extension in ((False, False, "none"), (False, True, "none"),
