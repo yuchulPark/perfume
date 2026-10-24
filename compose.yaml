@@ -40,6 +40,9 @@ services:
       # Staged authentication. Prepare auth schema/admin separately before opt-in.
       PERFUME_AUTH_ENABLED: ${PERFUME_AUTH_ENABLED:-false}
       PERFUME_AUTH_COOKIE_SECURE: "true"
+      # Separate support-only schema must be approved/applied before opt-in.
+      PERFUME_SUPPORT_ENABLED: ${PERFUME_SUPPORT_ENABLED:-false}
+      PERFUME_SUPPORT_ALLOWED_ORIGINS: ${PERFUME_SUPPORT_ALLOWED_ORIGINS:-}
       # Opt-in LAN development only. Full model digests come from the operator's .env.
       PERFUME_AI_SEARCH_ENABLED: ${PERFUME_AI_SEARCH_ENABLED:-false}
       PERFUME_AI_SEARCH_MODEL_DIGEST: ${PERFUME_AI_SEARCH_MODEL_DIGEST:-}

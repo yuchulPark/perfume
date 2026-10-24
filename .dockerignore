@@ -12,6 +12,7 @@ docs/*
 !docs/sql/
 docs/sql/*
 !docs/sql/perfume-embeddings-v1.sql
+!docs/sql/support-schema.sql
 **/application-local.properties
 **/application-secret.properties
 **/.env

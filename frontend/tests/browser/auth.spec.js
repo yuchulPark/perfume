@@ -8,6 +8,7 @@ async function mockAuth(page, options = {}) {
   const data = { user: options.loggedIn ? { username: 'admin', role: 'ADMIN' } : null, jobs: [], csrfCount: 0, logins: 0, token: 'masked-csrf-0' };
   await page.route('**/api/**', async (route) => {
     const request = route.request(), path = new URL(request.url()).pathname;
+    if (path === '/api/support/config') return route.fulfill({ json: { enabled: false } });
     if (path === '/api/auth/me') {
       if (options.meWait) await options.meWait;
       return route.fulfill({ json: { enabled: true, user: data.user } });

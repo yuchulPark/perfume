@@ -11,3 +11,5 @@ playwright.config.js
 tests/browser/
 tests/local/
 playwright.auth-local.config.js
+playwright.support.config.js
+tests/support-browser/

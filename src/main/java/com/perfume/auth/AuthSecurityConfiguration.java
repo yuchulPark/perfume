@@ -58,10 +58,15 @@ public class AuthSecurityConfiguration {
                         anonymous && protectedRecommendation(req) ? "AUTH_REQUIRED" : "ACCESS_DENIED");
                 }));
         if (!enabled) {
-            http.authorizeHttpRequests(rules -> rules.anyRequest().permitAll())
+            http.authorizeHttpRequests(rules -> rules
+                .requestMatchers("/api/support/config").permitAll()
+                .requestMatchers("/api/support/**", "/api/admin/support/**", "/ws/support").denyAll()
+                .anyRequest().permitAll())
                 .formLogin(form -> form.disable()).logout(logout -> logout.disable());
         } else {
             http.authorizeHttpRequests(rules -> rules
+                .requestMatchers("/api/admin/support/**").hasRole("ADMIN")
+                .requestMatchers("/api/support/**", "/ws/support").permitAll()
                 .requestMatchers(RECOMMEND, RECOMMEND + "/**").authenticated()
                 .requestMatchers("/api/auth/csrf", "/api/auth/me", "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/perfumes", "/api/perfumes/**", "/api/brands", "/api/brands/**", "/healthz").permitAll()

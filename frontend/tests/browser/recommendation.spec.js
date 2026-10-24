@@ -15,6 +15,7 @@ async function mockApi(page, handlers = {}) {
   await page.route('**/api/**', async (route) => {
     const request = route.request(), path = new URL(request.url()).pathname;
     if (path === '/api/auth/me') return route.fulfill({ json: { enabled: false, user: null } });
+    if (path === '/api/support/config') return route.fulfill({ json: { enabled: false } });
     if (path.startsWith(endpoint)) {
       const token = request.headers()['x-recommendation-token'];
       expect(token).toMatch(/^[0-9a-f]{64}$/);

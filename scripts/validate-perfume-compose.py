@@ -257,7 +257,8 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume", 
     require(app_env.get("SCENTREV_API_KEY") == "", "Web deployment must not receive a ScentRev API key.")
     auth_keys = {"PERFUME_AUTH_ENABLED", "PERFUME_AUTH_COOKIE_SECURE"}
     http_keys = {"SPRING_PROFILES_ACTIVE", "PERFUME_AUTH_DEV_HTTP_ENABLED", "PERFUME_AUTH_DEV_HTTP_ORIGIN"}
-    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | auth_keys | http_keys | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
+    support_keys = {"PERFUME_SUPPORT_ENABLED", "PERFUME_SUPPORT_ALLOWED_ORIGINS"}
+    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | auth_keys | http_keys | support_keys | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
             "Unexpected backend environment overrides.")
     if http_keys & app_env.keys():
         require(app_env.get("SPRING_PROFILES_ACTIVE") == "auth-dev-http"
@@ -272,6 +273,15 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume", 
                 and app_env["PERFUME_AUTH_COOKIE_SECURE"] == "true",
                 "Authentication deployment requires an explicit flag and Secure session cookies.")
     validate_ai_environment(app_env)
+    if support_keys & app_env.keys():
+        require(support_keys <= app_env.keys() and app_env.get("PERFUME_SUPPORT_ENABLED") in {"false", "true"},
+                "Support requires a complete explicit configuration.")
+        require(app_env["PERFUME_SUPPORT_ALLOWED_ORIGINS"] in {"", "http://192.168.0.19:8088"},
+                "Support deployment origins are restricted to the existing private development address.")
+        if app_env["PERFUME_SUPPORT_ENABLED"] == "true":
+            require(app_env.get("PERFUME_AUTH_ENABLED") == "true"
+                    and app_env["PERFUME_SUPPORT_ALLOWED_ORIGINS"] == "http://192.168.0.19:8088",
+                    "Support requires existing authentication and an explicit private origin.")
     for name in services:
         require(not services[name].get("command") and not services[name].get("entrypoint"), "Image startup defaults must be retained.")
     for name, directory in (("backend", deploy_directory), ("frontend", os.path.join(deploy_directory, "frontend"))):
