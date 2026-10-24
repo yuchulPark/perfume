@@ -24,7 +24,8 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 @SpringBootTest(classes = SupportTestApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "support.test.fixture=true", "server.address=127.0.0.1", "perfume.auth.enabled=true", "server.servlet.session.cookie.secure=false",
     "perfume.support.enabled=true", "perfume.support.allowed-origins=http://support.test", "spring.jpa.hibernate.ddl-auto=none", "spring.sql.init.mode=never",
-    "logging.level.root=WARN", "debug=false"})
+    // Root logging is JVM-wide and outlives this context; later import tests verify INFO events.
+    "debug=false"})
 class SupportApiTests {
     @LocalServerPort int port;
     @Autowired ObjectMapper json;
