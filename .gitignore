@@ -39,6 +39,7 @@ build/
 
 application-local.properties
 application-secret.properties
+/.secrets/
 
 ### Database backups ###
 /backups/

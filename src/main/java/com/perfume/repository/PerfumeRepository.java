@@ -45,6 +45,16 @@ public interface PerfumeRepository extends JpaRepository<Perfume, Long> {
     Page<PerfumeListProjection> findCatalogPage(@Param("pattern") String pattern,
             @Param("brandSlug") String brandSlug, Pageable page);
 
+    /** Hydrate secondary-index hits from the source of truth; the service restores relevance order. */
+    @Query("""
+            select p.id as id, p.scentrevPublicId as publicId, p.fragranceSlug as fragranceSlug,
+                   p.name as name, p.releaseYear as releaseYear, p.imageUrl as imageUrl,
+                   b.id as brandId, b.name as brandName, b.brandSlug as brandSlug
+            from Perfume p join p.brand b
+            where p.id in :ids and (:brandSlug is null or b.brandSlug = :brandSlug)
+            """)
+    List<PerfumeListProjection> findCatalogByIds(@Param("ids") Collection<Long> ids, @Param("brandSlug") String brandSlug);
+
     @Query("select p from Perfume p join fetch p.brand where p.id = :id")
     Optional<Perfume> findDetailById(@Param("id") Long id);
 

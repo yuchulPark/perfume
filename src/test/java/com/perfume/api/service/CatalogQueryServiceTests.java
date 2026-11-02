@@ -175,7 +175,8 @@ class CatalogQueryServiceTests {
         final PerfumeMetricRepository metrics = mock(PerfumeMetricRepository.class);
         final PerfumeOpinionRepository opinions = mock(PerfumeOpinionRepository.class);
         final PerfumeSimilarityRepository similarities = mock(PerfumeSimilarityRepository.class);
-        final PerfumeQueryService service = new PerfumeQueryService(perfumes, notes, flatNotes, accords, perfumers, metrics, opinions, similarities);
+        final PerfumeQueryService service = new PerfumeQueryService(perfumes, notes, flatNotes, accords, perfumers, metrics, opinions, similarities,
+                com.perfume.search.CatalogSearch.disabled());
         final Perfume perfume = identified(new Perfume("provider-id", "creed-aventus", "Aventus", null, null, null,
                 identified(new Brand("Creed", "creed"), 1L)), 2L);
         Fixture() { when(perfumes.findDetailById(2L)).thenReturn(Optional.of(perfume)); }

@@ -13,6 +13,7 @@ import com.perfume.domain.NoteLayer;
 import com.perfume.domain.PerfumeNote;
 import com.perfume.domain.PerfumeOpinion;
 import com.perfume.repository.*;
+import com.perfume.search.CatalogSearch;
 
 /** Local, read-only catalog access. No dependency on any provider client or importer. */
 @Service
@@ -26,21 +27,44 @@ public class PerfumeQueryService {
     private final PerfumeMetricRepository metrics;
     private final PerfumeOpinionRepository opinions;
     private final PerfumeSimilarityRepository similarities;
+    private final CatalogSearch search;
 
     public PerfumeQueryService(PerfumeRepository perfumes, PerfumeNoteRepository notes,
             PerfumeUnlayeredNoteRepository flatNotes, PerfumeAccordRepository accords,
             PerfumePerfumerRepository perfumers, PerfumeMetricRepository metrics,
-            PerfumeOpinionRepository opinions, PerfumeSimilarityRepository similarities) {
+            PerfumeOpinionRepository opinions, PerfumeSimilarityRepository similarities, CatalogSearch search) {
         this.perfumes = perfumes; this.notes = notes; this.flatNotes = flatNotes; this.accords = accords;
         this.perfumers = perfumers; this.metrics = metrics; this.opinions = opinions; this.similarities = similarities;
+        this.search = search;
     }
 
     public PageResponse<PerfumeSummaryResponse> list(int page, int size, String query, String brandSlug) {
         if (page < 0 || size < 1 || size > 100) { throw new IllegalArgumentException("Page must be nonnegative and size must be between 1 and 100."); }
+        if (query != null && !query.isBlank()) {
+            var found = search.search(page, size, query, brandSlug);
+            if (found.isPresent()) {
+                var hits = found.get();
+                var byId = new LinkedHashMap<Long, PerfumeListProjection>();
+                if (!hits.ids().isEmpty()) {
+                    perfumes.findCatalogByIds(hits.ids(), brandSlug).forEach(row -> byId.put(row.getId(), row));
+                }
+                // A removed perfume/changed brand means this page is stale. Never return dangling IDs.
+                if (byId.size() == hits.ids().size()) {
+                    int pages = (int) Math.min(Integer.MAX_VALUE, hits.total() / size + (hits.total() % size == 0 ? 0 : 1));
+                    return new PageResponse<>(hits.ids().stream().map(id -> summary(byId.get(id))).toList(),
+                            page, size, hits.total(), pages, page == 0, (long) page + 1 >= pages);
+                }
+                org.slf4j.LoggerFactory.getLogger(PerfumeQueryService.class)
+                        .warn("Catalog index contains stale IDs or brands; using PostgreSQL for this page; reindex required");
+            }
+        }
         var rows = perfumes.findCatalogPage(pattern(query), brandSlug, PageRequest.of(page, size));
-        return PageResponse.from(rows.map(row -> new PerfumeSummaryResponse(row.getId(), row.getPublicId(),
-                row.getFragranceSlug(), row.getName(), row.getReleaseYear(), row.getImageUrl(),
-                new BrandResponse(row.getBrandId(), row.getBrandName(), row.getBrandSlug()))));
+        return PageResponse.from(rows.map(PerfumeQueryService::summary));
+    }
+
+    private static PerfumeSummaryResponse summary(PerfumeListProjection row) {
+        return new PerfumeSummaryResponse(row.getId(), row.getPublicId(), row.getFragranceSlug(), row.getName(),
+                row.getReleaseYear(), row.getImageUrl(), new BrandResponse(row.getBrandId(), row.getBrandName(), row.getBrandSlug()));
     }
 
     public PerfumeDetailResponse detail(Long id) {

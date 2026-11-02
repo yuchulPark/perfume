@@ -1,0 +1,10 @@
+{
+  "name": "perfume-catalog-manual-index",
+  "expiration": "1d",
+  "role_descriptors": {
+    "catalog_index": {
+      "cluster": [],
+      "indices": [{ "names": ["perfumes-search", "perfumes-search-v-*"], "privileges": ["create_index", "create_doc", "read", "manage"], "allow_restricted_indices": false }]
+    }
+  }
+}

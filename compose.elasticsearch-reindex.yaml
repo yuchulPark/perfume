@@ -1,0 +1,28 @@
+# Manual one-shot job. Explicit service selection is required; no scheduler or startup dependency.
+services:
+  elasticsearch-reindex:
+    profiles: [search-index]
+    image: ${PERFUME_REINDEX_IMAGE:?Set PERFUME_REINDEX_IMAGE to the reviewed backend image ID}
+    entrypoint: [java, -Xms128m, -Xmx512m, -jar, /app/app.jar]
+    command: [--elasticsearch-reindex=full]
+    restart: "no"
+    read_only: true
+    tmpfs: [/tmp]
+    cpus: 0.5
+    mem_limit: 768m
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-perfume}?ApplicationName=perfume-es-reindex&connectTimeout=5&socketTimeout=35
+      DB_USERNAME: ${DB_USERNAME:-perfume_user}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the existing operator environment}
+      PERFUME_ELASTICSEARCH_URL: https://elasticsearch:9200
+      PERFUME_ELASTICSEARCH_ALIAS: perfumes-search
+      PERFUME_ELASTICSEARCH_CA_FILE: /run/secrets/elastic_ca
+      PERFUME_ELASTICSEARCH_INDEX_API_KEY_FILE: /run/secrets/elastic_index_key
+    secrets: [elastic_ca, elastic_index_key]
+    networks: [data, search]
+
+secrets:
+  elastic_ca:
+    file: ./.secrets/elasticsearch/node/ca.crt
+  elastic_index_key:
+    file: ./.secrets/elasticsearch/index-api-key

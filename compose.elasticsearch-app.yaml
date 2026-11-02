@@ -1,0 +1,19 @@
+# Separate, reviewed backend opt-in. Never implicitly used by the existing Jenkins deployment.
+services:
+  backend:
+    environment:
+      PERFUME_ELASTICSEARCH_ENABLED: ${PERFUME_ELASTICSEARCH_ENABLED:-false}
+      PERFUME_ELASTICSEARCH_URL: https://elasticsearch:9200
+      PERFUME_ELASTICSEARCH_ALIAS: perfumes-search
+      PERFUME_ELASTICSEARCH_CA_FILE: /run/secrets/elastic_ca
+      PERFUME_ELASTICSEARCH_API_KEY_FILE: /run/secrets/elastic_search_key
+    networks: [search]
+    secrets:
+      - elastic_ca
+      - elastic_search_key
+
+secrets:
+  elastic_ca:
+    file: ./.secrets/elasticsearch/node/ca.crt
+  elastic_search_key:
+    file: ./.secrets/elasticsearch/search-api-key

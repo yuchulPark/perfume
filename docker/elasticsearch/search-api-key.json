@@ -1,0 +1,10 @@
+{
+  "name": "perfume-catalog-search",
+  "expiration": "90d",
+  "role_descriptors": {
+    "catalog_read": {
+      "cluster": [],
+      "indices": [{ "names": ["perfumes-search"], "privileges": ["read"], "allow_restricted_indices": false }]
+    }
+  }
+}

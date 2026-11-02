@@ -1,0 +1,39 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "refresh_interval": "5s",
+    "analysis": {
+      "tokenizer": { "catalog_nori": { "type": "nori_tokenizer", "decompound_mode": "discard" } },
+      "filter": {
+        "catalog_synonyms": {
+          "type": "synonym_graph", "lenient": false,
+          "synonyms": ["크리드, creed", "아벤투스, aventus", "샤넬, chanel", "디올, dior", "장미, rose", "머스크, musk", "우디, woody", "시트러스, citrus", "베르가못, bergamot"]
+        }
+      },
+      "normalizer": { "catalog_exact": { "type": "custom", "filter": ["lowercase", "asciifolding"] } },
+      "analyzer": {
+        "catalog_plain": { "type": "custom", "tokenizer": "standard", "filter": ["lowercase", "asciifolding"] },
+        "catalog_search": { "type": "custom", "tokenizer": "standard", "filter": ["lowercase", "asciifolding", "catalog_synonyms"] },
+        "catalog_korean": { "type": "custom", "tokenizer": "catalog_nori", "filter": ["lowercase"] }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "_meta": { "schema_version": 1, "source": "postgresql", "synonyms_version": 1 },
+    "properties": {
+      "perfumeId": { "type": "long" },
+      "name": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" }, "raw": { "type": "keyword", "normalizer": "catalog_exact", "ignore_above": 512 } } },
+      "brandName": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" }, "raw": { "type": "keyword", "normalizer": "catalog_exact", "ignore_above": 512 } } },
+      "brandSlug": { "type": "keyword" },
+      "description": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" } } },
+      "releaseYear": { "type": "integer" },
+      "topNotes": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" } } },
+      "middleNotes": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" } } },
+      "baseNotes": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" } } },
+      "unlayeredNotes": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" } } },
+      "accords": { "type": "text", "analyzer": "catalog_plain", "search_analyzer": "catalog_search", "fields": { "ko": { "type": "text", "analyzer": "catalog_korean" } } }
+    }
+  }
+}
