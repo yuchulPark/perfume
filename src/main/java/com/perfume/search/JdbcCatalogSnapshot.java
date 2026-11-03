@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.sql.DataSource;
+import static com.perfume.search.SearchDiagnostics.*;
 
 /** One read-only REPEATABLE READ snapshot, including all note/accord relationships. No schema writes. */
 final class JdbcCatalogSnapshot implements CatalogSnapshot {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JdbcCatalogSnapshot.class);
     static final long LOCK_ID = 739206174812402L;
     static final String DOCUMENTS = """
             SELECT p.id, p.name, b.name AS brand_name, b.brand_slug, p.description, p.release_year,
@@ -30,23 +32,35 @@ final class JdbcCatalogSnapshot implements CatalogSnapshot {
 
     JdbcCatalogSnapshot(DataSource source) {
         Connection opened = null;
+        Stage stage = Stage.SNAPSHOT_OPEN;
+        begin(log, stage);
         try {
             opened = source.getConnection();
             opened.setReadOnly(true);
             opened.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             opened.setAutoCommit(false);
+            stage = Stage.ADVISORY_LOCK;
+            begin(log, stage);
             // Transaction lock is shared by manual reindex processes and released by rollback/close.
             try (var statement = opened.prepareStatement("SELECT pg_try_advisory_xact_lock(?)")) {
                 statement.setQueryTimeout(30);
                 statement.setLong(1, LOCK_ID);
                 try (var row = statement.executeQuery()) {
-                    if (!row.next() || !row.getBoolean(1)) throw new IllegalStateException("A catalog reindex is already running");
+                    if (!row.next() || !row.getBoolean(1))
+                        throw failure(stage, Code.LOCK_BUSY, "Cannot open catalog snapshot or acquire reindex lock");
                 }
             }
             connection = opened;
+            log.info("Catalog reindex stage={} outcome=ready", Stage.SNAPSHOT_OPEN);
         } catch (SQLException | RuntimeException failure) {
-            if (opened != null) { try { opened.close(); } catch (SQLException ignored) { } }
-            throw new IllegalStateException("Cannot open catalog snapshot or acquire reindex lock");
+            var safe = report(log, stage, failure);
+            if (opened != null) {
+                try { opened.close(); }
+                catch (SQLException | RuntimeException closeFailure) {
+                    safe.addSuppressed(report(log, Stage.SNAPSHOT_CLOSE, closeFailure));
+                }
+            }
+            throw safe;
         }
     }
 
@@ -54,7 +68,7 @@ final class JdbcCatalogSnapshot implements CatalogSnapshot {
         try (var statement = connection.prepareStatement("SELECT count(*) FROM public.perfumes")) {
             statement.setQueryTimeout(30);
             try (var row = statement.executeQuery()) { row.next(); return row.getLong(1); }
-        } catch (SQLException failure) { throw new IllegalStateException("Cannot count catalog snapshot"); }
+        } catch (SQLException | RuntimeException failure) { throw report(log, Stage.SOURCE_COUNT, failure); }
     }
 
     @Override public List<PerfumeSearchDocument> next(long afterId, int size) {
@@ -69,7 +83,7 @@ final class JdbcCatalogSnapshot implements CatalogSnapshot {
                         array(rows, "base_notes"), array(rows, "unlayered_notes"), array(rows, "accords")));
                 return result;
             }
-        } catch (SQLException failure) { throw new IllegalStateException("Cannot read catalog snapshot"); }
+        } catch (SQLException | RuntimeException failure) { throw report(log, Stage.SOURCE_READ, failure); }
     }
 
     private static List<String> array(ResultSet rows, String column) throws SQLException {
@@ -80,11 +94,15 @@ final class JdbcCatalogSnapshot implements CatalogSnapshot {
     }
 
     @Override public void close() {
+        Failure failed = null;
         try { connection.rollback(); }
-        catch (SQLException failure) { throw new IllegalStateException("Cannot close catalog snapshot"); }
-        finally {
-            try { connection.close(); }
-            catch (SQLException failure) { throw new IllegalStateException("Cannot close catalog connection"); }
+        catch (SQLException | RuntimeException failure) { failed = report(log, Stage.SNAPSHOT_CLOSE, failure); }
+        try { connection.close(); }
+        catch (SQLException | RuntimeException failure) {
+            var closeFailure = report(log, Stage.SNAPSHOT_CLOSE, failure);
+            if (failed == null) failed = closeFailure;
+            else failed.addSuppressed(closeFailure);
         }
+        if (failed != null) throw failed;
     }
 }
