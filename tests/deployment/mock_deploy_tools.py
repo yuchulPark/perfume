@@ -22,29 +22,45 @@ git)
         'rev-parse --show-toplevel') printf '%s\n' "$root" ;;
         'remote get-url') [[ "$3" == origin ]] || reject; printf 'https://github.com/yuchulPark/perfume.git\n' ;;
         'ls-files --error-unmatch') exit 1 ;;
-        'reset --hard') cp -- "$PERFUME_TEST_GUARD_SOURCE" "$root/scripts/validate-perfume-compose.py" ;;
+        'reset --hard')
+            if [[ "$mock_keep_legacy_guard" != 1 ]]; then cp -- "$PERFUME_TEST_GUARD_SOURCE" "$root/scripts/validate-perfume-compose.py"; fi
+            : >"$root/checkout-updated"
+            if [[ "$mock_change_secret" == 1 ]]; then
+                chmod u+w "$root/.secrets/elasticsearch/search-api-key"
+                printf 'changed-offline-key' >"$root/.secrets/elasticsearch/search-api-key"
+                chmod 400 "$root/.secrets/elasticsearch/search-api-key"
+            fi ;;
         'fetch --no-tags'|'cat-file -e'|'merge-base --is-ancestor') : ;;
-        'ls-tree -r') if [[ "$mock_protected_incoming" == 1 ]]; then printf '.env.pgvector-approval.json\0'; fi ;;
+        'ls-tree -r') if [[ "$mock_protected_incoming" == 1 ]]; then printf '%s\0' "$mock_protected_path"; fi ;;
         *) reject ;;
     esac ;;
 curl|flock) : ;;
 docker)
     case "$1" in
     compose)
-        for key in PERFUME_AI_SEARCH_ENABLED PERFUME_AI_SEARCH_MODEL_DIGEST PERFUME_AI_RECOMMEND_ENABLED PERFUME_AI_RECOMMEND_MODEL_DIGEST PERFUME_AUTH_ENABLED PERFUME_AUTH_COOKIE_SECURE PERFUME_AUTH_DEV_HTTP_ENABLED PERFUME_AUTH_DEV_HTTP_ORIGIN SPRING_PROFILES_ACTIVE; do
+        [[ "$COMPOSE_REMOVE_ORPHANS" == false ]] || reject
+        for key in PERFUME_AI_SEARCH_ENABLED PERFUME_AI_SEARCH_MODEL_DIGEST PERFUME_AI_RECOMMEND_ENABLED PERFUME_AI_RECOMMEND_MODEL_DIGEST PERFUME_AUTH_ENABLED PERFUME_AUTH_COOKIE_SECURE PERFUME_AUTH_DEV_HTTP_ENABLED PERFUME_AUTH_DEV_HTTP_ORIGIN SPRING_PROFILES_ACTIVE PERFUME_ELASTICSEARCH_ENABLED PERFUME_ELASTICSEARCH_URL PERFUME_ELASTICSEARCH_ALIAS PERFUME_ELASTICSEARCH_CA_FILE PERFUME_ELASTICSEARCH_API_KEY_FILE PERFUME_ELASTICSEARCH_INDEX_API_KEY_FILE; do
             [[ ! -v "$key" ]] || reject
         done
-        http_override=0; command=''; quiet=0
+        http_override=0; elastic_override=0; elastic_network=0; command=''; quiet=0
         for arg in "$@"; do
             case "$arg" in
                 */compose.auth-dev-http.yaml) http_override=1 ;;
+                */compose.elasticsearch-app.yaml) elastic_override=1 ;;
+                */compose.elasticsearch-jenkins.yaml) elastic_network=1 ;;
+                */compose.elasticsearch.yaml|*/compose.elasticsearch-reindex.yaml) reject ;;
                 config|build|up|ps) command="$arg" ;;
                 --quiet) quiet=1 ;;
             esac
         done
         [[ "$http_override" == "$mock_http" ]] || reject
+        expected_elastic="$mock_elastic"
+        if [[ "$mock_legacy" == 1 && ( ! -e "$root/checkout-updated" || "$mock_keep_legacy_guard" == 1 ) ]]; then expected_elastic=0; fi
+        [[ "$elastic_override" == "$expected_elastic" && "$elastic_network" == "$expected_elastic" ]] || reject
         case "$command" in
-        config) if [[ "$quiet" == 0 ]]; then emit compose.json; fi ;;
+        config) if [[ "$quiet" == 0 ]]; then
+            if [[ "$expected_elastic" == 0 ]]; then emit compose-base.json; else emit compose.json; fi
+        fi ;;
         build) [[ "${@: -2}" == 'backend frontend' ]] || reject ;;
         up)
             [[ " $* " == *' --no-deps '* && " $* " == *' --no-build '* ]] || reject
@@ -54,6 +70,7 @@ docker)
         *) reject ;;
         esac ;;
     volume) [[ "$*" == 'volume inspect perfume-dev_pgdata' ]] || reject ;;
+    network) [[ "$*" == "network inspect --format {{json .}} perfume-dev_search" ]] || reject; emit search-network.json ;;
     ps)
         [[ " $* " == *' label=com.docker.compose.project=perfume-dev '* && " $* " == *' label=com.docker.compose.service=db '* ]] || reject
         printf '%s\n' "$db_id" ;;
@@ -100,6 +117,8 @@ if args and args[0] == 'scripts/validate-perfume-compose.py':
     # Run the real validator and retain every validation/CLI/exit-code path.
     if os.name == 'nt' and '--approval-file' in args:
         args[args.index('--approval-file') + 1] = os.path.join(os.environ['PERFUME_TEST_DIRECTORY'], '.env.pgvector-approval.json')
+    if os.name == 'nt' and '--elasticsearch-files' in args:
+        args[args.index('--deploy-directory') + 1] = os.environ['PERFUME_TEST_DIRECTORY']
     original_run = subprocess.run
     def run(command, **kwargs):
         if command[0] == 'docker':
@@ -128,6 +147,8 @@ def prepare(root, fixture):
     (root / "commands").mkdir()
     config = {
         "compose.json": fixture["compose"], "container.json": fixture["container"],
+        "compose-base.json": fixture.get("compose_base", fixture["compose"]),
+        "search-network.json": fixture.get("search_network", {}),
         "changed-container.json": dict(fixture["container"], Id="9" * 64),
         "image.json": [fixture["image"]], "digests.json": fixture["image"]["RepoDigests"],
         "backend.json": {"Entrypoint": ["java", "-jar", "/app/app.jar"], "Cmd": [
@@ -141,6 +162,11 @@ def prepare(root, fixture):
                "mock_image_id": fixture["image"]["Id"], "mock_extension": fixture["extension"],
                "mock_change_id": str(int(fixture["change_id"])),
                "mock_protected_incoming": str(int(fixture["protected_incoming"])),
+               "mock_protected_path": fixture.get("protected_path", ".env.pgvector-approval.json"),
+               "mock_change_secret": str(int(fixture.get("change_secret", False))),
+               "mock_legacy": str(int(fixture.get("legacy", False))),
+               "mock_keep_legacy_guard": str(int(fixture.get("keep_legacy_guard", False))),
+               "mock_elastic": str(int(fixture["compose"]["services"]["backend"]["environment"].get("PERFUME_ELASTICSEARCH_ENABLED") == "true")),
                "mock_http": str(int(fixture["compose"]["services"]["backend"]["environment"].get("PERFUME_AUTH_DEV_HTTP_ENABLED") == "true"))}
     (root / "fixture.sh").write_text("\n".join(f"{key}={shlex.quote(value)}" for key, value in scalars.items()) + "\n",
                                      encoding="utf-8", newline="\n")

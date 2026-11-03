@@ -11,6 +11,26 @@ ROOT = Path(__file__).resolve().parents[2]
 DOCKER = shutil.which("docker")
 
 
+def add_elasticsearch_configuration(config, directory="/srv/perfume"):
+    """Offline connection-only fixture, separate from the manually managed ES service."""
+    config["services"]["backend"]["environment"].update({
+        "PERFUME_ELASTICSEARCH_ENABLED": "true", "PERFUME_ELASTICSEARCH_URL": "https://elasticsearch:9200",
+        "PERFUME_ELASTICSEARCH_ALIAS": "perfumes-search", "PERFUME_ELASTICSEARCH_CA_FILE": "/run/secrets/elastic_ca",
+        "PERFUME_ELASTICSEARCH_API_KEY_FILE": "/run/secrets/elastic_search_key",
+    })
+    config["services"]["backend"]["networks"]["search"] = None
+    config["networks"]["search"] = {"name": "perfume-dev_search", "external": True}
+    files = {"elastic_ca": ".secrets/elasticsearch/node/ca.crt", "elastic_search_key": ".secrets/elasticsearch/search-api-key"}
+    config["secrets"] = {name: {"name": "perfume-dev_" + name, "file": directory + "/" + file} for name, file in files.items()}
+    config["services"]["backend"]["secrets"] = [{"source": name, "target": "/run/secrets/" + name} for name in files]
+    return config
+
+
+def search_network():
+    return {"Name": "perfume-dev_search", "Driver": "bridge", "Scope": "local", "Internal": True,
+            "Labels": {"com.docker.compose.project": "perfume-dev", "com.docker.compose.network": "search"}}
+
+
 @unittest.skipUnless(DOCKER, "Docker Compose CLI required for configuration rendering only")
 class ElasticsearchComposeTests(unittest.TestCase):
     @classmethod
@@ -32,6 +52,9 @@ class ElasticsearchComposeTests(unittest.TestCase):
             cls.infra = render("compose.elasticsearch.yaml")
             cls.app = render("compose.elasticsearch.yaml", "compose.elasticsearch-app.yaml")
             cls.index = render("compose.elasticsearch.yaml", "compose.elasticsearch-reindex.yaml")
+            env.update(PERFUME_ELASTICSEARCH_ENABLED="true", PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_DEV_HTTP_ENABLED="true",
+                       PERFUME_SUPPORT_ENABLED="true", PERFUME_SUPPORT_ALLOWED_ORIGINS="http://192.168.0.19:8088")
+            cls.jenkins = render("compose.auth-dev-http.yaml", "compose.elasticsearch-app.yaml", "compose.elasticsearch-jenkins.yaml")
 
     def test_infrastructure_does_not_change_any_existing_service_or_volume(self):
         for name, service in self.base["services"].items():
@@ -75,6 +98,24 @@ class ElasticsearchComposeTests(unittest.TestCase):
         self.assertIn("elasticsearch-plugin install --batch analysis-nori", source)
         query_key = json.loads((ROOT / "docker/elasticsearch/search-api-key.json").read_text())
         self.assertEqual(["read"], query_key["role_descriptors"]["catalog_read"]["indices"][0]["privileges"])
+
+    def test_jenkins_connection_only_merge_preserves_http_auth_support_and_existing_resources(self):
+        from test_compose_guard import guard
+        guard.validate_config(self.jenkins, "compose-test-placeholder", str(ROOT), expected_elasticsearch=True)
+        self.assertEqual(set(self.base["services"]), set(self.jenkins["services"]))
+        self.assertEqual(self.base["volumes"], self.jenkins["volumes"])
+        for service in ("db", "frontend", "ollama"):
+            self.assertEqual(self.base["services"][service], self.jenkins["services"][service])
+        self.assertEqual("perfume-dev_search", self.jenkins["networks"]["search"]["name"])
+        self.assertTrue(self.jenkins["networks"]["search"]["external"])
+        self.assertFalse(self.jenkins["networks"]["search"].get("ipam"))
+        backend = self.jenkins["services"]["backend"]
+        self.assertEqual("true", backend["environment"]["PERFUME_ELASTICSEARCH_ENABLED"])
+        self.assertEqual("auth-dev-http", backend["environment"]["SPRING_PROFILES_ACTIVE"])
+        self.assertEqual("false", backend["environment"]["PERFUME_AUTH_COOKIE_SECURE"])
+        self.assertEqual("true", backend["environment"]["PERFUME_SUPPORT_ENABLED"])
+        self.assertEqual(self.base["services"]["backend"]["depends_on"], backend["depends_on"])
+        self.assertEqual(self.base["services"]["backend"]["healthcheck"], backend["healthcheck"])
 
 
 if __name__ == "__main__":

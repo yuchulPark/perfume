@@ -1,4 +1,4 @@
-# Separate, reviewed backend opt-in. Never implicitly used by the existing Jenkins deployment.
+# Backend connection only. Jenkins selects this explicitly from the server .env opt-in flag.
 services:
   backend:
     environment:

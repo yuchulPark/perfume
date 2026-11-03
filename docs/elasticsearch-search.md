@@ -106,7 +106,7 @@ PostgreSQL만 원본이며 ES는 다시 만들 수 있는 조회용 사본이다
 
 ## 6. Ubuntu 적용 명령 — 별도 검토 후 실행
 
-아래 명령은 `/srv/perfume`에 검토된 소스와 해당 backend 빌드가 준비된 후, 기존 배포 담당자와 작업 시간을 조율해 실행한다. 기존 Jenkins는 이 override들을 사용하지 않는다. **다음 기존 Jenkins 배포는 backend를 기본 Compose 설정으로 재생성해 ES가 다시 비활성화될 수 있다.** 지속 적용을 위한 Jenkins 변경은 이번 범위 밖이며 별도 검토 대상이다.
+아래 명령은 `/srv/perfume`에 검토된 소스와 해당 backend 빌드가 준비된 후, 기존 배포 담당자와 작업 시간을 조율해 실행한다. Jenkins 배포는 서버 `.env`의 `PERFUME_ELASTICSEARCH_ENABLED=true`일 때만 backend 연결 override와 외부 네트워크 참조를 적용한다. 기존 HTTP 인증 override도 함께 유지한다. ES 서비스/색인 job은 Jenkins가 실행하지 않는다. 최초 적용·비밀 파일 보호·비활성화의 자세한 결정 규칙은 [Jenkins Elasticsearch 배포 정책](jenkins-elasticsearch.md)을 따른다.
 
 ### 6.1 읽기 전용 사전 점검
 

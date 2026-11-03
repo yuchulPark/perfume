@@ -1,0 +1,6 @@
+# Connection metadata only. Merge after compose.elasticsearch-app.yaml, never the ES infrastructure file.
+# The operator owns this existing internal network and the Elasticsearch service/volume lifecycle.
+networks:
+  search:
+    name: perfume-dev_search
+    external: true

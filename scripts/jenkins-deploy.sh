@@ -27,40 +27,56 @@ test ! -e .perfume-embedding-active && test ! -L .perfume-embedding-active || {
 
 # Do not inherit a different project's Compose or DB settings from the SSH session.
 unset COMPOSE_FILE COMPOSE_PROJECT_NAME COMPOSE_PROFILES DB_NAME DB_USERNAME DB_PASSWORD DB_URL SCENTREV_API_KEY PERFUME_DB_IMAGE
+# ES is intentionally outside this Compose model. Never remove it as an orphan, even via .env/SSH defaults.
+export COMPOSE_REMOVE_ORPHANS=false
 # AI activation and model identities must come only from the operator-owned server .env.
 unset PERFUME_AI_SEARCH_ENABLED PERFUME_AI_SEARCH_MODEL_DIGEST PERFUME_AI_RECOMMEND_ENABLED PERFUME_AI_RECOMMEND_MODEL_DIGEST
 # Authentication activation also comes only from the operator-owned server .env.
 unset PERFUME_AUTH_ENABLED PERFUME_AUTH_COOKIE_SECURE PERFUME_AUTH_DEV_HTTP_ENABLED PERFUME_AUTH_DEV_HTTP_ORIGIN SPRING_PROFILES_ACTIVE
 # Support is a separate opt-in, never inherited from a Jenkins/SSH environment.
 unset PERFUME_SUPPORT_ENABLED PERFUME_SUPPORT_ALLOWED_ORIGINS
-auth_dev_http="$(python3 - <<'PY'
+unset PERFUME_ELASTICSEARCH_ENABLED PERFUME_ELASTICSEARCH_URL PERFUME_ELASTICSEARCH_ALIAS PERFUME_ELASTICSEARCH_CA_FILE PERFUME_ELASTICSEARCH_API_KEY_FILE PERFUME_ELASTICSEARCH_INDEX_API_KEY_FILE
+env_hash="$(sha256sum .env)"
+activation_flags="$(python3 - <<'PY'
 from pathlib import Path
 import re
-values = []
-for line in Path('.env').read_text().splitlines():
-    match = re.match(r'^\s*(?:export\s+)?PERFUME_AUTH_DEV_HTTP_ENABLED\s*=(.*)$', line)
-    if match:
-        value = re.fullmatch(r'''\s*(true|false|'true'|'false'|"true"|"false")\s*(?:#.*)?''', match[1])
-        if value is None:
-            raise SystemExit('Invalid development HTTP flag in server .env')
-        values.append(value[1].strip('\'"'))
-if len(values) > 1:
-    raise SystemExit('Duplicate development HTTP flag in server .env')
-print(values[0] if values else 'false')
+flags = []
+lines = Path('.env').read_text().splitlines()
+for name in ('PERFUME_AUTH_DEV_HTTP_ENABLED', 'PERFUME_ELASTICSEARCH_ENABLED'):
+    values = []
+    for line in lines:
+        match = re.match(r'^\s*(?:export\s+)?' + name + r'\s*=(.*)$', line)
+        if match:
+            value = re.fullmatch(r'''\s*(true|false|'true'|'false'|"true"|"false")\s*(?:#.*)?''', match[1])
+            if value is None:
+                raise SystemExit('Invalid ' + name + ' flag in server .env')
+            values.append(value[1].strip('\'"'))
+    if len(values) > 1:
+        raise SystemExit('Duplicate ' + name + ' flag in server .env')
+    flags.append(values[0] if values else 'false')
+print(' '.join(flags))
 PY
 )"
+read -r auth_dev_http elasticsearch_enabled <<< "$activation_flags"
+elasticsearch_compose=false
+elasticsearch_files_hash=''
 export GIT_TERMINAL_PROMPT=0
 compose() {
-    local http_override=()
+    local overrides=()
     if [[ "$auth_dev_http" == true ]]; then
         test -f "$deploy_directory/compose.auth-dev-http.yaml"
         test ! -L "$deploy_directory/compose.auth-dev-http.yaml"
-        http_override=(--file "$deploy_directory/compose.auth-dev-http.yaml")
+        overrides+=(--file "$deploy_directory/compose.auth-dev-http.yaml")
+    fi
+    if [[ "$elasticsearch_compose" == true ]]; then
+        for file in compose.elasticsearch-app.yaml compose.elasticsearch-jenkins.yaml; do
+            test -f "$deploy_directory/$file" && test ! -L "$deploy_directory/$file"
+            overrides+=(--file "$deploy_directory/$file")
+        done
     fi
     docker compose --project-name perfume-dev --project-directory "$deploy_directory" \
-        --env-file "$deploy_directory/.env" --file "$deploy_directory/compose.yaml" "${http_override[@]}" "$@"
+        --env-file "$deploy_directory/.env" --file "$deploy_directory/compose.yaml" "${overrides[@]}" "$@"
 }
-env_hash="$(sha256sum .env)"
 ready_hash="$(sha256sum .perfume-db-ready)"
 approval_file="$deploy_directory/.env.pgvector-approval.json"
 approval_hash_now() {
@@ -84,17 +100,39 @@ case "$(git remote get-url origin)" in
 esac
 
 verify_configuration() {
+    local guard_help elastic_args=() fingerprint
+    guard_help="$(python3 scripts/validate-perfume-compose.py --help)"
+    elasticsearch_compose=false
+    if [[ "$guard_help" == *--elasticsearch-enabled* ]]; then
+        elastic_args=(--elasticsearch-enabled "$elasticsearch_enabled")
+        elasticsearch_compose="$elasticsearch_enabled"
+    elif [[ "$elasticsearch_enabled" == true ]]; then
+        # Incoming shell runs before git reset; the old validator cannot accept the new connection metadata.
+        # This preflight changes no container. After checkout the new validation is mandatory.
+        echo "Elasticsearch connection validation deferred until the reviewed checkout is available."
+    fi
     compose config --quiet
     # The first deployment receives this script over SSH BEFORE the server checkout
     # has the new validator. Keep that initial preflight compatible with the old CLI.
-    if python3 scripts/validate-perfume-compose.py --help | grep -q -- '--db-container'; then
+    if [[ "$guard_help" == *--db-container* ]]; then
         configured_db_image="$(compose config --format json | python3 scripts/validate-perfume-compose.py \
-            --deploy-directory "$deploy_directory" --approval-file "$approval_file" --print-db-image)"
+            --deploy-directory "$deploy_directory" --approval-file "$approval_file" --print-db-image "${elastic_args[@]}")"
         pgvector_guard=true
     else
         compose config --format json | python3 scripts/validate-perfume-compose.py --deploy-directory "$deploy_directory"
         configured_db_image=postgres:17-bookworm
         pgvector_guard=false
+    fi
+    if [[ "$elasticsearch_compose" == true ]]; then
+        fingerprint="$(python3 scripts/validate-perfume-compose.py --elasticsearch-files --deploy-directory "$deploy_directory")"
+        if [[ -n "$elasticsearch_files_hash" ]]; then
+            test "$fingerprint" = "$elasticsearch_files_hash" || { echo "Search secret files changed during deployment." >&2; exit 1; }
+        else
+            elasticsearch_files_hash="$fingerprint"
+        fi
+        # Read-only metadata check. Do not require a running/healthy ES node: queries can fall back to SQL.
+        docker network inspect --format '{{json .}}' perfume-dev_search \
+            | python3 scripts/validate-perfume-compose.py --elasticsearch-network
     fi
 }
 verify_database() {
@@ -157,6 +195,7 @@ paths = sys.stdin.buffer.read().split(b"\0")
 for path in paths:
     name = path.rsplit(b"/", 1)[-1]
     if (path == b"backups" or path.startswith(b"backups/") or
+        path == b".secrets" or path.startswith(b".secrets/") or
         path in (b".perfume-db-ready", b".perfume-deploy.lock", b".perfume-embedding-active") or
         (name.startswith(b".env") and name != b".env.example") or
         name.endswith((b".dump", b".backup"))):
@@ -169,6 +208,9 @@ test "$(sha256sum .perfume-db-ready)" = "$ready_hash"
 test "$(approval_hash_now)" = "$approval_hash"
 verify_configuration
 test "$pgvector_guard" = true
+[[ "$elasticsearch_enabled" != true || "$elasticsearch_compose" == true ]] || {
+    echo "Reviewed Elasticsearch deployment validation is required before application replacement." >&2; exit 1;
+}
 
 compose build backend frontend
 docker image inspect --format '{{json .Config}}' perfume-dev-backend \
@@ -183,7 +225,11 @@ test "$db_id" = "$original_db_id"
 test "$(sha256sum .env)" = "$env_hash"
 test "$(sha256sum .perfume-db-ready)" = "$ready_hash"
 test "$(approval_hash_now)" = "$approval_hash"
+if [[ "$elasticsearch_enabled" == true ]]; then
+    test "$(python3 scripts/validate-perfume-compose.py --elasticsearch-files --deploy-directory "$deploy_directory")" = "$elasticsearch_files_hash"
+fi
 curl --fail --silent --show-error --max-time 15 http://127.0.0.1:8088/healthz >/dev/null
 curl --fail --silent --show-error --max-time 15 'http://127.0.0.1:8088/api/perfumes?size=1' >/dev/null
 compose ps backend frontend
+printf 'Catalog Elasticsearch opt-in from server .env: %s.\n' "$elasticsearch_enabled"
 printf 'Perfume revision %s deployed; DB container, volume and .env preserved.\n' "$revision"

@@ -1,5 +1,6 @@
 """Run the real deploy shell in a temporary checkout with every external action mocked."""
 import json
+from copy import deepcopy
 import os
 from pathlib import Path
 import shutil
@@ -27,7 +28,9 @@ print('Legacy default-image validation passed.')
 
 @unittest.skipUnless(BASH and Path(BASH).exists(), "Bash is required for mocked deploy-script execution.")
 class JenkinsDbPreservationTests(unittest.TestCase):
-    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False, ai_inputs=None, auth_enabled=None, auth_http=False, http_value=None):
+    def run_deploy(self, vector=False, legacy=False, change_id=False, protected_incoming=False, extension="none", reference=None, approved=False, embedding_marker=False, ai_inputs=None, auth_enabled=None, auth_http=False, http_value=None,
+                   elastic_value=None, missing_search_secret=False, unsafe_search_network=False, change_search_secret=False,
+                   protected_path=".env.pgvector-approval.json", support=False, action="deploy", legacy_search=False, keep_legacy_guard=False):
         with tempfile.TemporaryDirectory(prefix="perfume-deploy-mock-") as directory:
             root = Path(directory)
             (root / "scripts").mkdir()
@@ -46,15 +49,44 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                     PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_COOKIE_SECURE="false", SPRING_PROFILES_ACTIVE="auth-dev-http",
                     PERFUME_AUTH_DEV_HTTP_ENABLED="true", PERFUME_AUTH_DEV_HTTP_ORIGIN="http://192.168.0.19:8088")
                 (root / "compose.auth-dev-http.yaml").write_text((ROOT / "compose.auth-dev-http.yaml").read_text(encoding="utf-8"))
+            if support:
+                config["services"]["backend"]["environment"].update(
+                    PERFUME_SUPPORT_ENABLED="true", PERFUME_SUPPORT_ALLOWED_ORIGINS="http://192.168.0.19:8088")
             config["services"]["backend"]["build"]["context"] = posix_directory
             config["services"]["frontend"]["build"]["context"] = posix_directory + "/frontend"
             config["services"]["db"]["image"] = reference or (IMAGE_ID if vector else "postgres:17-bookworm")
+            base_config = deepcopy(config)
+            search_metadata = {}
+            original_search_files = {}
+            if elastic_value is not None and elastic_value.strip("'\"") == "true":
+                from test_elasticsearch_configuration import add_elasticsearch_configuration, search_network
+                add_elasticsearch_configuration(config, posix_directory)
+                search_metadata = search_network()
+                if unsafe_search_network:
+                    search_metadata["Internal"] = False
+                for relative in (".secrets/elasticsearch/node/ca.crt", ".secrets/elasticsearch/search-api-key"):
+                    path = root / relative
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text("offline-search-fixture", encoding="utf-8")
+                    path.chmod(0o400 if relative.endswith("search-api-key") else 0o644)
+                    original_search_files[relative] = path.read_bytes()
+                if missing_search_secret:
+                    missing_key = root / ".secrets/elasticsearch/search-api-key"
+                    missing_key.chmod(0o600); missing_key.unlink()
+                for name in ("compose.elasticsearch-app.yaml", "compose.elasticsearch-jenkins.yaml"):
+                    (root / name).write_text((ROOT / name).read_text(encoding="utf-8"), encoding="utf-8")
             fixture = {"compose": config, "container": container(vector), "image": image(vector), "probe": probe(vector),
-                       "change_id": change_id, "protected_incoming": protected_incoming, "extension": extension}
+                       "change_id": change_id, "protected_incoming": protected_incoming, "extension": extension,
+                       "compose_base": base_config, "search_network": search_metadata, "legacy": legacy or legacy_search,
+                       "change_secret": change_search_secret, "protected_path": protected_path, "keep_legacy_guard": keep_legacy_guard}
             prepare(root, fixture)
             env_content = "DB_PASSWORD='offline-test-password'\n"
             if auth_http or http_value is not None:
                 env_content += "PERFUME_AUTH_DEV_HTTP_ENABLED=" + (http_value if http_value is not None else "true") + "\n"
+            if elastic_value is not None:
+                env_content += "PERFUME_ELASTICSEARCH_ENABLED=" + elastic_value + "\n"
+            if support:
+                env_content += "PERFUME_SUPPORT_ENABLED=true\nPERFUME_SUPPORT_ALLOWED_ORIGINS=http://192.168.0.19:8088\n"
             (root / ".env").write_text(env_content, encoding="utf-8")
             (root / ".perfume-db-ready").write_text("perfume-dev_pgdata\n", encoding="utf-8", newline="\n")
             if embedding_marker:
@@ -63,8 +95,13 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                 from test_pgvector_production import verifier
                 verifier.write_approval(approval(), root / ".env.pgvector-approval.json")
             guard_source = ROOT / "scripts/validate-perfume-compose.py"
+            guard_text = guard_source.read_text(encoding="utf-8")
+            if legacy_search:
+                # Existing pgvector-aware server validator without the new search opt-in capability.
+                guard_text = guard_text.replace('    parser.add_argument("--elasticsearch-enabled", choices=("true", "false"))\n', '')
+                guard_text = guard_text.replace("args.elasticsearch_enabled", "None")
             (root / "scripts/validate-perfume-compose.py").write_text(
-                LEGACY_GUARD if legacy else guard_source.read_text(encoding="utf-8"), encoding="utf-8")
+                LEGACY_GUARD if legacy else guard_text, encoding="utf-8")
             script = (ROOT / "scripts/jenkins-deploy.sh").read_text(encoding="utf-8").replace(
                 "deploy_directory=/srv/perfume", "deploy_directory='" + posix_directory + "'")
             # Git Bash adjusts inherited Windows PATH; prepend mocks inside Bash itself.
@@ -87,6 +124,10 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                        PERFUME_AI_RECOMMEND_ENABLED="true", PERFUME_AI_RECOMMEND_MODEL_DIGEST="invalid-inherited",
                        PERFUME_AUTH_ENABLED="true", PERFUME_AUTH_COOKIE_SECURE="false", PERFUME_AUTH_DEV_HTTP_ENABLED="true",
                        PERFUME_AUTH_DEV_HTTP_ORIGIN="http://public.example.com", SPRING_PROFILES_ACTIVE="production")
+            env.update(PERFUME_ELASTICSEARCH_ENABLED="true", PERFUME_ELASTICSEARCH_URL="http://untrusted.example?token=untrusted-search-secret",
+                       PERFUME_ELASTICSEARCH_ALIAS="untrusted", PERFUME_ELASTICSEARCH_CA_FILE="/untrusted/ca",
+                       PERFUME_ELASTICSEARCH_API_KEY_FILE="/untrusted/key", PERFUME_ELASTICSEARCH_INDEX_API_KEY_FILE="/untrusted/index-key")
+            env["COMPOSE_REMOVE_ORPHANS"] = "true" # The script must force this off; ES is deliberately not in its model.
             env["PATH"] = str(root / "fake-bin") + os.pathsep + env["PATH"]
             for name in ("docker", "git", "curl", "flock", "python3"):
                 body = ('exec "$PERFUME_TEST_PYTHON" "$PERFUME_TEST_PYTHON_DRIVER" "$@"' if name == "python3" else
@@ -99,7 +140,7 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                     shebang = "#!/usr/bin/env bash"
                 path.write_text(shebang + "\n" + body + "\n", encoding="utf-8", newline="\n")
                 path.chmod(0o755)
-            result = diagnostics.run([BASH, "--noprofile", "--norc", str(root / "deploy.sh"), "deploy", "1" * 40],
+            result = diagnostics.run([BASH, "--noprofile", "--norc", str(root / "deploy.sh"), action, "1" * 40],
                                      env=env, trace=root / "steps.log", timeout=60)
             commands = read_commands(root)
             if os.environ.get("PERFUME_TEST_DEPLOY_TIMINGS") == "1":
@@ -107,10 +148,14 @@ class JenkinsDbPreservationTests(unittest.TestCase):
                 count = len(starts.read_text().splitlines()) if starts.exists() else 0
                 print(f"mock-processes commands={len(commands)} python-starts={count}", flush=True)
             self.assertNotIn(PASSWORD, result.stdout + result.stderr)
+            self.assertNotIn("untrusted-search-secret", result.stdout + result.stderr)
             self.assertEqual("perfume-dev_pgdata\n", (root / ".perfume-db-ready").read_text())
             self.assertEqual(env_content, (root / ".env").read_text())
             if vector or approved:
                 self.assertEqual(approval(), json.loads((root / ".env.pgvector-approval.json").read_text()))
+            if not missing_search_secret and not change_search_secret:
+                for relative, contents in original_search_files.items():
+                    self.assertEqual(contents, (root / relative).read_bytes())
             return result, commands
 
     def test_orphan_embedding_marker_refuses_deploy_before_git_or_docker(self):

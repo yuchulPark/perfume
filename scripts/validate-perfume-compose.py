@@ -1,5 +1,6 @@
 """Validate deployment metadata only; never open a database connection."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -31,6 +32,83 @@ AI_INPUT_ENV = {
     "PERFUME_AI_SEARCH_ENABLED", "PERFUME_AI_SEARCH_MODEL_DIGEST",
     "PERFUME_AI_RECOMMEND_ENABLED", "PERFUME_AI_RECOMMEND_MODEL_DIGEST",
 }
+ELASTIC_ENV = {
+    "PERFUME_ELASTICSEARCH_ENABLED": "true",
+    "PERFUME_ELASTICSEARCH_URL": "https://elasticsearch:9200",
+    "PERFUME_ELASTICSEARCH_ALIAS": "perfumes-search",
+    "PERFUME_ELASTICSEARCH_CA_FILE": "/run/secrets/elastic_ca",
+    "PERFUME_ELASTICSEARCH_API_KEY_FILE": "/run/secrets/elastic_search_key",
+}
+ELASTIC_FILES = {
+    "elastic_ca": ".secrets/elasticsearch/node/ca.crt",
+    "elastic_search_key": ".secrets/elasticsearch/search-api-key",
+}
+
+
+def validate_elasticsearch(config, deploy_directory, expected=None):
+    environment = config["services"]["backend"]["environment"]
+    flag = environment.get("PERFUME_ELASTICSEARCH_ENABLED", "false")
+    require(flag in ("false", "true"), "Elasticsearch flag must be true or false.")
+    enabled = flag == "true"
+    require(expected is None or enabled == expected, "Elasticsearch configuration differs from server opt-in.")
+    actual = {key: value for key, value in environment.items() if key.startswith("PERFUME_ELASTICSEARCH_")}
+    if enabled:
+        require(actual == ELASTIC_ENV, "Elasticsearch requires fixed HTTPS, alias and secret file settings.")
+        secrets = config.get("secrets", {})
+        require(set(secrets) == set(ELASTIC_FILES), "Only catalog search TLS CA and read key secrets are allowed.")
+        for name, relative in ELASTIC_FILES.items():
+            definition = secrets[name]
+            require(set(definition) <= {"name", "file"} and "file" in definition,
+                    "Elasticsearch secrets must use fixed local files.")
+            require(definition.get("name", "perfume-dev_" + name) == "perfume-dev_" + name,
+                    "Unexpected Elasticsearch secret name.")
+            require(os.path.normcase(os.path.abspath(definition["file"])) ==
+                    os.path.normcase(os.path.abspath(os.path.join(deploy_directory, relative))),
+                    "Unexpected Elasticsearch secret source.")
+        references = config["services"]["backend"].get("secrets", [])
+        require(len(references) == 2, "Backend must mount exactly two search secrets.")
+        require({item.get("source") for item in references} == set(ELASTIC_FILES), "Unexpected search secret mount.")
+        for item in references:
+            require(set(item) <= {"source", "target"}
+                    and item.get("target") in {item["source"], "/run/secrets/" + item["source"]},
+                    "Search secrets must retain their fixed read-only targets.")
+    else:
+        require(actual in ({}, {"PERFUME_ELASTICSEARCH_ENABLED": "false"})
+                and not config.get("secrets") and not config["services"]["backend"].get("secrets"),
+                "Disabled Elasticsearch must not add credentials or connection configuration.")
+    for name, service in config["services"].items():
+        if name != "backend":
+            require(not service.get("secrets") and not any(key.startswith("PERFUME_ELASTICSEARCH_")
+                    for key in service.get("environment", {})), "Search credentials are backend-only.")
+    return enabled
+
+
+def validate_elasticsearch_network(network):
+    require(network.get("Name") == "perfume-dev_search" and network.get("Driver") == "bridge"
+            and network.get("Scope") == "local" and network.get("Internal") is True
+            and not network.get("Ingress"), "Search requires the existing isolated local bridge network.")
+    labels = network.get("Labels") or {}
+    require(labels.get("com.docker.compose.project") == "perfume-dev"
+            and labels.get("com.docker.compose.network") == "search", "Unexpected search network ownership.")
+
+
+def elasticsearch_files_fingerprint(deploy_directory):
+    # Read metadata only: the deploy user need not read the UID 10001-owned key contents.
+    # ctime/mtime and inode identity detect replacement/rotation while preserving existing file ownership.
+    rows = []
+    for relative in ELASTIC_FILES.values():
+        path = Path(deploy_directory)
+        for component in Path(relative).parts:
+            path = path / component
+            require(not path.is_symlink(), "Search secret paths cannot contain symlinks.")
+        info = path.stat()
+        require(stat.S_ISREG(info.st_mode) and info.st_size > 0, "Search secret files must already exist and be nonempty.")
+        if os.name == "posix":
+            prohibited = 0o077 if relative.endswith("search-api-key") else 0o022
+            require(not stat.S_IMODE(info.st_mode) & prohibited, "Search secret file permissions are too broad.")
+        rows.append((relative, info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
+                     info.st_size, info.st_mtime_ns, info.st_ctime_ns))
+    return hashlib.sha256(json.dumps(rows).encode()).hexdigest()
 
 
 def validate_ai_environment(environment):
@@ -182,13 +260,14 @@ def validate_probe(output, with_vector=False, approval=None):
     return lines
 
 
-def validate_config(config, expected_password, deploy_directory="/srv/perfume", db_approval=None):
+def validate_config(config, expected_password, deploy_directory="/srv/perfume", db_approval=None, expected_elasticsearch=None):
     require(bool(expected_password), "Jenkins DB password credential is missing.")
     require(config["name"] == "perfume-dev", "Compose project must be perfume-dev.")
     services = config["services"]
     require(set(services) == {"db", "backend", "frontend", "ollama"}, "Unexpected Compose services.")
     require(all(not s.get("container_name") for s in services.values()), "Fixed container names are prohibited.")
     db, backend, frontend = (services[name] for name in ("db", "backend", "frontend"))
+    elasticsearch = validate_elasticsearch(config, deploy_directory, expected_elasticsearch)
     ollama = services["ollama"]
     require(backend.get("image") in (None, "perfume-dev-backend", "perfume-dev-backend:latest")
             and frontend.get("image") in (None, "perfume-dev-frontend", "perfume-dev-frontend:latest"), "Unexpected application image names.")
@@ -213,13 +292,22 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume", 
     require(not backend.get("ports"), "Backend must not publish a host port.")
     require(not backend.get("volumes") and not frontend.get("volumes"), "Unexpected application bind mounts.")
     networks = config["networks"]
-    require(set(networks) == {"app", "data", "db-access", "web", "ai", "ollama-download"}, "Unexpected network definitions.")
+    require(set(networks) == {"app", "data", "db-access", "web", "ai", "ollama-download"}
+            | ({"search"} if elasticsearch else set()), "Unexpected network definitions.")
     for name, network in networks.items():
         require(network["name"] == "perfume-dev_" + name, "Unexpected network name.")
+        if name == "search":
+            # Some Compose releases include an empty normalized IPAM object even for external networks.
+            require(network.get("external") is True and set(network) <= {"name", "external", "ipam"}
+                    and not network.get("ipam"),
+                    "Search network lifecycle must remain operator-managed.")
+            continue
         require(not network.get("external"), "External networks are prohibited.")
         require(bool(network.get("internal")) == (name in {"app", "data", "ai"}), "Unexpected network isolation.")
     for name, expected in (("db", {"data", "db-access"}), ("backend", {"app", "data", "ai"}),
                            ("frontend", {"app", "web"}), ("ollama", {"ai", "ollama-download"})):
+        if name == "backend" and elasticsearch:
+            expected = expected | {"search"}
         require(set(services[name]["networks"]) == expected, "Unexpected service network attachment.")
         require(not services[name].get("network_mode"), "Service network overrides are prohibited.")
     require(ollama["image"] == "ollama/ollama:0.40.4" and not ollama.get("build"), "Unexpected Ollama image.")
@@ -258,7 +346,7 @@ def validate_config(config, expected_password, deploy_directory="/srv/perfume", 
     auth_keys = {"PERFUME_AUTH_ENABLED", "PERFUME_AUTH_COOKIE_SECURE"}
     http_keys = {"SPRING_PROFILES_ACTIVE", "PERFUME_AUTH_DEV_HTTP_ENABLED", "PERFUME_AUTH_DEV_HTTP_ORIGIN"}
     support_keys = {"PERFUME_SUPPORT_ENABLED", "PERFUME_SUPPORT_ALLOWED_ORIGINS"}
-    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | auth_keys | http_keys | support_keys | AI_INPUT_ENV | AI_FIXED_ENV.keys(),
+    require(set(app_env) <= {"DB_URL", "DB_USERNAME", "DB_PASSWORD", "SCENTREV_API_KEY"} | auth_keys | http_keys | support_keys | AI_INPUT_ENV | AI_FIXED_ENV.keys() | ELASTIC_ENV.keys(),
             "Unexpected backend environment overrides.")
     if http_keys & app_env.keys():
         require(app_env.get("SPRING_PROFILES_ACTIVE") == "auth-dev-http"
@@ -309,11 +397,19 @@ if __name__ == "__main__":
     parser.add_argument("--print-db-image", action="store_true")
     parser.add_argument("--db-container", action="store_true")
     parser.add_argument("--expected-db-image")
+    parser.add_argument("--elasticsearch-enabled", choices=("true", "false"))
+    parser.add_argument("--elasticsearch-network", action="store_true")
+    parser.add_argument("--elasticsearch-files", action="store_true")
     args = parser.parse_args()
     try:
+        if args.elasticsearch_files:
+            print(elasticsearch_files_fingerprint(args.deploy_directory))
+            sys.exit(0)
         metadata = json.load(sys.stdin)
         if args.backend_image:
             validate_backend_image(metadata)
+        elif args.elasticsearch_network:
+            validate_elasticsearch_network(metadata)
         elif args.db_container:
             approval = load_approval(args.approval_file)
             image = json.loads(docker_output(["image", "inspect", metadata["Image"]]))[0]
@@ -323,7 +419,8 @@ if __name__ == "__main__":
                            with_vector, approval if with_vector else None)
         else:
             validate_config(metadata, os.environ.get("PERFUME_EXPECTED_DB_PASSWORD"), args.deploy_directory,
-                            load_approval(args.approval_file))
+                            load_approval(args.approval_file),
+                            None if args.elasticsearch_enabled is None else args.elasticsearch_enabled == "true")
     except (ValueError, KeyError, TypeError, AttributeError, IndexError, OSError):
         # Never include configuration JSON or credentials in errors.
         print("Perfume deployment configuration rejected; check the documented fixed settings and credentials.", file=sys.stderr)

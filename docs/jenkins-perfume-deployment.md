@@ -112,6 +112,8 @@ Pipeline은 이 표식을 생성하거나 수정하지 않습니다. DB/볼륨/�
 
 ## 이후 코드 재배포와 실패 대응
 
+Elasticsearch 연동 개발서버는 [Jenkins Elasticsearch 배포 정책](jenkins-elasticsearch.md)을 따른다. 서버 `.env`에 `PERFUME_ELASTICSEARCH_ENABLED=true`가 명시된 경우에만 backend 연결 override를 병합하고, 기존 `compose.auth-dev-http.yaml` 설정을 유지한다. ES 서비스/볼륨은 자동 배포 모델에 포함하지 않으며, orphan 자동 삭제도 강제로 끈다. 비활성 환경의 기존 배포 경로는 유지한다.
+
 기존 상시 backend의 AI 검색·추천 활성화는 [개발 LAN AI 활성화 절차](perfume-ai-lan-activation.md)를 따른다. 기본값은 비활성이며 전체 모델 Digest는 서버 `.env`에서만 주입한다. 해당 문서에 단계별 활성화·검증·비활성화 롤백을 정리했다.
 
 main에 Push하면 같은 Pipeline이 코드/이미지만 갱신합니다. 서버 .env, backups, .perfume-db-ready 및 PostgreSQL 볼륨을 보존하며 dump를 재복원하지 않습니다. incoming 커밋에 .env/덤프/백업/운영 표식이 들어 있으면 Git reset 이전에 거부합니다.
