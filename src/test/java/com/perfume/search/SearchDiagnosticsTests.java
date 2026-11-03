@@ -85,9 +85,10 @@ class SearchDiagnosticsTests {
         }
     }
 
-    @ParameterizedTest @EnumSource(value = Code.class, names = {"REQUEST_TIMEOUT", "CONNECTION_FAILED", "TLS_FAILED", "HTTP_IO_FAILED", "OPERATION_FAILED"})
+    @ParameterizedTest @EnumSource(value = Code.class, names = {"CONNECT_TIMEOUT", "REQUEST_TIMEOUT", "CONNECTION_FAILED", "TLS_FAILED", "HTTP_IO_FAILED", "OPERATION_FAILED"})
     void transportExceptionsUseCodesWithoutRawMessagesOrCauses(Code code) throws Exception {
         Exception error = switch (code) {
+            case CONNECT_TIMEOUT -> new java.net.http.HttpConnectTimeoutException(RAW);
             case REQUEST_TIMEOUT -> new java.net.http.HttpTimeoutException(RAW);
             case CONNECTION_FAILED -> new java.net.ConnectException(RAW);
             case TLS_FAILED -> new javax.net.ssl.SSLException(RAW);
@@ -183,7 +184,11 @@ class SearchDiagnosticsTests {
         when(driver.connect(eq(url), any())).thenThrow(new SQLException(RAW, "08001"));
         DriverManager.registerDriver(driver);
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME); Level oldLevel = root.getLevel();
-        try (var logs = new Logs(); var ignored = mockConstruction(ElasticHttpTransport.class)) {
+        try (var logs = new Logs(); var ignored = mockConstruction(ElasticHttpTransport.class, (mock, context) -> {
+            assertThat(context.arguments()).hasSize(4);
+            assertThat(context.arguments().get(2)).isEqualTo(Duration.ofSeconds(30));
+            assertThat(context.arguments().get(3)).isEqualTo(Duration.ofSeconds(5));
+        })) {
             root.setLevel(Level.DEBUG);
             var env = environment().withProperty("DB_URL", url).withProperty("DB_USERNAME", "fixture-user")
                     .withProperty("DB_PASSWORD", "diag-db-password");

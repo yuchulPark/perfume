@@ -28,7 +28,7 @@ public final class ElasticsearchReindexCli {
         try {
             var options = ElasticsearchOptions.from(env, true);
             var mapper = new ObjectMapper();
-            var transport = new ElasticHttpTransport(options, mapper, Duration.ofSeconds(30));
+            var transport = new ElasticHttpTransport(options, mapper, Duration.ofSeconds(30), Duration.ofSeconds(5));
             var source = dataSource(env.getRequiredProperty("DB_URL"),
                     env.getRequiredProperty("DB_USERNAME"), env.getRequiredProperty("DB_PASSWORD"));
             stage = Stage.SNAPSHOT_OPEN;

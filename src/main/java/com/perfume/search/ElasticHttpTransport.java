@@ -4,6 +4,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
+import java.net.http.HttpConnectTimeoutException;
 import java.net.ConnectException;
 import javax.net.ssl.SSLException;
 import java.nio.file.Files;
@@ -25,14 +26,18 @@ final class ElasticHttpTransport implements ElasticTransport {
     private final Duration timeout;
 
     ElasticHttpTransport(ElasticsearchOptions options, ObjectMapper mapper, Duration timeout) {
-        this(options, mapper, timeout, client(options));
+        this(options, mapper, timeout, Duration.ofMillis(300));
+    }
+
+    ElasticHttpTransport(ElasticsearchOptions options, ObjectMapper mapper, Duration timeout, Duration connectTimeout) {
+        this(options, mapper, timeout, client(options, connectTimeout));
     }
 
     ElasticHttpTransport(ElasticsearchOptions options, ObjectMapper mapper, Duration timeout, HttpClient client) {
         this.options = options; this.mapper = mapper; this.timeout = timeout; this.client = client;
     }
 
-    private static HttpClient client(ElasticsearchOptions options) {
+    private static HttpClient client(ElasticsearchOptions options, Duration connectTimeout) {
         try {
             var store = KeyStore.getInstance(KeyStore.getDefaultType());
             store.load(null, null);
@@ -46,7 +51,7 @@ final class ElasticHttpTransport implements ElasticTransport {
             trust.init(store);
             var tls = SSLContext.getInstance("TLS");
             tls.init(null, trust.getTrustManagers(), null);
-            return HttpClient.newBuilder().sslContext(tls).connectTimeout(Duration.ofMillis(300))
+            return HttpClient.newBuilder().sslContext(tls).connectTimeout(connectTimeout)
                     .followRedirects(HttpClient.Redirect.NEVER).build();
         } catch (Exception invalid) { throw new IllegalArgumentException("Cannot load Elasticsearch CA certificate"); }
     }
@@ -79,6 +84,8 @@ final class ElasticHttpTransport implements ElasticTransport {
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             throw report(log, stage, failure(stage, Code.REQUEST_INTERRUPTED, "Elasticsearch request interrupted"));
+        } catch (HttpConnectTimeoutException connectTimeoutFailure) {
+            throw report(log, stage, failure(stage, Code.CONNECT_TIMEOUT, "Elasticsearch request failed"));
         } catch (HttpTimeoutException timeoutFailure) {
             throw report(log, stage, failure(stage, Code.REQUEST_TIMEOUT, "Elasticsearch request failed"));
         } catch (ConnectException unavailable) {
